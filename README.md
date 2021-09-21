@@ -210,7 +210,8 @@ KernTool4 is compatible with KernFinger from the KernTool3 suite, while I am wor
 
 ![](doc/pic23.png)
 
-
+***
+>The presentation uses the Bodoni PT font created by Paratype, in the process of work, so some margins and kerning values may differ from the release.
 
 
 
