@@ -5,7 +5,7 @@ description: extension for editing Kerning and Margins in Robofont4
 developer: Alexander Lubovenko
 developerURL: https://github.com/typedev
 tags: [ kerning, spacing, margins ]
-icon: https://github.com/typedev/KernTool4/raw/master/kt4icon.png
-infoPath: http://github.com/typedev/KernTool4/blob/master/KernTool4.roboFontExt/info.plist
+icon: https://raw.githubusercontent.com/typedev/KernTool4/master/kt4icon.png
+infoPath: https://raw.githubusercontent.com/typedev/KernTool4/master/KernTool4.roboFontExt/info.plist
 zipPath: https://github.com/typedev/KernTool4/archive/master.zip
 dateAdded: 2021-09-22 11:30:00
