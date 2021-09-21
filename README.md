@@ -7,9 +7,9 @@ version history:
 ```
 > Key features of KernTool4:
 > - the ability to work in parallel with several fonts at once
-> - quick and easy switching between kerning and margins modes
-> - checking kerning pairs for language compatibility
-> - checking margins between glyphs in kerning groups
+> - quick and easy switching between Kerning and Margins edit modes
+> - checking Kerning pairs for language compatibility
+> - checking Margins between glyphs in kerning groups
 > - compatible with Robofont4, Merz, Subscriber
 
 ![](doc/pic1.png)
@@ -77,17 +77,17 @@ Pressing the `LEFT` arrow decreases kerning by `-10`, and pressing the `RIGHT` a
 ```
 Left = -10;             Right = +10; 
 Shift+Left = -5;        Shift+Right = +5;  
-alt+Left = -1           alt+Right = +1
+Alt+Left = -1           Alt+Right = +1
 
 press a digit to multiply the last value:
 * 2, 3, .. 9, 0 = ( 20, 30, .. 90, 100 )
 ```
 
-If at the bottom of the window you see that any of the pairs of characters needs to be excluded from the group kerning - select it and press `[E]xception`, in the first line an exception will be created for the glyph on the left, in the second line for the glyph on the right, if the pair needs a mutual exclusion, press `opt + [E]`. Each type of exception is indicated by the sign of lightning, and an arrow in the direction of the excluded glyph, and if mutual exclusion - double lightning.
+If at the bottom of the window you see that any of the pairs of characters needs to be excluded from the group kerning - select it and press `[E]xception`, in the first line an exception will be created for the glyph on the left, in the second line for the glyph on the right, if the pair needs a mutual exclusion, press `alt+[E]`. Each type of exception is indicated by the sign of lightning, and an arrow in the direction of the excluded glyph, and if mutual exclusion - double lightning.
 
 ![](doc/pic9.png)
 
-In the upper part of the window, pairs can be flipped by pressing `[F]lip`, to switch the selected pair at the top from the selected one at the bottom -` [S]witch`. Remove pair kerning or exception - `[backspace]`.
+In the upper part of the window, pairs can be flipped by pressing `[F]lip`, to switch the selected pair at the top from the selected one at the bottom - `[S]witch`. Remove pair kerning or exception - `[backspace]`.
 
 ![](doc/pic10.png)
 
@@ -103,7 +103,7 @@ All kerning changes are instantly made to the font and displayed in the _Space C
 
 
 ## How to work with margins?
-If you notice a red asterisk next to a glyph, it means that its margin is different from the first character in the group. To check this you can enable `Show Margins`. It often happens that margins do not match in composite signs, due to some component. When viewing margins, you can additionally turn on `Beam`, this is a beam similar to` Beam` from _Space Center_, it will show the real offset of margins.
+If you notice a red asterisk next to a glyph, it means that its margin is different from the first character in the group. To check this you can enable `Show Margins`. It often happens that margins do not match in composite signs, due to some component. When viewing margins, you can additionally turn on `Beam`, this is a beam similar to `Beam` from _Space Center_, it will show the real offset of margins.
 
 ![](doc/pic12.png)
 ![](doc/pic13.png)
@@ -174,7 +174,7 @@ The key feature of KernTool4 is its ability to work with multiple fonts at once.
 
 By default, KernTool4 displays pairs for all open fonts at once. You can select the required fonts and sort them in the desired order in `Select Fonts`.
 
-When there are several fonts, they can be linked - `Link Fonts` (shortcut` L`). 
+When there are several fonts, they can be linked - `Link Fonts` (shortcut `L`). 
 
 When you are working with multiple fonts, any generated arrays of pairs or downloads will be split into lines, where each line belongs to a different font. Each line is signed with the name of the font, and linked lines are indicated by an asterisk.
 
@@ -210,6 +210,7 @@ KernTool4 is compatible with KernFinger from the KernTool3 suite, while I am wor
 
 ![](doc/pic23.png)
 
+***
 >The presentation uses the Bodoni PT font created by Paratype, in the process of work, so some margins and kerning values may differ from the release.
 
 
