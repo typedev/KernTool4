@@ -8,7 +8,7 @@ KernTool4 is an extension for working with Kerning and glyph Margins in Robofont
 version history:
 4.0.1 first release
 ```
-> Key features of KernTool4:
+> ### Key features of KernTool4:
 > - the ability to work in parallel with several fonts at once
 > - quick and easy switching between Kerning and Margins edit modes
 > - checking Kerning pairs for language compatibility
