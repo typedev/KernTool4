@@ -1,6 +1,6 @@
-<img height="32" src="doc/kt4icon.png" width="32"/>
 
-#   KernTool4 
+
+# <img height="32" src="doc/kt4icon.png" width="32"/>  KernTool4 
 
 KernTool4 is an extension for working with kerning and glyph margins in Robofont4.
 
@@ -213,7 +213,6 @@ KernTool4 is compatible with KernFinger from the KernTool3 suite, while I am wor
 
 ![](doc/pic23.png)
 
-***
 >The presentation uses the Bodoni PT font created by Paratype, in the process of work, so some margins and kerning values may differ from the release.
 
 
