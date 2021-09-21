@@ -1,4 +1,4 @@
-![](doc/kt4icon.png)
+<img height="32" src="doc/kt4icon.png" width="32"/>
 
 #   KernTool4 
 
