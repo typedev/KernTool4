@@ -106,7 +106,7 @@ All kerning changes are instantly made to the font and displayed in the _Space C
 
 
 ## How to work with margins?
-If you notice a red asterisk next to a glyph, it means that its margin is different from the first character in the group. To check this you can enable `Show Margins`. It often happens that margins do not match in composite signs, due to some component. When viewing margins, you can additionally turn on `Beam`, this is a beam similar to `Beam` from _Space Center_, it will show the real offset of margins.
+If you notice a red asterisk next to a glyph, it means that its margin is different from the first character in the group. To check this you can enable `Show Margins`. It often happens that margins do not match in composite signs, due to some component. When viewing margins, you can additionally turn on `Beam`, this is a beam similar to `Beam` from _Space Center_, it will show the real offset of margins. (You can control the height of the `Beam` using the buttons `UP` and `DOWN`, in more detail just below)
 
 ![](doc/pic12.png)
 ![](doc/pic13.png)
