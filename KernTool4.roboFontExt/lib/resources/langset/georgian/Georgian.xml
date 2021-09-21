@@ -1,0 +1,15 @@
+<langset>
+<key name="enable">on</key>
+<key name="base">georgian</key>
+<key name="keycode">#10D0</key>
+<key name="name">Georgian</key>
+<key name="upper"></key>
+<key name="lower">#10D0 #10D1 #10D2 #10D3 #10D4 #10D5 #10D6 #10D7 #10D8 #10D9 #10DA #10DB #10DC #10DD #10DE #10DF #10E0 #10E1 #10E2 #10E3 #10E4 #10E5 #10E6 #10E7 #10E8 #10E9 #10EA #10EB #10EC #10ED #10EE #10EF #10F0 #10F1 #10F2 #10F3 #10F4 #10F5 #10F6</key>
+<key name="other">#10FB</key>
+<key name="digits"></key>
+<key name="punct"></key>
+<key name="patternUpper">#10B6 #10B6</key>
+<key name="patternLower">#10D8 #10D8</key>
+<key name="patternOther">#10B6 #10B6</key>
+<key name="patternDigits">#0030 #0030</key>
+<key name="patternPunct">#10B6 #10B6</key></langset>

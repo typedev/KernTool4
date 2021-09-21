@@ -2,7 +2,7 @@
 
 # <img height="48" src="doc/kt4icon.png" width="48"/>  KernTool4 
 
-KernTool4 is an extension for working with kerning and glyph margins in Robofont4.
+KernTool4 is an extension for working with Kerning and glyph Margins in Robofont4.
 
 ```
 version history:

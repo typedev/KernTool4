@@ -1,0 +1,15 @@
+<langset>
+<key name="enable">on</key>
+<key name="base">hebrew</key>
+<key name="keycode">#05D0</key>
+<key name="name">Tat (Hebr)</key>
+<key name="upper"></key>
+<key name="lower"></key>
+<key name="other">#05D0 #05D1 #05D2 #05D3 #05D4 #05D5 #05D6 #05D7 #05D8 #05D9 #05DA #05DB #05DC #05DD #05DE #05DF #05E0 #05E1 #05E2 #05E3 #05E4 #05E5 #05E6 #05E7 #05E8 #05E9 #05EA #05B0 #05B1 #05B2 #05B3 #05B4 #05B5 #05B6 #05B7 #05B8 #05B9 #05BB #05BC #05BD #05BF #05C1 #05C2 #05F0 #05F1 #05F2 #FB2E #FB31 #FB30 #FB3B #FB2F #FB44 #FB46 #05BE #05C0 #05C3 #05F3 #05F4</key>
+<key name="digits"></key>
+<key name="punct"></key>
+<key name="patternUpper">#05DD #05DD</key>
+<key name="patternLower">#05DD #05DD</key>
+<key name="patternOther">#05DD #05DD</key>
+<key name="patternDigits">#0030 #0030</key>
+<key name="patternPunct">#05DD #05DD</key></langset>

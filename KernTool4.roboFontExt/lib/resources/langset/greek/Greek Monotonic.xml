@@ -1,0 +1,15 @@
+<langset>
+<key name="enable">on</key>
+<key name="base">greek</key>
+<key name="keycode">#0391</key>
+<key name="name">Greek Monotonic</key>
+<key name="upper">#0391 #0392 #0393 #0394 #0395 #0396 #0397 #0398 #0399 #039A #039B #039C #039D #039E #039F #03A0 #03A1 #03A3 #03A4 #03A5 #03A6 #03A7 #03A8 #03A9 #0386 #0388 #0389 #038A #038C #038E #03DC #03DA #03DE #03E0</key>
+<key name="lower">#03B1 #03B2 #03B3 #03B4 #03B5 #03B6 #03B7 #03B8 #03B9 #03BA #03BB #03BC #03BD #03BE #03BF #03C0 #03C1 #03C2 #03C3 #03C4 #03C5 #03C6 #03C7 #03C8 #03C9 #03AC #03AD #03AE #03AF #03CA #0390 #03CC #03CD #03CB #03B0 #03DD #03DB #03DF #03E1</key>
+<key name="other"></key>
+<key name="digits"></key>
+<key name="punct"></key>
+<key name="patternUpper">#0397 #0397</key>
+<key name="patternLower">#03B7 #03B7</key>
+<key name="patternOther">#0397 #0397</key>
+<key name="patternDigits">#0030 #0030</key>
+<key name="patternPunct">#0397 #0397</key></langset>
