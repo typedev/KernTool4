@@ -1,0 +1,15 @@
+<langset>
+<key name="enable">on</key>
+<key name="base">cyrillic</key>
+<key name="keycode">#0430</key>
+<key name="name">Russian Church (X-XVII)</key>
+<key name="upper">#0410 #0411 #0412 #0413 #0414 #0416 #041A #041B #041C #041D #041E #041F #0420 #0421 #0422 #0423 #0424 #0425 #0426 #0427 #0428 #0429 #042A #042B #042C #042D #042E #042F #0404 #0405 #0406 #A640 #0478 #0460 #0462 #A65C #0464 #0466 #0468 #046A #046C #046E #0470 #0472 #0474 #0407 #047A #0480 #047C #047E #0476</key>
+<key name="lower">#0430 #0431 #0432 #0433 #0434 #0436 #043A #043B #043C #043D #043E #043F #0440 #0441 #0442 #0443 #0444 #0445 #0446 #0447 #0448 #0449 #044A #044B #044C #044D #044E #044F #0454 #0455 #0456 #A641 #0479 #0461 #0463 #A65D #0465 #0467 #0469 #046B #046D #046F #0471 #0473 #0475 #0457 #047B #0481 #047D #047F #0477</key>
+<key name="other">#0021 #0028 #0029 #002B #002C #002D #002E #003A #003B #003D #003F</key>
+<key name="digits">#0030 #0031 #0032 #0033 #0034 #0035 #0036 #0037 #0038 #0039</key>
+<key name="punct"></key>
+<key name="patternUpper">#041D #041D</key>
+<key name="patternLower">#043D #043D</key>
+<key name="patternOther">#041D #041D</key>
+<key name="patternDigits">#0030 #0030</key>
+<key name="patternPunct">#041D #041D</key></langset>

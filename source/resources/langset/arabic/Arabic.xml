@@ -1,0 +1,15 @@
+<langset>
+<key name="enable">on</key>
+<key name="base">arabic</key>
+<key name="keycode">#0627</key>
+<key name="name">Arabic</key>
+<key name="upper"></key>
+<key name="lower"></key>
+<key name="other">#0627 #0628 #062A #062B #062C #062D #062E #062F #0630 #0631 #0632 #0633 #0634 #0635 #0636 #0637 #0638 #0639 #063A #0641 #0642 #0643 #0644 #0645 #0646 #0647 #0648 #0649 #064A #0621 #FE8E #FB58 #FE9B #FE9F #FEA3 #FEA7 #FEB3 #FEB7 #FEBB #FEBF #FECB #FECF #FED3 #FED7 #FEDB #FEDF #FEE3 #FEE7 #FEEB #FEF3 #0021 #0028 #0029 #002E #003A #201C #201D #060C #061B #061F</key>
+<key name="digits">#0660 #0661 #0662 #0663 #0664 #0665 #0666 #0667 #0668 #0669</key>
+<key name="punct"></key>
+<key name="patternUpper">#0627 #0627</key>
+<key name="patternLower">#0627 #0627</key>
+<key name="patternOther">#0627 #0627</key>
+<key name="patternDigits">#0661 #0661</key>
+<key name="patternPunct">#0627 #0627</key></langset>
