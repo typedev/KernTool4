@@ -8,6 +8,7 @@ import AppKit
 import mojo
 from mojo.subscriber import Subscriber, registerCurrentFontSubscriber, unregisterCurrentFontSubscriber
 from mojo.events import addObserver, removeObserver
+from vanilla.vanillaBase import osVersionCurrent, osVersion10_14
 
 import re, codecs
 import importlib
@@ -167,11 +168,14 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		KERNTOOL_UI_GROUPS_VIEW_PANEL_SIZE = getExtensionDefault(PREFKEY_GroupsViewPanelSize, fallback = 230)
 		darkm = ''
 		KERNTOOL_UI_DARKMODE = False
-		dark = AppKit.NSAppearance.appearanceNamed_(AppKit.NSAppearanceNameDarkAqua)
-		if AppKit.NSApp().appearance() == dark:
-			KERNTOOL_UI_DARKMODE = True
-		if KERNTOOL_UI_DARKMODE:
-			darkm = '-dark'
+
+		if osVersionCurrent >= osVersion10_14: # remove DarkMode for old OS
+			dark = AppKit.NSAppearance.appearanceNamed_(AppKit.NSAppearanceNameDarkAqua)
+			if AppKit.NSApp().appearance() == dark:
+				KERNTOOL_UI_DARKMODE = True
+
+			if KERNTOOL_UI_DARKMODE:
+				darkm = '-dark'
 
 		self.w = vanilla.Window((1000,800), minSize = (200, 100), title = 'KernTool4', autosaveName = PREFKEY_WindowSize)
 
