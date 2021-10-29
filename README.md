@@ -6,6 +6,7 @@ KernTool4 is an extension for working with Kerning and glyph Margins in Robofont
 
 ```
 version history:
+4.0.2 fixed import of AppKit for Monterey support 
 4.0.1 first release
 ```
 > ### Key features of KernTool4:

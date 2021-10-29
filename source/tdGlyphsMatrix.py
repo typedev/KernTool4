@@ -2,7 +2,7 @@ import vanilla
 import merz
 from fontParts import *
 import random
-from AppKit import *
+# from AppKit import *
 from mojo.pens import DecomposePointPen
 from fontParts.world import *
 import math

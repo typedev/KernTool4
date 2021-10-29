@@ -6,7 +6,7 @@
 	<array>
 		<dict>
 			<key>nestInSubmenus</key>
-			<true/>
+			<false/>
 			<key>path</key>
 			<string>KernTool4.py</string>
 			<key>preferredName</key>
@@ -30,8 +30,8 @@
 	<key>requiresVersionMajor</key>
 	<string>4</string>
 	<key>timeStamp</key>
-	<real>1632312608.9553161</real>
+	<real>1635513166.4133329</real>
 	<key>version</key>
-	<string>4.0.11</string>
+	<string>4.0.2</string>
 </dict>
 </plist>
