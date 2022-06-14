@@ -9,7 +9,6 @@ import mojo
 from mojo.subscriber import Subscriber, registerCurrentFontSubscriber, unregisterCurrentFontSubscriber
 from mojo.events import addObserver, removeObserver
 from vanilla.vanillaBase import osVersionCurrent, osVersion10_14
-
 import re, codecs
 import importlib
 import tdKernToolEssentials4
@@ -160,6 +159,7 @@ else:
 class TDKernMultiTool(Subscriber): #, WindowController
 
 	debug = True
+	fontDocumentDidSaveDelay = 5.0
 	# fontDidChangeDelay = 0
 
 	def build (self):
@@ -169,13 +169,15 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		darkm = ''
 		KERNTOOL_UI_DARKMODE = False
 
-		if osVersionCurrent >= osVersion10_14: # remove DarkMode for old OS
+		if osVersionCurrent >= osVersion10_14:
 			dark = AppKit.NSAppearance.appearanceNamed_(AppKit.NSAppearanceNameDarkAqua)
 			if AppKit.NSApp().appearance() == dark:
 				KERNTOOL_UI_DARKMODE = True
 
-			if KERNTOOL_UI_DARKMODE:
-				darkm = '-dark'
+		if KERNTOOL_UI_DARKMODE:
+			darkm = '-dark'
+
+		self.idName = 'KernTool4'
 
 		self.w = vanilla.Window((1000,800), minSize = (200, 100), title = 'KernTool4', autosaveName = PREFKEY_WindowSize)
 
@@ -321,7 +323,13 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		# self.w.glyphsView.selectionMode = SELECTION_MODE_LINE
 		self.w.glyphsView.setStatus('mode:kerning', True)
 		self.w.glyphsView.setStatus('linked', True)
+		self.w.glyphsView.setStatus('check language', True)
+
 		self.w.glyphsView.id = 'glyphs view'
+		self.w.glyphsView.scaleFactor = pt2Scale(KERNTOOL_UI_GLYPHS_VIEW_FONTSIZE)
+		self.w.glyphsView.canUseVerticalRayBeam = False
+
+
 
 		self.w.groupsView = TDGlyphsMerzView(
 			delegate = self,
@@ -340,11 +348,8 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		                                     dividerStyle = 'thin',
 		                                     dividerThickness = 5)
 
-		self.w.glyphsView.scaleFactor = pt2Scale(KERNTOOL_UI_GLYPHS_VIEW_FONTSIZE)
 		self.w.groupsView.scaleFactor = pt2Scale(KERNTOOL_UI_GROUPS_VIEW_FONTSIZE)
-		self.w.glyphsView.canUseVerticalRayBeam = False
 		self.w.groupsView.canUseVerticalRayBeam = False
-
 		self.w.groupsView.separatePairs = True
 		self.w.groupsView.lineGap = 180
 		self.w.groupsView.linkedMode = False
@@ -353,7 +358,6 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		self.w.groupsView.setStatus('mode:exceptions', True)
 		# self.w.groupsView.setStatus('check language', True)
 		self.w.groupsView.id = 'groups view'
-		self.w.glyphsView.setStatus('check language', True)
 
 		self.PB_leftList = []
 		self.PB_rightList = []
@@ -383,6 +387,8 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		self.keyCommander.registerKeyCommand(KEY_F, callback = self.flipPair)
 		self.keyCommander.registerKeyCommand(KEY_S, callback = self.switchPair)
 		self.keyCommander.registerKeyCommand(KEY_L, callback = self.switchLinkedMode)
+
+		self._saveInProcess = False
 		# self.keyCommander.registerKeyCommand(KEY_S, alt = True, ctrl = True, callback = self.getStateCallbak)
 
 
@@ -462,7 +468,6 @@ class TDKernMultiTool(Subscriber): #, WindowController
 
 	def fontDidChange(self, info):
 		if not self.blockEventFontChange: # receive fontDidChange for external tools only
-			print('font did change')
 			self.refreshViews()
 		self.blockEventFontChange = False
 
@@ -471,13 +476,21 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		self.w.glyphsView.refreshView()
 		self.w.groupsView.refreshView()
 
-	def groupsDidChange(self, info):
-		print ('groups changes detected')
-		print (info)
+	def fontGroupsDidChange(self, info):
+		# if self._saveInProcess: return
+		# print ('KT4: groups did change. Reloaded...')
+		# self.fontListCallback(None)
+		pass
+
+	def fontDocumentWillSave (self, info):
+		self._saveInProcess = True
+
+	def fontDocumentDidSave (self, info):
+		self._saveInProcess = False
 
 	# def fontKerningDidChange(self, info):
 	# 	print ('kerning changed')
-	# 	self.drawGlyphsMatrix(refresh = True)
+		# self.drawGlyphsMatrix(refresh = True)
 	# def fontDocumentBecameCurrent(self, info):
 	# 	print (info)
 	# 	self.glyphDidChange(None)
@@ -572,7 +585,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 						lines.append('{break}')
 			filetxt.close()
 
-			tm = TDGlyphsMatrix(CurrentFont(), width = 15000)
+			tm = TDGlyphsMatrix(CurrentFont(), width = 25000)
 			tm.setGlyphs(lines, insertVirtual = True)
 			tm.buildMatrix()
 
@@ -856,6 +869,21 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				self.linkedMode = False
 				self.w.glyphsView.switchLinkedMode(linked = self.linkedMode)
 			self.w.glyphsView.startDrawGlyphsMatrix(matrix, animatedStart = True)
+		elif not list and self.fontList:
+			self.fontsHashKernLib = makeFontsHashGroupsLib(self.fontList, self.langSet)
+			# self.txtPatterns.makeLibPatterns(self.fontList)
+			self.w.glyphsView.fontsHashKernLib = self.fontsHashKernLib
+			self.w.groupsView.fontsHashKernLib = self.fontsHashKernLib
+			self.spaceControl.fontsHashKernLib = self.fontsHashKernLib
+			self.spaceControl.kernControl.fontsHashKernLib = self.fontsHashKernLib
+			self.spaceControl.marginsControl.fontsHashKernLib = self.fontsHashKernLib
+			matrix = prepareGlyphsMatrix(self.glyphsInMatrix, self.fontList)
+			if len(self.fontList) == 1:
+				self.linkedMode = False
+				self.w.glyphsView.switchLinkedMode(linked = self.linkedMode)
+			self.w.glyphsView.startDrawGlyphsMatrix(matrix, animatedStart = False)
+
+
 
 	def showMarginsCallback (self, sender):
 		self.showInfo = not self.showInfo
@@ -974,8 +1002,11 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		removeObserver(self, EVENT_OBSERVER_SETTEXT)
 		unregisterCurrentFontSubscriber(self)
 
+def main():
+	registerCurrentFontSubscriber(TDKernMultiTool)
 
-registerCurrentFontSubscriber(TDKernMultiTool)
+if __name__ == "__main__":
+	main()
 # registerRoboFontSubscriber(TDKernMultiTool)
 # registerCurrentGlyphSubscriber(TDKernMultiTool)
 # MerzDemo.open()

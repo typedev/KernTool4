@@ -1,0 +1,15 @@
+<langset>
+<key name="enable">on</key>
+<key name="base">cyrillic</key>
+<key name="keycode">#0430</key>
+<key name="name">Abazin</key>
+<key name="upper">#0410 #0411 #0412 #0413 #0414 #0415 #0401 #0416 #0417 #0418 #0419 #041A #041B #041C #041D #041E #041F #0420 #0421 #0422 #0423 #0424 #0425 #0426 #0427 #0428 #0429 #042A #042B #042C #042D #042E #042F #04C0 #0406</key>
+<key name="lower">#0430 #0431 #0432 #0433 #0434 #0435 #0451 #0436 #0437 #0438 #0439 #043A #043B #043C #043D #043E #043F #0440 #0441 #0442 #0443 #0444 #0445 #0446 #0447 #0448 #0449 #044A #044B #044C #044D #044E #044F #04CF</key>
+<key name="other">#0021 #0028 #0029 #002B #002C #002D #002E #003A #003B #003D #003F #2014 #00AB #00BB #2116</key>
+<key name="digits">#0030 #0031 #0032 #0033 #0034 #0035 #0036 #0037 #0038 #0039</key>
+<key name="punct"></key>
+<key name="patternUpper">#041D #041D</key>
+<key name="patternLower">#043D #043D</key>
+<key name="patternOther">#041D #041D</key>
+<key name="patternDigits">#0030 #0030</key>
+<key name="patternPunct">#041D #041D</key></langset>

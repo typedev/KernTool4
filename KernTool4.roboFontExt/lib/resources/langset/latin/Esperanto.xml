@@ -1,5 +1,5 @@
 <langset>
-<key name="enable">off</key>
+<key name="enable">on</key>
 <key name="base">latin</key>
 <key name="keycode">#0061</key>
 <key name="name">Esperanto</key>

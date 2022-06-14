@@ -7,10 +7,12 @@ import xml.etree.ElementTree as ET
 
 class TDLangSet(object):
 	def __init__(self, init = 'XML'):
-		self.base = {}
-		self.langdic = {}
-		self.langdic_reversed = {}
-		self.pattern = {}
+		self.base = {}  # base script: [unicodes] # latin:[], cyrillic:[], etc.
+		self.base_reversed = {} # unicode: [base script],
+		self.langdic = {} # language: [unicodes]
+		self.langdic_reversed = {} # unicode: [languages]
+		self.langdic_structured = {} # language = dict(upper = upper, lower = lower, other = other, digits = digit, punct = punct)
+		self.pattern = {} # unicode: pattern
 		self.basicPatternNames = {}
 		self.libPatterns = {}
 		if init == 'XML':
@@ -42,10 +44,13 @@ class TDLangSet(object):
 
 
 	def _initializeFromXML(self):
-		libpath = os.path.join(sys.path[0],'resources','langset')
+		# libpath = os.path.join(sys.path[0],'resources','langset')
+		libpath = os.path.dirname(__file__)
+		libpath = os.path.join(libpath, 'resources','langset')
 		files = glob.glob(libpath + '/**/*.xml', recursive = True)
 		self.langdic = {}
 		self.langdic_reversed = {}
+		self.langdic_structured = {}
 		self.pattern = {}
 		for f in files:
 			# print (f)
@@ -109,9 +114,15 @@ class TDLangSet(object):
 					pattPunct, fullpatterns = self._splitUnicodesList(value, base, language, fullpatterns)#, addtofullllist = False)
 
 			self.langdic[language] = fulllist
+			self.langdic_structured[language] = dict(upper = upper, lower = lower, other = other, digits = digit, punct = punct)
 			if base not in self.base:
 				self.base[base] = []
+
 			for u in fulllist:
+				if u not in self.base_reversed:
+					self.base_reversed[u] = []
+				if base not in self.base_reversed[u]:
+					self.base_reversed[u].append(base)
 				if u not in self.langdic_reversed:
 					self.langdic_reversed[u] = [language]
 				else:
@@ -203,13 +214,16 @@ class TDLangSet(object):
 
 	def wrapGlyphToPattern(self, font, glyphname):
 		base = glyphname
+		if glyphname not in font:
+			side1 = font[self.libPatterns[font][0]].name
+			side2 = font[self.libPatterns[font][0]].name
+			return (side1, glyphname, side2)
+
 		uni = font[glyphname].unicode
 		sfx = None
 		side1 = None
 		side2 = None
-
-		# print (glyphname, uni)
-		if '.' in glyphname:
+		if '.' in glyphname and not glyphname.startswith('.'):
 			base = glyphname.split('.')[0]
 			sfx = '.%s' % '.'.join(glyphname.split('.')[1:])
 			if base in font:
@@ -237,8 +251,14 @@ class TDLangSet(object):
 			# 	side1 += sfx
 			# if sfx and side2 + sfx in font:
 			# 	side2 += sfx
-
 		return (side1, glyphname, side2)
+
+	def wrapPairToPattern(self, font, pair):
+		l, r = pair
+		(side1L, g1, side2L) = self.wrapGlyphToPattern(font, l)
+		(side1R, g2, side2R) = self.wrapGlyphToPattern(font, r)
+		return (side1L, g1, g2, side2R)
+
 
 	def wrapGlyphsLine_MarksAndMasks (self, font, glyphsline, marks):
 		t = ['']
@@ -257,17 +277,22 @@ class TDLangSet(object):
 				_mask.extend([True, False])
 		return (t[1:], _marks[1:], _mask[1:])
 
-	def checkPairLanguageCompatibility(self, font, pair):
+	def _getPairUnicodes(self, font, pair):
 		l, r = pair
-		if '.' in l:
+		uniL, uniR = None, None
+		if '.' in l and not l.startswith('.'):
 			l = l.split('.')[0]
-		if '.' in r:
+		if '.' in r and not r.startswith('.'):
 			r = r.split('.')[0]
 		if l in font and r in font:
 			uniL = font[l].unicode
 			uniR = font[r].unicode
-			if uniL and uniR:
-				return self.checkPairLangsByUnicodes((uniL,uniR))
+		return (uniL, uniR)
+
+	def checkPairLanguageCompatibility(self, font, pair):
+		uniL, uniR = self._getPairUnicodes(font, pair)
+		if uniL and uniR:
+			return self.checkPairLangsByUnicodes((uniL,uniR))
 		return True
 
 	def checkPairLangsByUnicodes(self, pair):
@@ -278,6 +303,25 @@ class TDLangSet(object):
 			if not set(setL).intersection(setR):
 				return False
 		return True
+
+	def checkPairBaseScriptCompatibility(self, font, pair):
+		uniL, uniR = self._getPairUnicodes(font, pair)
+		if uniL and uniL in self.base_reversed and uniR and uniR in self.base_reversed:
+			if not set(self.base_reversed[uniL]).intersection(self.base_reversed[uniR]):
+				return False
+		return True
+
+	def getBaseScriptByGlyphName(self, font, glyphname):
+		if '.' in glyphname and not glyphname.startswith('.'):
+			glyphname = glyphname.split('.')[0]
+		uni = None
+		if glyphname in font:
+			uni = font[glyphname].unicode
+		if uni and uni in self.base_reversed:
+			return self.base_reversed[uni]
+		return None
+
+
 
 	# def checkPairLangsByUnicodesForIn(self, pair):
 	# 	uniL, uniR = pair
@@ -424,15 +468,32 @@ if __name__ == "__main__":
 	ignore = '0021 0028 0029 002B 002C 002D 002E 003A 003B 003D 003F 2013 201C 201D 2019 2014 00AB 00BB 2116 2019 00A1 00BF 0030 0031 0032 0033 0034 0035 0036 0037 0038 0039'.split(' ')
 
 	landster = TDLangSet()
-	for k,v in landster.base.items():
-		for (_k,_v) in landster.base.items():
-			if k != _k:
-				inter = set(v).intersection(_v)
-				if inter:
-					print (k,_k)
-					for l in inter:
-						if "%04X" % l not in ignore:
-							print (chr(l), l, "#%04X" % l, landster.langdic_reversed[l])
+	# for k,v in landster.base.items():
+	# 	print (k)
+	# 	t = ''
+	# 	for i in v:
+	# 		t += ' %s' % chr(i)
+	# 	print (t)
+
+	for k, v in landster.langdic.items():
+		t = ''
+		print(k)
+		for i in v:
+			t += ' %s' % chr(i)
+		print(t)
+	print (landster.base['cyrillic'])
+	# print (landster.base_reversed)
+
+
+		# for (_k,_v) in landster.base.items():
+		#
+		# 	if k != _k:
+		# 		inter = set(v).intersection(_v)
+		# 		if inter:
+		# 			print (k,_k)
+		# 			for l in inter:
+		# 				if "%04X" % l not in ignore:
+		# 					print (chr(l), l, "#%04X" % l, landster.langdic_reversed[l])
 
 	# print (landster.basicPatternNames)
 	# landster.setupPatternsForFonts(AllFonts())

@@ -73,6 +73,33 @@ KEY_BACKDOWN = 'backdown'
 KEY_FORWARDDEL = 'forwarddel'
 
 
+def decodeModifiers (modifier):
+	"""
+	{:032b}
+	0 0 0 0 0 0 0 0 0 0 0 1   1   1   1   1   0 0 0 0 0 0 0 1 0 0 1 0 1 0 1 1
+	0                     11  12  13  14  15                                31
+	cmd  00000000000100000000000100001000 b11
+	alt  00000000000010000000000100100000 b12
+	ctrl 00000000000001000000000100000001 b13
+	shft 00000000000000100000000100000010 b14
+	caps 00000000000000010000000100000000 b15
+	"""
+	bincode = '{:032b}'.format(modifier)
+
+	alt = False
+	shift = False
+	cmd = False
+	ctrl = False
+	caps = False
+
+	if bincode[11] == '1': cmd = True  # result.append('Cmd')
+	if bincode[12] == '1': alt = True  # result.append('Alt')
+	if bincode[13] == '1': ctrl = True  # result.append('Ctrl')
+	if bincode[14] == '1': shift = True  # result.append('Shift')
+	if bincode[15] == '1': caps = True  # result.append('Caps')
+	return (alt, shift, cmd, ctrl, caps)  # '+'.join(result)
+
+
 class TDKeyCommander(object):
 	def __init__(self):
 		self.keyCommands = {}
@@ -197,31 +224,7 @@ class TDKeyCommander(object):
 			if callback:
 				callback(sender, callbackValue)
 
-	def decodeModifiers (self, modifier):
-		"""
-		{:032b}
-		0 0 0 0 0 0 0 0 0 0 0 1   1   1   1   1   0 0 0 0 0 0 0 1 0 0 1 0 1 0 1 1
-		0                     11  12  13  14  15                                31
-		cmd  00000000000100000000000100001000 b11
-		alt  00000000000010000000000100100000 b12
-		ctrl 00000000000001000000000100000001 b13
-		shft 00000000000000100000000100000010 b14
-		caps 00000000000000010000000100000000 b15
-		"""
-		bincode = '{:032b}'.format(modifier)
 
-		alt = False
-		shift = False
-		cmd = False
-		ctrl = False
-		caps = False
-
-		if bincode[11] == '1': cmd = True #result.append('Cmd')
-		if bincode[12] == '1': alt = True #result.append('Alt')
-		if bincode[13] == '1': ctrl = True #result.append('Ctrl')
-		if bincode[14] == '1': shift = True #result.append('Shift')
-		if bincode[15] == '1': caps = True #result.append('Caps')
-		return (alt, shift, cmd, ctrl, caps)#'+'.join(result)
 
 	def decodeCanvasKeys (self, keyCode, modifier):
 		try:
@@ -229,7 +232,7 @@ class TDKeyCommander(object):
 		except:
 			key = None
 
-		mod = self.decodeModifiers(modifier)
+		mod = decodeModifiers(modifier)
 		return {'key': key, 'mod': mod}
 
 # for k, v in keysMap.items():

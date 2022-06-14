@@ -5,10 +5,10 @@ from fontParts import *
 from mojo.tools import IntersectGlyphWithLine
 # from mojo.subscriber import Subscriber, WindowController, registerCurrentGlyphSubscriber, registerRoboFontSubscriber, registerCurrentFontSubscriber
 # from merz.tools.drawingTools import NSImageDrawingTools
-
-import tdKernToolEssentials4
-importlib.reload(tdKernToolEssentials4)
-from tdKernToolEssentials4 import *
+#
+# import tdKernToolEssentials4
+# importlib.reload(tdKernToolEssentials4)
+# from tdKernToolEssentials4 import *
 
 import tdGlyphsMatrix
 importlib.reload(tdGlyphsMatrix)
@@ -45,6 +45,68 @@ EDITMODE_OFF = 0
 
 SIDE_1 = 'L' # left side
 SIDE_2 = 'R' # right side
+
+
+ID_KERNING_GROUP = 'public.kern'
+ID_GROUP_LEFT = '.kern1.'
+ID_GROUP_RIGHT = '.kern2.'
+
+ID_GROUP_MASK_1 = ID_KERNING_GROUP.replace('.kern', ID_GROUP_LEFT) #+ ID_GROUP_LEFT
+ID_GROUP_MASK_2 = ID_KERNING_GROUP.replace('.kern', ID_GROUP_RIGHT) #+ ID_GROUP_RIGHT
+
+ID_MARGINS_GROUP = 'public.margins' # '.margins'
+ID_MARGINS_GROUP_LEFT = '.margins1.'
+ID_MARGINS_GROUP_RIGHT  = '.margins2.'
+
+ID_GROUP_MARGINS_MASK_1 = ID_MARGINS_GROUP.replace('.margins', ID_MARGINS_GROUP_LEFT) #+ ID_MARGINS_GROUP_LEFT
+ID_GROUP_MARGINS_MASK_2 = ID_MARGINS_GROUP.replace('.margins', ID_MARGINS_GROUP_RIGHT) #+ ID_MARGINS_GROUP_RIGHT
+
+
+PAIR_INFO_NONE = 0
+PAIR_INFO_ORPHAN = 30
+PAIR_INFO_EXCEPTION = 20
+PAIR_INFO_EMPTY = 40  # hight rating in sort
+PAIR_INFO_ATTENTION = 10
+PAIR_INFO_EXCEPTION_DELETED = 100
+PAIR_INFO_ERROR = 90
+
+
+def italicShift (angle, Ypos):
+	if angle:
+		return Ypos * math.tan(-angle * 0.0175) # abs(angle)
+	else:
+		return 0
+
+def getDirection (groupname):
+	if ID_KERNING_GROUP and ID_GROUP_LEFT in groupname:
+		return SIDE_1
+	elif ID_KERNING_GROUP and ID_GROUP_RIGHT in groupname:
+		return SIDE_2
+	elif ID_MARGINS_GROUP and ID_MARGINS_GROUP_LEFT in groupname:
+		return SIDE_1
+	elif ID_MARGINS_GROUP and ID_MARGINS_GROUP_RIGHT in groupname:
+		return SIDE_2
+	else:
+		# print ('ERROR!!! Wrong Group Name')
+		return None
+
+def getDisplayNameGroup(groupname):
+	# RF3 style
+	if not groupname: return
+	mask1 = ID_GROUP_MASK_1#ID_KERNING_GROUP.replace('.kern', '') + ID_GROUP_LEFT
+	mask2 = ID_GROUP_MASK_2#ID_KERNING_GROUP.replace('.kern', '') + ID_GROUP_RIGHT
+	mask3 = ID_GROUP_MARGINS_MASK_1
+	mask4 = ID_GROUP_MARGINS_MASK_2
+	if mask1 in groupname:
+		return groupname.replace(mask1,'@ ') # '@_'
+	elif mask2 in groupname:
+		return groupname.replace(mask2,'@ ')
+	elif mask3 in groupname:
+		return groupname.replace(mask3, '# ')
+	elif mask4 in groupname:
+		return groupname.replace(mask4, '# ')
+	else:
+		return groupname
 
 def getMargins(glyph, rounded = True, useRayBeam = False, rayBeamPosition = 0):
 	italicAngle = 0
@@ -288,6 +350,82 @@ def researchPair (font, hashDic, rawpair):
 		        }
 
 
+# PAIR_INFO_NONE = 0
+# PAIR_INFO_ORPHAN = 30
+# PAIR_INFO_EXCEPTION = 20
+# PAIR_INFO_EMPTY = 40  # hight rating in sort
+# PAIR_INFO_ATTENTION = 10
+# PAIR_INFO_EXCEPTION_DELETED = 100
+# PAIR_INFO_ERROR = 90
+
+
+def getKernPairNotes( font, hashKernDic, pair): # version 2
+	tl, tr = pair
+	if hashKernDic.isKerningGroup(tl) and len(font.groups[hashKernDic.getGroupNameByGlyph(tl, side = SIDE_1)]) == 0:
+		return (PAIR_INFO_EMPTY, tl, tr)
+	if hashKernDic.isKerningGroup(tr) and len(font.groups[hashKernDic.getGroupNameByGlyph(tr, side = SIDE_2)]) == 0:
+		return (PAIR_INFO_EMPTY, tl, tr)
+
+	if (tl,tr) not in font.kerning:
+		parentL = hashKernDic.getGroupNameByGlyph(tl, side = SIDE_1)
+		parentR = hashKernDic.getGroupNameByGlyph(tr, side = SIDE_2)
+		# print ('pair removed', tl,tr,parentL,parentR)
+		return (PAIR_INFO_EXCEPTION_DELETED, parentL,parentR)#tl,tr) # ???????????
+
+	l = hashKernDic.getKeyGlyphByGroupname(tl)
+	r = hashKernDic.getKeyGlyphByGroupname(tr)
+
+	if hashKernDic.isKerningGroup(tl):
+		for nl in font.groups[tl]:
+			if (nl,tr) in font.kerning:
+				# print('exc left', nl, tr)
+				return (PAIR_INFO_ATTENTION, nl, tr) # return first exception from group
+	if hashKernDic.isKerningGroup(tr):
+		for nr in font.groups[tr]:
+			if (tl,nr) in font.kerning:
+				# print('exc right', tl, nr)
+				return (PAIR_INFO_ATTENTION, tl, nr)
+
+	# if not hashKernDic.thisGroupIsMMK(tl) and not hashKernDic.thisGroupIsMMK(tr):
+	# 	parentL = hashKernDic.getGroupNameByGlyph(tl, side = 'L')
+	# 	parentR = hashKernDic.getGroupNameByGlyph(tr, side = 'R')
+	# 	if parentL != tl and parentR != tr:
+	# 		return (PAIR_INFO_ATTENTION, tl, tr)
+
+
+
+	respair = researchPair(font, hashKernDic, (l,r))
+	L_realName = respair['L_realName']
+	R_realName = respair['R_realName']
+	exception = respair['exception']
+	# L_inGroup = respair['L_inGroup']
+	# R_inGroup = respair['R_inGroup']
+	L_nameForKern = respair['L_nameForKern']
+	R_nameForKern = respair['R_nameForKern']
+	# L_markException = respair['L_markException']
+	# R_markException = respair['R_markException']
+	if exception:
+		if L_realName == L_nameForKern and R_realName == R_nameForKern:
+			# print ('attention', l,r,L_nameForKern, R_nameForKern)
+			return (PAIR_INFO_ATTENTION, L_nameForKern, R_nameForKern)
+		if L_realName != L_nameForKern and R_realName !=R_nameForKern:
+			# print('orphan', l, r, L_nameForKern, R_nameForKern)
+			return (PAIR_INFO_ORPHAN, L_nameForKern, R_nameForKern)
+		if L_realName != L_nameForKern or R_realName !=R_nameForKern:
+			# print('exec', l, r, L_nameForKern, R_nameForKern)
+			return (PAIR_INFO_EXCEPTION, L_nameForKern, R_nameForKern)
+
+	if hashKernDic.isKerningGroup(tl) and hashKernDic.isKerningGroup(tr):
+		for nl in font.groups[tl]:
+			for nr in font.groups[tr]:
+				if (nl,nr) in font.kerning:
+					# print('deep investigated exc', tl, nr)
+					return (PAIR_INFO_ATTENTION, tl, nr)
+
+	return (PAIR_INFO_NONE, tl, tr)
+
+
+
 
 class TDHashGroupsDic(object):
 	def __init__ (self, font, langSet = None):
@@ -299,6 +437,7 @@ class TDHashGroupsDic(object):
 		self.font = font
 		self.langSet = langSet
 		self.history = []
+		self.trackHistory = True
 		self.makeReverseGroupsMapping()
 		# self.langSet = TDLangSet()
 
@@ -311,11 +450,17 @@ class TDHashGroupsDic(object):
 		self.dicOfKeyGlyphsByGroup = {}
 		self.font = font
 		self.langSet = langSet
-		# self.history = []
+		self.history = []
 		self.makeReverseGroupsMapping()
 
 	def clearHistory(self):
 		self.history = []
+
+	def setHistoryPause(self):
+		self.trackHistory = False
+	def setHistoryResume(self):
+		self.trackHistory = True
+
 
 	def isLeftSideGroup (self, groupname):
 		result = False
@@ -425,7 +570,7 @@ class TDHashGroupsDic(object):
 		elif side == SIDE_2:
 			return list(filter(lambda p: p[0][1] == (key), self.font.kerning.items()))
 
-	def addGlyphsToGroup (self, group, glyphlist, checkKerning=True, showAlert = False):
+	def addGlyphsToGroup (self, group, glyphlist, checkKerning=True, checkLanguageCompatibility = False, showAlert = False):
 		"""
 		function for adding glyphs to a group, if the group does not exist, it will be created
 		if the glyph is already in a group of the same class, the operation will be canceled
@@ -434,32 +579,40 @@ class TDHashGroupsDic(object):
 			if kerning is different, such an exception will be saved
 		"""
 		report = []
-		self.history.append(('+', group, glyphlist, checkKerning))
-		def msgCanceled(self, glyphname, side, mode, showAlert):
-			txt = 'Glyph %s is already in the group %s, the addition is canceled' % (glyphname, self.getGroupNameByGlyph(glyphname, side, mode))
-			if showAlert:
-				vanilla.dialogs.message(messageText = 'Operation canceled', informativeText = txt, alertStyle = 'critical')
-			else:
-				return txt
+		if self.trackHistory:
+			self.history.append(('add', group, glyphlist, checkKerning, checkLanguageCompatibility))
+		# def msgCanceled(self, glyphname, side, mode, showAlert):
+		# 	txt = 'Glyph %s is already in the group %s, the addition is canceled' % (glyphname, self.getGroupNameByGlyph(glyphname, side, mode))
+		# 	if showAlert:
+		# 		vanilla.dialogs.message(messageText = 'Operation canceled', informativeText = txt, alertStyle = 'critical')
+		# 	else:
+		# 		return txt
 
 
 		def checkingPresenceInGroups(self, group, glyphname, side, mode, showAlert, report):
-
+			"""
+			the function checks if the glyph is in a group.
+			if the glyph is free returns None,
+			if the glyph is already in the group returns its name
+			"""
 			if self.thisGlyphInGroup(glyphname, SIDE_1, mode) and side == SIDE_1:
-				r = msgCanceled(self, glyphname, SIDE_1, mode, showAlert )
-				report.append((r))
-				return False
+				# r = msgCanceled(self, glyphname, SIDE_1, mode, showAlert )
+				# report.append((r))
+				return glyphname
 			elif self.thisGlyphInGroup(glyphname, SIDE_2, mode) and side == SIDE_2:
-				r = msgCanceled(self, glyphname, SIDE_2, mode, showAlert)
-				report.append((r))
-				return False
+				# r = msgCanceled(self, glyphname, SIDE_2, mode, showAlert)
+				# report.append((r))
+				return glyphname
 			else:
 				if glyphname not in self.font.groups[group]:
-					return True
-			return False
+					return None
+			return glyphname
 
 		newGroup = False
 		newcontent = []
+		skiped = []
+		newPairs = []
+		deletedPairs = []
 		if group not in self.font.groups:
 			self.font.groups[group] = ()
 			newGroup = True
@@ -471,7 +624,8 @@ class TDHashGroupsDic(object):
 
 		for glyphname in glyphlist:
 			if self.isKerningGroup(group):
-				if checkingPresenceInGroups(self, group, glyphname, side, EDITMODE_KERNING, showAlert, report):
+				glyphingroup = checkingPresenceInGroups(self, group, glyphname, side, EDITMODE_KERNING, showAlert, report)
+				if not glyphingroup:
 					newcontent.append(glyphname)
 					if checkKerning:
 						if side == SIDE_1:
@@ -481,16 +635,20 @@ class TDHashGroupsDic(object):
 								for (l, r), v in pairsGlyph:
 									for (_l, _r), _v in pairsTarget:
 										if r == _r and v == _v:
-											report.append(('added and cleared', l,r,v, '=', _l,_r,_v ))
+											report.append(('added and cleared', (l,r),v, '=', (_l,_r),_v ))
 											self.font.kerning.remove((l, r))
+											deletedPairs.append((l,r))
 										elif r == _r and v != _v:
-											report.append(('added and saved as exception', l,r,v, '!=', _l,_r,_v ))
+											report.append(('added, but saved as exception', (l,r),v, '!=', (_l,_r),_v ))
 							else:
 								for (l, r), v in pairsGlyph:
-									report.append (('copyed from', l,r,v, 'to', group,r))
-									self.font.kerning[(group,r)] = self.font.kerning[(l,r)]
-									report.append (('removed as exception', l,r))
+									if self.copyKern((l,r),(group,r),report,checkLanguageCompatibility):
+										newPairs.append((group,r))
+									# report.append (('copyed from', l,r,v, 'to', group,r))
+									# self.font.kerning[(group,r)] = self.font.kerning[(l,r)]
+									report.append (('removed as exception', (l,r)))
 									self.font.kerning.remove((l, r))
+									deletedPairs.append((l,r))
 									newGroup = False
 
 						if side == SIDE_2:
@@ -500,31 +658,81 @@ class TDHashGroupsDic(object):
 								for (l, r), v in pairsGlyph:
 									for (_l, _r), _v in pairsTarget:
 										if l == _l and v == _v:
-											report.append(('added and cleared', l,r,v, '=', _l,_r,_v ))
+											report.append(('added and cleared', (l,r),v, '=', (_l,_r),_v ))
 											self.font.kerning.remove((l,r))
+											deletedPairs.append((l, r))
 										elif l == _l and v != _v:
-											report.append(('added and saved as exception', l,r,v, '!=', _l,_r,_v ))
+											report.append(('added, but saved as exception', (l,r),v, '!=', (_l,_r),_v ))
 							else:
 								for (l, r), v in pairsGlyph:
-									report.append(('copyed from', l,r,v, 'to', l,group))
-									self.font.kerning[(l,group)] = self.font.kerning[(l,r)]
-									report.append(('removed as exception', l, r))
+									if self.copyKern((l,r),(l,group),report,checkLanguageCompatibility):
+										newPairs.append((l,group))
+									# report.append(('copyed from', l,r,v, 'to', l,group))
+									# self.font.kerning[(l,group)] = self.font.kerning[(l,r)]
+									report.append(('removed as exception', (l, r)))
 									self.font.kerning.remove((l, r))
+									deletedPairs.append((l,r))
 									newGroup = False
+				else:
+					skiped.append(glyphingroup)
 
-			if self.isMarginsGroup(group):
-				if checkingPresenceInGroups(self, group, glyphname, side, EDITMODE_MARGINS, showAlert, report):
+
+			elif self.isMarginsGroup(group):
+				glyphingroup = checkingPresenceInGroups(self, group, glyphname, side, EDITMODE_MARGINS, showAlert, report)
+				if not glyphingroup:
 					newcontent.append(glyphname)
+				else:
+					skiped.append(glyphingroup)
+
+			else:
+				newcontent.append(glyphname)
 
 		if newcontent:
 			self.font.groups[group] += tuple(newcontent)
 			self.makeReverseGroupsMapping()
-		if report:
-			for i in report:
-				print (' '.join([ str(n) for n in i]))
+		# if report:
+		# 	for i in report:
+		# 		print (' '.join([ str(n) for n in i]))
+		return (skiped, newPairs, deletedPairs)
+
+	def repositionGlyphsInGroup (self, group, idx=0, glyphlist=None):
+		# RF3 style
+		if idx > len(self.font.groups[group]): return
+		try:
+			tempgroup = list(self.font.groups[group])
+			glyphIdxName = tempgroup[idx]
+			for name in glyphlist:
+				tempgroup.remove(name)
+			idx = 0
+			for i, name in enumerate(tempgroup):
+				if name == glyphIdxName:
+					idx = i
+			for name in glyphlist:
+				tempgroup.insert(idx, name)
+				idx += 1
+			self.font.groups[group] = tuple(tempgroup)
+		except:
+			pass
+
+	def copyKern (self, pairSource, pairDest, report, checkLanguageCompatibility=False):
+		if not checkLanguageCompatibility:
+			v = self.font.kerning[pairSource]
+			self.font.kerning[pairDest] = self.font.kerning[pairSource]
+			report.append(('kerning was copied to', pairDest, v, 'from', pairSource, v))
+			return True
+		else:
+			if self.checkPairLanguageCompatibilityGroupped(pairDest) and self.checkPairLanguageCompatibilityGroupped(pairSource):
+				v = self.font.kerning[pairSource]
+				self.font.kerning[pairDest] = self.font.kerning[pairSource]
+				report.append(('kerning was copied to', pairDest, v, 'from', pairSource, v, 'compatibility verified'))
+				return True
+			else:
+				v = self.font.kerning[pairSource]
+				report.append(('pair is not compatible, ignored', pairDest, v, 'source was', pairSource, v))
+				return False
 
 
-	def delGlyphsFromGroup (self, group, glyphlist, checkKerning=True, rebuildMap = True):
+	def delGlyphsFromGroup (self, group, glyphlist, checkKerning=True, rebuildMap = True, checkLanguageCompatibility = False):
 		"""
 		function to remove glyphs from a group
 		if kerning check mode is enabled, existing kerning with this group will be checked:
@@ -532,7 +740,10 @@ class TDHashGroupsDic(object):
 			this will be classified as an exception
 		"""
 		report = []
-		self.history.append(('-', group, glyphlist, checkKerning))
+		newPairs = []
+		deletedPairs = []
+		if self.trackHistory:
+			self.history.append(('remove', group, glyphlist, checkKerning, checkLanguageCompatibility))
 		if group in self.font.groups:
 			newcontent = []
 			for glyphname in self.font.groups[group]:
@@ -549,44 +760,66 @@ class TDHashGroupsDic(object):
 					pairs = self.getPairsBy(group, side)
 					for glyph in glyphlist:
 						glyphpairs = self.getPairsBy(glyph, side)
-
 						for (l,r),v in pairs:
-							self.font.kerning[(glyph, r)] = self.font.kerning[(l, r)]
-							report.append (('removed from group and saved as exception', glyph,r,v, '=', l,r,v))
+							if (glyph, r) in self.font.kerning and self.font.kerning[(glyph, r)] != v:
+								report.append(('removed from group and keep exception', (glyph, r), v, '!=', (l, r), v))
+							else:
+								if self.copyKern((l,r), (glyph, r), report, checkLanguageCompatibility = checkLanguageCompatibility):
+									newPairs.append((glyph, r))
+							# self.font.kerning[(glyph, r)] = self.font.kerning[(l, r)]
+							# report.append (('removed from group and saved as exception', glyph,r,v, '=', l,r,v))
 						if glyphpairs:
 							for (l, r), v in glyphpairs:
-								self.font.kerning[(glyph, r)] = self.font.kerning[(l, r)]
-								report.append (('removed from group and saved as exception', glyph, r, v, '=', l, r, v))
+								if (glyph, r) in self.font.kerning and self.font.kerning[(glyph, r)] != v:
+									report.append(('removed from group and keep exception', (glyph, r), v, '!=', (l, r), v))
+								else:
+									if self.copyKern((l, r), (glyph, r), report, checkLanguageCompatibility = checkLanguageCompatibility):
+										newPairs.append((glyph, r))
+								# self.font.kerning[(glyph, r)] = self.font.kerning[(l, r)]
+								# report.append (('removed from group and saved as exception', glyph, r, v, '=', l, r, v))
 				if side == SIDE_2:
 					pairs = self.getPairsBy(group, side)
 					for glyph in glyphlist:
 						glyphpairs = self.getPairsBy(glyph, side)
-
 						for (l,r),v in pairs:
-							self.font.kerning[(l, glyph)] = self.font.kerning[(l, r)]
-							report.append (('removed from group and saved as exception', l, glyph,v, '=', l,r,v))
+							if (l, glyph) in self.font.kerning and self.font.kerning[(l, glyph)] != v:
+								report.append(('removed from group and keep exception', (glyph, r), v, '!=', (l, r), v))
+							else:
+								if self.copyKern((l, r), (l, glyph), report, checkLanguageCompatibility = checkLanguageCompatibility):
+									newPairs.append((l, glyph))
+							# self.font.kerning[(l, glyph)] = self.font.kerning[(l, r)]
+							# report.append (('removed from group and saved as exception', l, glyph,v, '=', l,r,v))
 						if glyphpairs:
 							for (l, r), v in glyphpairs:
-								self.font.kerning[(l, glyph)] = self.font.kerning[(l, r)]
-								report.append (('removed from group and saved as exception', l, glyph, v, '=', l, r, v))
+								if (l, glyph) in self.font.kerning and self.font.kerning[(l, glyph)] != v:
+									report.append(('removed from group and keep exception', (glyph, r), v, '!=', (l, r), v))
+								else:
+									if self.copyKern((l, r), (l, glyph), report, checkLanguageCompatibility = checkLanguageCompatibility):
+										newPairs.append((l, glyph))
+								# self.font.kerning[(l, glyph)] = self.font.kerning[(l, r)]
+								# report.append (('removed from group and saved as exception', l, glyph, v, '=', l, r, v))
 
 			self.font.groups[group] = tuple(newcontent)
 			if rebuildMap:
 				self.makeReverseGroupsMapping()
-		if report:
-			for i in report:
-				print(' '.join([ str(n) for n in i]))
+		# if report:
+		# 	for i in report:
+		# 		print(' '.join([ str(n) for n in i]))
+		return (newPairs, deletedPairs)
 
-	def deleteGroup(self, group, checkKerning = True):
+	def deleteGroup(self, group, checkKerning = True, checkLanguageCompatibility = False ):
 		report = []
-
-		self.history.append(('del', group, checkKerning))
+		newPairs = []
+		deletedPairs = []
+		if self.trackHistory:
+			self.history.append(('delete', group, checkKerning, checkLanguageCompatibility))
 		if group in self.font.groups:
 			glyphslist = self.font.groups[group]
-			self.delGlyphsFromGroup(group, glyphslist, checkKerning = checkKerning, rebuildMap = False)
+			newPairs = self.delGlyphsFromGroup(group, glyphslist, checkKerning = checkKerning,
+			                        rebuildMap = False, checkLanguageCompatibility = checkLanguageCompatibility )
 			report.append (('group removed', group))
 			if self.isKerningGroup(group):
-				report.append ( ('clearing kerning'))
+				report.append ( ('clearing kerning' , ''))
 				if self.isLeftSideGroup(group):
 					side = SIDE_1
 				else:
@@ -594,24 +827,94 @@ class TDHashGroupsDic(object):
 				if side == SIDE_1:
 					pairs = self.getPairsBy(group, SIDE_1)
 					for (l,r),v in pairs:
-						report.append ( ('removed', l,r,v))
+						report.append ( ('removed', (l,r),v))
 						self.font.kerning.remove((l,r))
+						deletedPairs.append((l,r))
 				if side == SIDE_2:
 					pairs = self.getPairsBy(group, SIDE_2)
 					for (l,r),v in pairs:
-						report.append (('removed', l, r, v))
+						report.append (('removed', (l, r), v))
 						self.font.kerning.remove((l,r))
+						deletedPairs.append((l,r))
 
 			del self.font.groups[group]
 			self.makeReverseGroupsMapping()
-		if report:
-			for i in report:
-				print(' '.join([ str(n) for n in i]))
+		# if report:
+		# 	for i in report:
+		# 		print(' '.join([ str(n) for n in i]))
+		return (newPairs, deletedPairs)
+
+	def renameGroup(self, group, newname, checkKerning = True, checkLanguageCompatibility = False ):
+		report = []
+		newPairs = []
+		deletedPairs = []
+		if self.trackHistory:
+			self.history.append(('rename', group, newname, checkKerning, checkLanguageCompatibility))
+		if group in self.font.groups and newname not in self.font.groups:
+			content = list(self.font.groups[group])
+			self.font.groups[newname] = ()
+			if self.isKerningGroup(group):
+				if checkKerning:
+					if self.isLeftSideGroup(group):
+						side = SIDE_1
+					else:
+						side = SIDE_2
+					if side == SIDE_1:
+						pairs = self.getPairsBy(group, SIDE_1)
+						for (l,r),v in pairs:
+							if self.copyKern((l,r),(newname, r),report,checkLanguageCompatibility = checkLanguageCompatibility):
+								newPairs.append((newname, r))
+							self.font.kerning.remove((l,r))
+							deletedPairs.append((l,r))
+					if side == SIDE_2:
+						pairs = self.getPairsBy(group, SIDE_2)
+						for (l,r),v in pairs:
+							if self.copyKern((l,r),(l, newname),report,checkLanguageCompatibility = checkLanguageCompatibility):
+								newPairs.append((l, newname))
+							self.font.kerning.remove((l, r))
+							deletedPairs.append((l,r))
+			self.font.groups.remove(group)
+			# if content:
+			self.font.groups[newname] = tuple(content)
+			self.makeReverseGroupsMapping()
+		# if report:
+		# 	for i in report:
+		# 		print(' '.join([str(n) for n in i]))
+		return (newPairs, deletedPairs)
+
 
 
 	def checkPairLanguageCompatibility(self, pair):
 		if self.langSet:
 			return self.langSet.checkPairLanguageCompatibility(self.font, pair)
+
+	def checkPairLanguageCompatibilityGroupped(self, pair, level = 1): # 2 for languages, 1 for basescripts
+		l, r = pair
+		_l, _r = pair
+		if not self.langSet: return True
+		if self.isKerningGroup(l) and self.isKerningGroup(r):
+			_l = self.getKeyGlyphByGroupname(l)
+			_r = self.getKeyGlyphByGroupname(r)
+
+		elif self.isKerningGroup(l) and not self.isKerningGroup(r):
+			_l = self.getKeyGlyphByGroupname(l)
+			_r = r
+			# return self.langSet.checkPairLanguageCompatibility(self.font, (_l, r))
+		elif not self.isKerningGroup(l) and self.isKerningGroup(r):
+			_l = l
+			_r = self.getKeyGlyphByGroupname(r)
+
+			# return self.langSet.checkPairLanguageCompatibility(self.font, (l, _r))
+		# else:
+		# 	return self.langSet.checkPairLanguageCompatibility(self.font, (l,r))
+
+		if level == 2:
+			return self.langSet.checkPairLanguageCompatibility(self.font, (_l, _r))
+		else:
+			return self.langSet.checkPairBaseScriptCompatibility(self.font, (_l, _r))
+		# if self.langSet:
+		# 	return self.langSet.checkPairLanguageCompatibility(self.font, pair)
+
 
 
 
@@ -642,7 +945,7 @@ class TDSpaceControl(object):
 		self.glyphsView.selectionMode = SELECTION_MODE_PAIR
 		self.glyphsView.setStatus('mode:kerning', True)
 		self.glyphsView.setStatus('mode:margins', False)
-		self.glyphsView.showMargins = False
+		# self.glyphsView.showMargins = False
 
 		if self.groupsView:
 			self.groupsView.setStatus('mode:margins', False)
@@ -650,7 +953,7 @@ class TDSpaceControl(object):
 			self.groupsView.setStatus('mode:exceptions', True)
 			self.groupsView.setStatus('show:beam', False)
 			self.groupsView.selectionMode = SELECTION_MODE_PAIR
-			self.groupsView.showMargins = False
+			# self.groupsView.showMargins = False
 			self.groupsView.separatePairs = True
 			self.groupsView.linkedMode = False
 			self.groupsView.useRayBeam = False
@@ -750,7 +1053,7 @@ class TDKernControl(object):
 
 	def checkCommand(self, sender, event):
 		if not self.ON: return
-		if 'mode:kerning' in sender.statuses and sender.statuses['mode:kerning'][0]:
+		if sender.statuses and 'mode:kerning' in sender.statuses and sender.statuses['mode:kerning'][0]:
 			self.keyCommander.checkCommand(sender, event)
 
 
@@ -886,7 +1189,7 @@ class TDMarginsControl(object):
 
 	def checkCommand(self, sender, event):
 		if not self.ON: return
-		if 'mode:margins' in sender.statuses and sender.statuses['mode:margins'][0]:
+		if sender.statuses and 'mode:margins' in sender.statuses and sender.statuses['mode:margins'][0]:
 			self.keyCommander.checkCommand(sender, event)
 
 	def refreshViews(self):

@@ -1,5 +1,5 @@
 <langset>
-<key name="enable">off</key>
+<key name="enable">on</key>
 <key name="base">cyrillic</key>
 <key name="keycode">#0430</key>
 <key name="name">Buryat</key>

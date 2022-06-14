@@ -84,7 +84,7 @@ def convertGlyphName2unicode(font, glyphName):
 	else:
 		return '/%s ' % glyphName
 
-def prepareGlyphsMatrix(glyphslines, fonts):
+def prepareGlyphsMatrix(glyphslines, fonts, lineinfo = None):
 	matrix = []
 	idx = 0
 	for glist in glyphslines:
@@ -100,7 +100,7 @@ def prepareGlyphsMatrix(glyphslines, fonts):
 				lineinfo = '%s %s' % (font.info.familyName, font.info.styleName)
 
 			else:
-				lineinfo = None
+				lineinfo = lineinfo
 				# lineinfo = '%i:%i' % ( idx, len(glyphslines))
 			matrix.append({'glyphs': gline, 'info': lineinfo, 'link': link})
 			# matrix.append({'glyphs': gline, 'info': lineinfo, 'link': link, 'scale': .5})
@@ -300,7 +300,7 @@ class TDGlyphsMerzView (MerzView):
 		self.bottomGap = 400
 		self.lineHeight = 2000 # height of glyphsline
 		self.lineGap = 0 # lineGap between of glyphslines
-		self.maxGlyphSize = 150
+		self.maxGlyphSize = 250
 		self.startXpos = 500
 
 		self.displayFontName = 'Menlo'#'.SFNSMono-Medium'  # font drawing margins, titles, kerning etc.
@@ -434,8 +434,6 @@ class TDGlyphsMerzView (MerzView):
 			verticalAlignment = 'bottom',
 			horizontalAlignment = "center"
 		)
-
-
 
 	def drawXRayBeam(self, container, glyph, rayBeamPosition):
 		intersection = getIntersectGlyphWithHorizontalBeam(glyph, rayBeamPosition = rayBeamPosition)
@@ -610,6 +608,49 @@ class TDGlyphsMerzView (MerzView):
 			offset = (0, 4),
 			visible = self.showMargins,
 		)
+		# drawMarginsStrokes = True
+		# if drawMarginsStrokes:
+		# 	sbleft = container.appendLineSublayer(
+		# 		name = 'margin.stroke.left',
+		# 		startPoint = (0, 0),
+		# 		endPoint = (0, 50),
+		# 		strokeWidth = 1,
+		# 		strokeColor = COLOR_TITLES,  # (0,0,0,1),#(.3,.3,.3,.3),
+		# 		# strokeDash = (1, 3)  # hM / clines)
+		# 	)
+		# 	sbleft.setStartSymbol(dict(name = "triangle", size = (5, 5), fillColor = COLOR_TITLES))
+		#
+		# 	sbrigth = container.appendLineSublayer(
+		# 		name = 'margin.stroke.right',
+		# 		startPoint = (width, 0),
+		# 		endPoint = (width, 50),
+		# 		strokeWidth = 1,
+		# 		strokeColor = COLOR_TITLES,  # (0,0,0,1),#(.3,.3,.3,.3),
+		# 		# strokeDash = (1, 3)  # hM / clines)
+		# 	)
+		# 	sbrigth.setStartSymbol( dict( name="triangle", size=(5, 5), fillColor= COLOR_TITLES ) )
+		#
+		# 	h, w = container.getSize()
+		# 	sblefttop = container.appendLineSublayer(
+		# 		name = 'margin.stroke.lefttop',
+		# 		startPoint = (0, self.lineHeight-20),
+		# 		endPoint = (0, self.lineHeight-70),
+		# 		strokeWidth = 1,
+		# 		strokeColor = COLOR_TITLES,  # (0,0,0,1),#(.3,.3,.3,.3),
+		# 		# strokeDash = (1, 3)  # hM / clines)
+		# 	)
+		# 	sblefttop.setStartSymbol(dict(name = "triangle", size = (5, 5), fillColor = COLOR_TITLES))
+		#
+		# 	sbrigthtop = container.appendLineSublayer(
+		# 		name = 'margin.stroke.righttop',
+		# 		startPoint = (width, self.lineHeight-20),
+		# 		endPoint = (width, self.lineHeight-70),
+		# 		strokeWidth = 1,
+		# 		strokeColor = COLOR_TITLES,  # (0,0,0,1),#(.3,.3,.3,.3),
+		# 		# strokeDash = (1, 3)  # hM / clines)
+		# 	)
+		# 	sbrigthtop.setStartSymbol(dict(name = "triangle", size = (5, 5), fillColor = COLOR_TITLES))
+
 		# uniqname= container.getName().replace('glyphbox.','')
 		# if uniqname in self.selected:
 		# 	print ('sizemargins', container.getSublayer('margin.left').textLayerSize, container.getSublayer('margin.right').textLayerSize)
@@ -681,6 +722,7 @@ class TDGlyphsMerzView (MerzView):
 			)
 		)
 		cross.setRotation(45)
+
 
 
 	def drawGlyph (self, container, glyph, uniqname=None, position=(0, 0), italicAngle=0,
@@ -779,7 +821,7 @@ class TDGlyphsMerzView (MerzView):
 		container.appendTextLineSublayer(
 			name = 'lineinfo',
 			font = self.displayFontName,
-			position = (xpos + 1000, (self.lineHeight + self.lineGap) - self.lineHeight / 3),  # + 1500
+			position = (xpos + 1000, (self.lineHeight + self.lineGap) - self.lineHeight / 4),  # + 1500
 			fillColor = colorLine,
 			backgroundColor = colorBack,
 			borderColor = colorBorder,
@@ -807,7 +849,7 @@ class TDGlyphsMerzView (MerzView):
 		if self.linkedMode and link == self.selectedLink:
 			lm = container.appendSymbolSublayer(
 				name = 'marklink',
-				position = (xpos + 1000, (self.lineHeight + self.lineGap) - self.lineHeight / 3),
+				position = (xpos + 1000, (self.lineHeight + self.lineGap) - self.lineHeight / 4),
 				imageSettings = dict(
 					name = 'star',  # KernToolCursorSymbol,
 					size = (15, 15),
@@ -882,6 +924,7 @@ class TDGlyphsMerzView (MerzView):
 				r = glyphbox.getSublayer('margin.right')
 				if r: #TODO need reposition right margins layer
 					r.setText(str(rm)+RIGHT_SYMBOL_MARGIN)
+
 				n = glyphbox.getSublayer('glyphTitle')
 				if n:
 					n.setSize(( glyph.width , self.lineHeight - 50 ))
@@ -917,10 +960,10 @@ class TDGlyphsMerzView (MerzView):
 		# w, h = container.getSize()
 		lineinfo = container.getSublayer('lineinfo') # marklink
 		if lineinfo:
-			lineinfo.setPosition((xpos + 1000, (self.lineHeight+self.lineGap) - self.lineHeight/3 ))
+			lineinfo.setPosition((xpos + 1000, (self.lineHeight+self.lineGap) - self.lineHeight/4 ))
 		marklink = container.getSublayer('marklink')
 		if marklink:
-			marklink.setPosition((xpos + 1000, (self.lineHeight+self.lineGap) - self.lineHeight/3 ))
+			marklink.setPosition((xpos + 1000, (self.lineHeight+self.lineGap) - self.lineHeight/4 ))
 
 
 

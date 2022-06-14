@@ -7,7 +7,7 @@ from fontParts.world import CurrentFont
 from vanilla.dialogs import getFile, putFile, ask
 from defconAppKit.controls.glyphCollectionView import GlyphCollectionView
 
-
+#0108
 import importlib
 
 import tdKernToolEssentials4
@@ -250,18 +250,23 @@ class PairsBuilderDialogWindow(object):
 		                                    callback = self.btnFlipCallback)
 		self.w.gc.btnFlip.set(1)
 
-		wSeg = gcwx1/8+5
-		segmentsGrp = [{'width': wSeg, 'title': '1'},
+		wSeg = gcwx1/9+5 # ширина сегмента
+		segmentsGrp = [{'width': wSeg, 'title': '∞'},
+		               {'width': wSeg, 'title': '1'},
 		               {'width': wSeg, 'title': '2'},
 		               {'width': wSeg, 'title': '3'},
 		               {'width': wSeg, 'title': '4'},
-		               {'width': wx1 - (wSeg)*4+20 , 'title': 'Pairs/Line'}]
+		               {'width': wSeg, 'title': '5'},
+		               {'width': wSeg, 'title': '6'},
+		               # можно сврободно добавлять еще сегменты
+		               ]
+						# {'width': wx1 - (wSeg)*4+20 , 'title': 'Pairs/Line'}]
 		self.w.gc.btnPairsPerLine = SegmentedButton((gcleftHalfX, blockY2, gcwx1, elemH),
 		                                     segmentDescriptions = segmentsGrp,
 		                                     selectionStyle = 'one',
 		                                     sizeStyle = 'small',
 		                                    callback = self.btnPairsPerLineCallback)
-		self.w.gc.btnPairsPerLine.set(3)
+		self.w.gc.btnPairsPerLine.set(4)
 		self.pairsPerLine = 4
 
 
@@ -329,11 +334,10 @@ class PairsBuilderDialogWindow(object):
 
 	def btnPairsPerLineCallback(self, sender):
 		ppl = sender.get()
-		if ppl == 4:
+		if ppl == 0:
 			self.pairsPerLine = None
 		else:
-			self.pairsPerLine = ppl+1
-		# print 'Set PairsPerLine', self.pairsPerLine
+			self.pairsPerLine = ppl #+1
 		self.showPreview()
 
 	def btnFlipCallback(self, sender):
