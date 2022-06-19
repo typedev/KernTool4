@@ -15,7 +15,7 @@ mainScriptsList = ['KernTool4', 'GroupsControl']
 developer = "Alexander Lubovenko"
 developerURL = "https://github.com/typedev"
 roboFontVersion = "4.2"
-iconFile = 'icon.png'
+iconFile = 'kt4icon.png'
 
 # ------------------------------------------------------------------------
 mainScript = ''
