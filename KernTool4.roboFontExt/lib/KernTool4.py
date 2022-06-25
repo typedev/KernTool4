@@ -55,33 +55,51 @@ class FontSelectorDialogWindow(object):
 	# nsViewClass = NSView
 
 	def __init__ (self, parentWindow,
-	              callback=None, listitems=None
+	              callback=None, fontListSelected=None, scales = None
 	              ):
-		wW = 700
+		wW = 800
 		hW = 300
 		self.w = vanilla.Sheet((wW, hW), parentWindow) #minSize = (wW,hW), ,  maxSize = (500,1000)
 		self.callback = callback
 
 		self.fontList = {}
-		if not listitems:
-			listitems = []
-
+		listitems = []
+		if not fontListSelected:
 
 			for idx, font in enumerate(AllFonts()):
 				listitems.append( {'UFO': font.path.split('/')[-1],
 				                   'Family': '%s' % font.info.familyName,
 				                   'Style': '%s' % font.info.styleName,
 				                   'Select': True,
+				                   'Scale kerning': 1.0,
 				                   'ID': idx} )
 				self.fontList[idx] = font
-		# else:
-		# 	for item in listitems:
-		# 		idx = item['ID']
-		# 		self.fontList[idx] = font
-		# dropSettings = dict(
-		# 	type = ['strings'],
-		# 	callback = self.fontsDropCallback
-		# )
+		else:
+			idx = 0
+			for font in fontListSelected:
+				scale = 1.0
+				if scales and font in scales:
+					scale = scales[font]
+				listitems.append({'UFO': font.path.split('/')[-1],
+				                  'Family': '%s' % font.info.familyName,
+				                  'Style': '%s' % font.info.styleName,
+				                  'Select': True,
+				                  'Scale kerning': scale,
+				                  'ID': idx})
+
+				self.fontList[idx] = font
+				idx += 1
+			for font in AllFonts():
+				if font not in fontListSelected:
+					listitems.append({'UFO': font.path.split('/')[-1],
+					                  'Family': '%s' % font.info.familyName,
+					                  'Style': '%s' % font.info.styleName,
+					                  'Select': False,
+					                  'Scale kerning': 1.0,
+					                  'ID': idx})
+
+					self.fontList[idx] = font
+					idx += 1
 
 		self.w.fontsList = vanilla.List((10, 35, -10, -50), listitems,
 		                                allowsMultipleSelection = False,
@@ -89,11 +107,8 @@ class FontSelectorDialogWindow(object):
 		                                                    {"title": "Family", 'width': 150},
 		                                                    {'title': 'Style', 'width': 150},
 		                                                    {"title": "Select", 'cell': vanilla.CheckBoxListCell(),'width': 50},
+		                                                    {"title": 'Scale kerning', 'width': 80, 'editable': True},
 		                                                    {'title': 'ID', 'width': 0}],
-		                                # selfWindowDropSettings = dropSettings,
-		                                # selfApplicationDropSettings = dropSettings,
-		                                # selfDropSettings = dropSettings,
-		                                # otherApplicationDropSettings = dropSettings,
 		                                )
 
 		self.w.btnCancel = vanilla.Button((10, -35, 100, 21), "Cancel",
@@ -108,38 +123,27 @@ class FontSelectorDialogWindow(object):
 
 		self.w.open()
 
-	# def fontsDropCallback(self, sender, dropInfo):
-	# 	print (sender, dropInfo)
-	# 	# groupper(sender, dropInfo)
-	# 	if dropInfo['isProposal']: pass
-	# 	else:
-	# 		print(sender, dropInfo)
-	#
-	# 	return True
-
 	def btnSortCallback(self, sender):
 		listitems = self.w.fontsList.get()
 		selected = self.w.fontsList.getSelection()[0]
-		# print ('before')
-		# print (listitems, selected)
 		if sender == self.w.btnDown and selected < len(listitems):
 			listitems.insert(selected + 1, listitems.pop(selected))
 		if sender == self.w.btnUp and selected > 0:
 			listitems.insert(selected - 1, listitems.pop(selected))
-		# print('after')
-		# print (listitems)
 		self.w.fontsList.set(listitems)
 
 	def btnCloseCallback(self, sender):
 		if sender == self.w.btnApply:
 			fontlist = []
+			scales = {}
 			for item in self.w.fontsList.get():
 				if item['Select']:
 					fontlist.append( self.fontList[ item['ID'] ] )
+					scale = str(item['Scale kerning']).replace(',','.')
+					scales[self.fontList[ item['ID'] ]] = float( scale )
 			if self.callback:
-				self.callback({'selectedFonts': fontlist})
+				self.callback({'selectedFonts': fontlist, 'scales': scales})
 		self.w.close()
-
 
 # =================================
 # KERN MULTI TOOL =================
@@ -307,6 +311,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		self.fontsHashKernLib = makeFontsHashGroupsLib(AllFonts(),self.langSet)
 		self.glyphsInMatrix = []
 		self.fontList = AllFonts()
+		self.fontListScales = {}
 		# self.txtPatterns = TD_txtPatterns()
 		# self.txtPatterns.makeLibPatterns(self.fontList)
 
@@ -737,14 +742,15 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				margin = rm
 
 				for ggname in font.groups[gL]:
-					(_lm,_rm) = getMargins(font[ggname], useRayBeam = ray, rayBeamPosition = raypos)
-					if margin != _rm:
-						ggLmarks.append(True)
-					else:
+					if ggname in font:
+						(_lm,_rm) = getMargins(font[ggname], useRayBeam = ray, rayBeamPosition = raypos)
+						if margin != _rm:
+							ggLmarks.append(True)
+						else:
+							ggLmarks.append(False)
+						ggL.append(font[ggname])
+						ggL.append(font[r])
 						ggLmarks.append(False)
-					ggL.append(font[ggname])
-					ggL.append(font[r])
-					ggLmarks.append(False)
 			else:
 				Llabel = '%s // %s' % (l, r)
 				ggL.append(font[l])
@@ -755,14 +761,15 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				margin = lm
 
 				for ggname in font.groups[gR]:
-					ggR.append(font[l])
-					ggRmarks.append(False)
-					ggR.append(font[ggname])
-					(_lm, _rm) = getMargins(font[ggname], useRayBeam = ray, rayBeamPosition = raypos)
-					if margin != _lm:
-						ggRmarks.append(True)
-					else:
+					if l in font and ggname in font:
+						ggR.append(font[l])
 						ggRmarks.append(False)
+						ggR.append(font[ggname])
+						(_lm, _rm) = getMargins(font[ggname], useRayBeam = ray, rayBeamPosition = raypos)
+						if margin != _lm:
+							ggRmarks.append(True)
+						else:
+							ggRmarks.append(False)
 			else:
 				Rlabel = '%s // %s' % (l, r)
 				ggR.append(font[l])
@@ -790,7 +797,8 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				(lm, rm) = getMargins(font[font.groups[gL][0]], useRayBeam = ray, rayBeamPosition = raypos)
 				margin = rm
 				for ggname in font.groups[gL]:
-					glyphslineL, ggLmarks = fillglyphsline(font, glyphslineL, ggLmarks, mapGlyphs, ggname, margin, 'L',ray,raypos)
+					if ggname in font:
+						glyphslineL, ggLmarks = fillglyphsline(font, glyphslineL, ggLmarks, mapGlyphs, ggname, margin, 'L',ray,raypos)
 			else:
 				(lm, rm) = getMargins(font[gL], useRayBeam = ray, rayBeamPosition = raypos)
 				margin = rm
@@ -806,7 +814,8 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				(lm, rm) = getMargins(font[font.groups[gR][0]], useRayBeam = ray, rayBeamPosition = raypos)
 				margin = lm
 				for ggname in font.groups[gR]:
-					glyphslineR, ggRmarks = fillglyphsline(font, glyphslineR, ggRmarks, mapGlyphs, ggname, margin, 'R',ray,raypos)
+					if ggname in font:
+						glyphslineR, ggRmarks = fillglyphsline(font, glyphslineR, ggRmarks, mapGlyphs, ggname, margin, 'R',ray,raypos)
 			else:
 				(lm, rm) = getMargins(font[gR], useRayBeam = ray, rayBeamPosition = raypos)
 				margin = lm
@@ -851,37 +860,45 @@ class TDKernMultiTool(Subscriber): #, WindowController
 	# ===========
 
 	def fontsCallback(self, sender):
-		FontSelectorDialogWindow( parentWindow = self.w, callback = self.fontListCallback)
+		FontSelectorDialogWindow( parentWindow = self.w, callback = self.fontListCallback, fontListSelected = self.fontList, scales = self.fontListScales)
 
-	def fontListCallback(self, list):
-		if list:
-			self.fontList = list['selectedFonts']
-			# TODO need recode HashKernLib refreshing
+	def fontListCallback(self, fontListSelected):
+		# print (self.glyphsInMatrix)
+		if fontListSelected:
+			self.fontList = fontListSelected['selectedFonts']
+			self.fontListScales = fontListSelected['scales']
 			self.fontsHashKernLib = makeFontsHashGroupsLib(self.fontList, self.langSet)
-			# self.txtPatterns.makeLibPatterns(self.fontList)
-			self.w.glyphsView.fontsHashKernLib = self.fontsHashKernLib
-			self.w.groupsView.fontsHashKernLib = self.fontsHashKernLib
-			self.spaceControl.fontsHashKernLib = self.fontsHashKernLib
-			self.spaceControl.kernControl.fontsHashKernLib = self.fontsHashKernLib
-			self.spaceControl.marginsControl.fontsHashKernLib = self.fontsHashKernLib
+			self.spaceControl.setupSpaceControl(fontsHashKernLib = self.fontsHashKernLib, scalesKern = self.fontListScales)
 			matrix = prepareGlyphsMatrix(self.glyphsInMatrix, self.fontList)
+			self.linkedMode = True
 			if len(self.fontList) == 1:
 				self.linkedMode = False
-				self.w.glyphsView.switchLinkedMode(linked = self.linkedMode)
+			self.w.glyphsView.switchLinkedMode(linked = self.linkedMode)
 			self.w.glyphsView.startDrawGlyphsMatrix(matrix, animatedStart = True)
-		elif not list and self.fontList:
-			self.fontsHashKernLib = makeFontsHashGroupsLib(self.fontList, self.langSet)
-			# self.txtPatterns.makeLibPatterns(self.fontList)
-			self.w.glyphsView.fontsHashKernLib = self.fontsHashKernLib
-			self.w.groupsView.fontsHashKernLib = self.fontsHashKernLib
-			self.spaceControl.fontsHashKernLib = self.fontsHashKernLib
-			self.spaceControl.kernControl.fontsHashKernLib = self.fontsHashKernLib
-			self.spaceControl.marginsControl.fontsHashKernLib = self.fontsHashKernLib
-			matrix = prepareGlyphsMatrix(self.glyphsInMatrix, self.fontList)
-			if len(self.fontList) == 1:
-				self.linkedMode = False
-				self.w.glyphsView.switchLinkedMode(linked = self.linkedMode)
-			self.w.glyphsView.startDrawGlyphsMatrix(matrix, animatedStart = False)
+
+			# self.w.glyphsView.fontsHashKernLib = self.fontsHashKernLib
+			# self.w.groupsView.fontsHashKernLib = self.fontsHashKernLib
+			# self.spaceControl.fontsHashKernLib = self.fontsHashKernLib
+			# self.spaceControl.kernControl.fontsHashKernLib = self.fontsHashKernLib
+			# self.spaceControl.marginsControl.fontsHashKernLib = self.fontsHashKernLib
+			# matrix = prepareGlyphsMatrix(self.glyphsInMatrix, self.fontList)
+			# if len(self.fontList) == 1:
+			# 	self.linkedMode = False
+			# 	self.w.glyphsView.switchLinkedMode(linked = self.linkedMode)
+			# self.w.glyphsView.startDrawGlyphsMatrix(matrix, animatedStart = True)
+		# elif not list and self.fontList:
+		# 	self.fontsHashKernLib = makeFontsHashGroupsLib(self.fontList, self.langSet)
+		# 	# self.txtPatterns.makeLibPatterns(self.fontList)
+		# 	self.w.glyphsView.fontsHashKernLib = self.fontsHashKernLib
+		# 	self.w.groupsView.fontsHashKernLib = self.fontsHashKernLib
+		# 	self.spaceControl.fontsHashKernLib = self.fontsHashKernLib
+		# 	self.spaceControl.kernControl.fontsHashKernLib = self.fontsHashKernLib
+		# 	self.spaceControl.marginsControl.fontsHashKernLib = self.fontsHashKernLib
+		# 	matrix = prepareGlyphsMatrix(self.glyphsInMatrix, self.fontList)
+		# 	if len(self.fontList) == 1:
+		# 		self.linkedMode = False
+		# 		self.w.glyphsView.switchLinkedMode(linked = self.linkedMode)
+		# 	self.w.glyphsView.startDrawGlyphsMatrix(matrix, animatedStart = False)
 
 
 
@@ -1007,7 +1024,3 @@ def main():
 
 if __name__ == "__main__":
 	main()
-# registerRoboFontSubscriber(TDKernMultiTool)
-# registerCurrentGlyphSubscriber(TDKernMultiTool)
-# MerzDemo.open()
-# TDKernMultiTool()

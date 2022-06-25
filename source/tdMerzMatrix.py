@@ -80,6 +80,8 @@ class TDMerzMatrixDesigner (object): #MerzView
 		self.borderColor = (0,0,0,0)
 		self.controlsColor = (1,1,1,1)
 		self.cornerRadius = 0
+		self.focusColor = (0,0,1,1)
+		self.focusMargin = 0
 		# self.animatedStart = False
 		# self.animatedDirection = None
 
@@ -89,6 +91,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 		self.windowHeight = 0 #self.height()
 		self.sceneMarginX = 20
 		self.sceneMarginY = 20
+		self.sceneMarginYTop = 30
 		self.baseWidth = 0
 		self.baseHeight = 0
 		self.elementWidth = 0
@@ -102,6 +105,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 		self.container = container #self.getMerzContainer()
 		self.documentLayer = None
 		self.dropsLayer = None
+		self.focusLayer = None
 		self.controlsLayer = None
 		self.selectedLayer = None
 
@@ -113,6 +117,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 		self.indexYpos = {}
 
 		self.dropStyle = dropStyle
+		self.focused = True
 
 		# scrollbars control
 		self.controlsElements = {}
@@ -139,7 +144,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 	def setupScene(self, size = None, elementSize = (0, 0), elementMargins = (0, 0),
 	               backgroundColor=None, selectionColor = None, controlsColor = None,
 	               selectedBorderColor = None, borderColor = None,
-	                cornerRadius = 0): # animatedStart = False,
+	                cornerRadius = 0, focusColor = None): # animatedStart = False,
 		self.drawBase()
 		if not size:
 			size = (1,1)
@@ -162,6 +167,8 @@ class TDMerzMatrixDesigner (object): #MerzView
 			self.selectedBorderColor = selectedBorderColor
 		if borderColor:
 			self.borderColor = borderColor
+		if focusColor:
+			self.focusColor = focusColor
 		# if animatedStart:
 		# 	self.animatedStart = animatedStart
 		# if animatedDirection:
@@ -208,6 +215,15 @@ class TDMerzMatrixDesigner (object): #MerzView
 		w, h = self.container.getSize()
 		dw, dh = self.documentLayer.getSize()
 		# drw, drh = self.dropsLayer.getSize()
+
+		# w, h = self.container.getSize()
+		# dw, dh = self.documentLayer.getSize()
+		# dx, dy = self.documentLayer.getPosition()
+		# if dy + dh > 0:
+		with self.documentLayer.propertyGroup():  # duration = .5
+			self.documentLayer.setPosition((0, h - dh))  # - (dy + dh)
+			self.dropsLayer.setPosition((0, h - dh))  # - (dy + dh)
+
 		if direction == 'bottom' and animated:
 			self.documentLayer.setPosition((0, - dh))
 			self.dropsLayer.setPosition((0, - dh))
@@ -270,6 +286,12 @@ class TDMerzMatrixDesigner (object): #MerzView
 				name = 'controls',
 				size = (wM, hM),
 				position = (0, 0)
+			)
+			self.focusLayer = self.container.appendBaseSublayer(
+				name = 'focus',
+				size = (wM-self.focusMargin*2,hM-self.focusMargin*2),
+				cornerRadius = 7,
+				position = (self.focusMargin,self.focusMargin)
 			)
 		if not self.layerWillDrawCallback: return
 		# check if the contentLayer is visible, create a callback to draw it
@@ -714,11 +736,21 @@ class TDMerzMatrixDesigner (object): #MerzView
 		c = self.controlsLayer
 		# c.setPosition((0,0))
 		c.setSize((wM, hM))
-		self.resizeScene()
+		f = self.focusLayer
+		f.setSize((wM-self.focusMargin*2, hM-self.focusMargin*2))
+		f.setPosition((self.focusMargin,self.focusMargin))
+		self.resizeScene(positiontozero = False)
 		# self.drawControlsElements()
+		w, h = self.container.getSize()
+		dw, dh = self.documentLayer.getSize()
+		dx, dy = self.documentLayer.getPosition()
+		if h - dh - dy > 0:
+			with self.documentLayer.propertyGroup(): #duration = .5
+				self.documentLayer.setPosition((0, h - dh )) # - (dy + dh)
+				self.dropsLayer.setPosition((0, h - dh )) #- (dy + dh)
 		self.drawBase()
 
-	def setViewSize(self, size = None):
+	def setViewSize(self, size = None, positiontozero = True):
 		hM = self.windowHeight
 		wM = self.windowWidth
 		if size:
@@ -733,14 +765,18 @@ class TDMerzMatrixDesigner (object): #MerzView
 		drops.setSize(size)
 		c = self.controlsLayer
 		c.setSize((wM, hM))
+		f = self.focusLayer
+		f.setSize((wM-self.focusMargin*2,hM-self.focusMargin*2))
+		f.setPosition((self.focusMargin,self.focusMargin))
 
 		w, h = self.container.getSize()
 		dw, dh = self.documentLayer.getSize()
 		dx, dy = self.documentLayer.getPosition()
-		# if dy + dh > 0:
-		with self.documentLayer.propertyGroup(): #duration = .5
-			self.documentLayer.setPosition((0, h - dh )) # - (dy + dh)
-			self.dropsLayer.setPosition((0, h - dh )) #- (dy + dh)
+		# if h - dh - dy > 0:
+		if positiontozero:
+			with self.documentLayer.propertyGroup():  # duration = .5
+				self.documentLayer.setPosition((0, h - dh))  # - (dy + dh)
+				self.dropsLayer.setPosition((0, h - dh))  # - (dy + dh)
 
 		# self.drawBase(refresh = True)
 	def checkWidthElement(self):
@@ -749,7 +785,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 		else:
 			return self.elementWidth
 
-	def reCalculateSizeScene(self):
+	def reCalculateSizeScene(self, positiontozero = True):
 		xshift = self.elementXshift
 		yshift = self.elementYshift
 		# welem = self.elementWidth
@@ -763,10 +799,10 @@ class TDMerzMatrixDesigner (object): #MerzView
 			qline = 1
 		else:
 			qline = self.baseWidth // (welem + xshift)
-
+		# print ('basewidth', self.baseWidth, qline, welem)
 		self.baseWidth = (welem + xshift) * qline
 		self.baseHeight = (quantityElements // qline) * (helem + yshift) + (helem + yshift) + self.sceneMarginY
-		self.setViewSize()
+		self.setViewSize(positiontozero = positiontozero)
 
 
 	def appendContentLayer(self, container, position, size, backgroundColor = (0, 0, 0, 0), acceptsHit = True): #, **kwargs
@@ -806,6 +842,8 @@ class TDMerzMatrixDesigner (object): #MerzView
 			self.documentLayer.clearSublayers()
 		if self.controlsLayer:
 			self.controlsLayer.clearSublayers()
+		if self.focusLayer:
+			self.focusLayer.clearSublayers()
 
 	def setSceneItems(self, items, animated = None, **kwargs):
 		#TODO before update scene, need save selected items and restore selection after update
@@ -823,8 +861,8 @@ class TDMerzMatrixDesigner (object): #MerzView
 			self.reloadSceneItems(items)
 		elif len(items) == len(self.items):
 			self.reloadSceneItems(items)
-		self.reCalculateSizeScene()
-		self.resizeScene()
+		# self.reCalculateSizeScene(positiontozero = True)
+		self.resizeScene(positiontozero = True)
 		animatedStart = False
 		if animated == 'bottom' or animated == 'left' or animated == 'right' or animated == 'shake':
 			animatedStart = True
@@ -832,13 +870,13 @@ class TDMerzMatrixDesigner (object): #MerzView
 		self.drawControlsElements()
 
 
-	def resizeScene(self):
+	def resizeScene(self, positiontozero = True):
 		# if not self.documentLayer: return
 		# welem = self.elementWidth
 		helem = self.elementHeight
 		xshift = self.elementXshift
 		yshift = self.elementYshift
-		self.reCalculateSizeScene()
+		self.reCalculateSizeScene(positiontozero = positiontozero)
 		welem = self.checkWidthElement()
 		ypos = self.baseHeight - helem
 		xpos = self.sceneMarginX
@@ -870,12 +908,14 @@ class TDMerzMatrixDesigner (object): #MerzView
 	def getSelectedSceneItems(self):
 		return sorted(self.selection)
 
-	def _insertSceneItems(self, items, index = None):
+	def _insertSceneItems(self, items, index = None, elementHeight = None):
 		xshift = self.elementXshift
 		yshift = self.elementYshift
 		# welem = self.elementWidth
 		welem = self.checkWidthElement()
-		helem = self.elementHeight
+		helem = elementHeight
+		if not elementHeight:
+			helem = self.elementHeight
 
 		ypos = self.baseHeight - helem
 		xpos = self.sceneMarginX
@@ -889,7 +929,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 		self.resizeScene()
 
 
-	def insertSceneItems(self, items, index = None):
+	def insertSceneItems(self, items, index = None, elementHeight = None):
 		if index == None:
 			self.items.extend(items)
 		else:
@@ -900,7 +940,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 					layer.clearSublayers()
 
 		self.reCalculateSizeScene()
-		self._insertSceneItems(items, index)
+		self._insertSceneItems(items, index, elementHeight = elementHeight)
 
 		self.drawBase()
 		# if quantityElements <= 1500:
@@ -932,12 +972,13 @@ class TDMerzMatrixDesigner (object): #MerzView
 			w, h = self.container.getSize()
 			layer = self.documentLayer.getSublayers()[itemsIndexes[0]]
 			dx, dy = layer.getPosition()
+			lw, lh = layer.getSize()
 			dw, dh = self.documentLayer.getPosition()
-			yp = (h - self.elementHeight) - (dh + dy)
+			yp = (h - lh) - (dh + dy) # self.elementHeight -> lh
 			d = 0
 			if animate:
 				d = .3
-			self.scrollMoving((0, -yp + (h-self.elementHeight)/2), duration = d)
+			self.scrollMoving((0, -yp + (h - lh)/2), duration = d) #self.elementHeight -> lh
 			if animate:
 				with layer.propertyGroup(duration = .05, restore = True, delay = 0.5):
 					_x, _y = layer.getPosition()
@@ -997,6 +1038,16 @@ class TDMerzMatrixDesigner (object): #MerzView
 		if len(items) != len(self.items): return
 		self.items = items
 		self.updateSceneItems()
+
+	def setFocus(self, focused):
+		if focused:
+			self.focusLayer.setBorderWidth(4)
+			self.focusLayer.setBorderColor((self.focusColor))
+		else:
+			self.focusLayer.setBorderWidth(0)
+			self.focusLayer.setBorderColor((0, 0, 0, 0))
+
+
 
 
 
@@ -1131,6 +1182,12 @@ class TDMerzMatrixScenery(MerzView):
 			scene.setBorderWidth(2)
 			scene.setBorderColor((1,0,0,1))
 
+	def setFocus(self, scene = None, focused = False):
+		if not scene:
+			scene = self.getDefaultScene()
+		if self.scenes and scene in self.scenes:
+			self.scenes[scene].setFocus(focused)
+
 	def getSceneById(self, idScene):
 		for scene in self.scenes:
 			_idScene = scene.getInfoValue('idScene')
@@ -1143,7 +1200,7 @@ class TDMerzMatrixScenery(MerzView):
 		if self.scenes and scene in self.scenes:
 			self.scenes[scene].insertSceneItems(items = items, index = index)
 
-	def getSceneItems(self,  scene = None):
+	def getSceneItems(self, scene = None):
 		if not scene:
 			scene = self.getDefaultScene()
 		if self.scenes and scene in self.scenes:
@@ -1299,6 +1356,9 @@ class TDMerzMatrixView(vanilla.Group):
 	def addControlElement(self, **kwargs):
 		self.view.addControlElement(**kwargs)
 
+	def setFocus(self, **kwargs):
+		self.view.setFocus(**kwargs)
+
 	def plistDestViewDropCandidateEnteredCallback (self, info):
 		self.view.removeDraggedCursor()
 		return dropOperationMap['copy']
@@ -1368,258 +1428,35 @@ class TDMerzMatrixView(vanilla.Group):
 		return True
 
 
+class TDScenesSelector(object):
+	def __init__(self):
+		self.scenes = {}
+		self.selectedScene = None
 
-#
-# if __name__ == "__main__":
-#
-# 	class TDTestView(object):  # , WindowController
-# 		def __init__(self):
-# 			self.w = vanilla.Window((1242, 400), minSize = (200, 100), title = 'test')
-#
-# 			self.w.fontView = TDMerzMatrixView('auto',
-# 			                                   # dropSettings = dropSettings,
-# 			                                   delegate = self
-# 			                                   )
-# 			self.w.groupView = TDMerzMatrixView('auto',
-# 			                                    # dropSettings = dropSettings,
-# 			                                    delegate = self
-# 			                                    )
-# 			rules = [
-# 				"H:|[b1]-space-[b2(==b1)]|",
-# 				"V:|[b1]|",
-# 				"V:|[b2]|"
-# 			]
-# 			metrics = {
-# 				"border": 1,
-# 				"space": 1
-# 			}
-# 			self.w.addAutoPosSizeRules(rules, metrics)
-#
-# 			s1 = self.w.fontView.setupMatrix(
-# 				# position = (20,20), size = (300,400),
-# 				layerWillDrawCallback = self.layerWillDrawCallback,
-# 				selectLayerCallback = self.selectLayerCallback,
-# 			    clearHash = False,
-# 	            backgroundColor = (.5,.6,.7,1),
-# 	            selectionColor = (0,0,1,.5),
-# 	            controlsColor = (.2,.3,.4,1),
-# 			    )
-#
-# 			s2 = self.w.groupView.setupMatrix(
-# 				# position = (20,20), size = (400,400),
-# 				layerWillDrawCallback = self.layerWillDrawCallback,
-# 				selectLayerCallback = self.selectLayerCallback,
-# 				clearHash = False,
-# 				backgroundColor = (.55, .53, .5, 1),  # .75, .73, .7, 1
-# 				selectionColor = (0, 0, 1, 1),
-# 				controlsColor = (.2, .3, .4, 1),
-# 				)
-#
-# 			self.font = CurrentFont()
-# 			self.kern = self.font.kerning.items()
-#
-# 			self.mode = 'glyphs' # 'kern'
-#
-# 			self.pointSize = 10
-#
-# 			if self.mode == 'glyphs':
-# 				self.layerHeight = 65  # 80
-# 				self.layerWidth = 65  # 80
-# 				quantityElements = len(self.font)
-# 			elif self.mode == 'kern':
-# 				self.layerHeight = 20  # 80
-# 				self.layerWidth = 350  # 80
-# 				quantityElements = len(self.kern)
-# 				# self.w.b1.view.documentLayer.appendRectangleSublayer(
-# 				# 	position = (130,0),
-# 				# 	size = (130, self.layerHeight * quantityElements),
-# 				# 	fillColor = (.2,.2,.4,.5)
-# 				# )
-#
-# 			self.w.fontView.buildMatrix(scene = s1,
-# 			                            elementSize = (self.layerWidth,self.layerHeight),
-# 			                            quantityElements = quantityElements,  # len(self.kern), #
-# 			                            cornerRadius = 3,
-# 			                            # borderColor = (.1,.1,.1,.1),
-# 			                            # borderWidth = 1
-# 			                            )
-# 			# self.w.b1.buildMatrix(scene = s3,
-# 			#                       elementSize = (self.layerWidth, self.layerHeight),
-# 			#                       quantityElements = quantityElements,  # len(self.kern), #
-# 			#                       cornerRadius = 3,
-# 			#                       # borderColor = (.1,.1,.1,.1),
-# 			#                       # borderWidth = 1
-# 			#                       )
-# 			# self.w.b1.view.resizeMatrix()
-# 			self.w.groupView.buildMatrix(scene = s2,
-# 			                             elementSize = (self.layerWidth, self.layerHeight),
-# 			                             quantityElements = quantityElements,  # len(self.kern), #
-# 			                             cornerRadius = 3,
-# 			                             # borderColor = (.1,.1,.1,.1),
-# 			                             # borderWidth = 1
-# 			                             )
-# 			self.w.open()
-#
-#
-#
-# 		def layerWillDrawCallback(self, sender, info):
-# 			layer = info['layer']
-# 			index = info['index']
-# 			scale = .03
-# 			# with layer.sublayerGroup():
-# 			# sender.documentLayer.clearSublayers()
-# 			# with sender.documentLayer.sublayerGroup():
-# 				# layer.clearSublayers()
-# 			b = layer.getSublayer('base')
-# 			ytxt = self.layerHeight
-# 			# (l,r),v = self.kern[index]
-#
-# 			if not b:
-# 				markColor = None
-# 				if self.mode == 'glyphs':
-# 					glyph = self.font[self.font.glyphOrder[index]]
-# 					# markColor = (1, 1, 1, 1)
-# 					markColor = glyph.markColor
-#
-# 				elif self.mode == 'kern':
-# 					if index < len(self.kern):
-# 						(l, r), v = self.kern[index]
-# 					else:
-# 						print ('wrong index', index, len(self.kern), layer)
-# 						return
-# 				# else:
-# 				# 	(r, g, b, a) = markColor
-# 				# 	markColor = (r,g,b,.7)
-# 				if not markColor:
-# 					markColor = (1, 1, 1, .7)
-# 				with layer.sublayerGroup():
-#
-# 					b = layer.appendBaseSublayer(
-# 						name = 'base',
-# 						position = (0, 0),
-# 						size = (self.layerWidth, self.layerHeight),
-# 						backgroundColor = markColor,
-# 						cornerRadius = 3
-# 					)
-# 					# b.setOpacity(.7)
-# 					# b.setCompositingMode("multiply")
-# 					# x,y = layer.getPosition()
-# 					idx = sender.getIndexOfLayer(layer)
-# 					lbl = b.appendTextLineSublayer(
-# 						position = (3,8),
-# 						text = '%i' % (idx),
-# 						pointSize = 5,
-# 						fillColor = (0, 0, 0, 1),
-#
-# 					)
-#
-# 					if self.mode == 'glyphs':
-# 						title = b.appendTextBoxSublayer(
-# 							# font = 'Menlo',
-# 							# name = 'side1',
-# 							size = (self.layerWidth, self.layerHeight),
-# 							position = (0, 0 ),
-# 							fillColor = (0, 0, 0, 1),
-# 							pointSize = self.pointSize,
-# 							# text = '%i %s %s %i' % (c, l, r, v),
-# 							# text = glyph.name,
-# 							horizontalAlignment = "center",
-# 							padding = (3, 3)
-# 							# offset = (0, yoffset) # -(self.pointSize/2)+2
-# 						)
-# 						glyphname = glyph.name
-# 						if len(glyphname) > self.pointSize-1:
-# 							title.setPointSize(self.pointSize*.7)
-# 							if '.' in glyphname:
-# 								glyphname = '%s\n.%s' % (glyph.name.split('.')[0], '.'.join(glyph.name.split('.')[1:]))
-#
-# 						title.setText(glyphname)
-#
-# 						glyphLayer = b.appendPathSublayer(
-# 							name = 'path.' + glyph.name,
-# 							fillColor = (0,0,0,1),
-# 							position = ((self.layerWidth/scale - (glyph.width))/2, 400),
-# 							strokeColor = None,
-# 							strokeWidth = 0,
-# 						)
-# 						glyphPath = glyph.getRepresentation("merz.CGPath")
-# 						glyphLayer.setPath(glyphPath)
-# 						glyphLayer.addScaleTransformation(scale)
-# 						b.setMaskToFrame(True)
-#
-# 					elif self.mode == 'kern':
-# 						yoffset = (self.pointSize / 2 ) - (self.layerHeight - self.pointSize)
-#
-# 						b.appendLineSublayer(
-# 							startPoint = (0 , 0),
-# 							endPoint = (self.layerWidth, 0),
-# 							strokeWidth = 1,
-# 							strokeColor = (.2,.2,.2,.2)
-# 						)
-# 						b.appendTextLineSublayer(
-# 							# font = 'Menlo',
-# 							name = 'side1',
-# 							position = (5, ytxt),
-# 							fillColor = (0, 0, 0, 1),
-# 							pointSize = self.pointSize,
-# 							# text = '%i %s %s %i' % (c, l, r, v),
-# 							text = '%s' % (l),
-# 							horizontalAlignment = "left",
-# 							offset = (0, yoffset) # -(self.pointSize/2)+2
-#
-# 						)
-# 						b.appendTextLineSublayer(
-# 							# font = 'Menlo',
-# 							name = 'side2',
-# 							position = (160, ytxt),
-# 							fillColor = (0, 0, 0, 1),
-# 							pointSize = self.pointSize,
-# 							text = '%s' % (r),
-# 							horizontalAlignment = "left",
-# 							offset = (0, yoffset)
-# 						)
-# 						v = self.font.kerning[(l,r)]
-# 						if v < 0:
-# 							colorvalue = (.7, 0.1, 0.1, 1)
-# 						else:
-# 							colorvalue = (0.1, 0.1, .6, 1)
-# 						b.appendTextLineSublayer(
-# 							# font = 'Menlo',
-# 							name = 'value',
-# 							position = (320, ytxt),
-# 							fillColor = colorvalue,
-# 							pointSize = self.pointSize,
-# 							text = '%i' % (v),
-# 							horizontalAlignment = "right",
-# 							offset = (0, yoffset)
-# 						)
-#
-#
-# 		def selectLayerCallback(self, sender, info):
-#
-# 			layer = info['layer']
-# 			index = info['index']
-#
-# 			print ('selected', sender, layer, index, layer.getPosition()) #self.w.view.getIdLayer(layers[0]) , self.font.glyphOrder[index]
-# 			print ('all selection', sender, sender.selection)
-#
-#
-# 		# this section is required for Merz
-# 		def acceptsFirstResponder (self, info):
-# 			return True
-# 		def sizeChanged (self, sender):
-# 			sender.eventResizeView()
-# 		def mouseUp (self, sender, event):
-# 			sender.eventMouseUp(event)
-# 		def mouseDragged (self, sender, event):
-# 			sender.eventMouseDragged(event)
-# 		def scrollWheel (self, sender, event):
-# 			sender.eventScrollWheel(event)
-# 		def magnifyWithEvent (self, sender, event):
-# 			sender.eventMagnify(event)
-# 		def mouseDown (self, sender, event):
-# 			sender.eventMouseDown(event)
-# 		def keyDown (self, sender, event):
-# 			sender.eventKeyDown(event)
-#
-# 	TDTestView()
+	def addScene(self, scene, view):
+		if scene not in self.scenes:
+			self.scenes[scene] = view
+
+	# def addScene(self, scene):
+	# 	if scene not in self.scenes:
+	# 		self.scenes.append(scene)
+
+	def setSelectedScene(self, scene):
+		if scene in self.scenes:
+			self.selectedScene = scene
+			self.scenes[scene].setFocus(scene = scene, focused = True)
+			for _scene, view in self.scenes.items():
+				if _scene != scene:
+					view.setFocus(scene = _scene, focused = False)
+
+	def getSelectedScene(self):
+		return self.selectedScene
+
+
+
+
+
+
+
+
+

@@ -328,6 +328,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			selectionColor = (0, 0, 1, .5),
 			controlsColor = (.2, .3, .4, 1),
 			cornerRadius = 5,
+			focusColor = (1,1,1,.5)
 		)
 		self.sceneGroupContent = self.w.g1.contentView.setupScene(
 			layerWillDrawCallback = self.layerContentWillDrawCallback,
@@ -341,6 +342,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			selectionColor = (0, 0, 1, .5),
 			controlsColor = (.2, .3, .4, 1),
 			cornerRadius = 5,
+			focusColor = (1, 1, 1, .5)
 		)
 		self.sceneFont = self.w.g1.fontView.setupScene(
 			layerWillDrawCallback = self.layerFontWillDrawCallback,
@@ -354,6 +356,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			selectionColor = (0, 0, 1, .5),
 			controlsColor = (.2, .3, .4, 1),
 			cornerRadius = 5,
+			focusColor = (1, 1, 1, .5)
 		)
 		self.schemaButtons = {
 			'buttonSide1': dict(xpos = 15 + 5, ypos = 'top', width = 100, value = True),
@@ -377,14 +380,23 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			selectionColor = (.8, .8, .82, .8),
 			controlsColor = (.2, .3, .4, 1),
 			cornerRadius = 0,
+			focusColor = (.7, .7, .72, .8)
 		)
+
+		self.scenesSelector = TDScenesSelector()
+		self.scenesSelector.addScene(self.sceneGroups, self.w.g1.groupView)
+		self.scenesSelector.addScene(self.sceneGroupContent, self.w.g1.contentView)
+		self.scenesSelector.addScene(self.sceneFont, self.w.g1.fontView)
+		self.scenesSelector.addScene(self.kernList, self.w.g1.kernListView)
 
 		self.kernListButtons = {}
 		self.kernListSortOrder = 'buttonSide1'
 		self.kernListSortReverse = False
 		self.kernListPairs = {}
+		self.kernListLastSelection = None
 
-		self.selectedScene = self.sceneGroups
+		# self.selectedScene = self.sceneGroups
+		# self.scenesSelector.selectedScene(self.sceneGroups)
 
 		self.w.g1.kernListView.addControlElement(name = 'buttonSide1', callback = self.buttonCallback, drawingMethod = self.drawSortingButton)
 		self.w.g1.kernListView.addControlElement(name = 'buttonSide2', callback = self.buttonCallback, drawingMethod = self.drawSortingButton)
@@ -399,9 +411,13 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		self.w.open()
 
 		self.refreshGroupsView()
+		# self.selectedScene = self.sceneGroups
+		# if self.sceneGroups:
+		self.scenesSelector.setSelectedScene(self.sceneGroups)
 
 	# =========================================================================================
 	def selectPairLayerCallback(self, sender, info):
+		self.scenesSelector.setSelectedScene(self.kernList)
 		if self.previewMode == 'margins':
 			self.previewMode = 'kerning'
 			self.spaceControl.switchKerningON()
@@ -494,7 +510,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			(layerWidth, layerHeight) = container.getSize()
 			btn = self.schemaButtons[nameButton]
 			if btn['ypos'] == 'top':
-				ypos = layerHeight - 17
+				ypos = layerHeight - 20
 			if btn['value']:
 				colorBack = (.3, .3, .3, .8)
 				colorSelect = (.8, .8, .8, .8)
@@ -526,7 +542,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		else:
 			btn = self.schemaButtons[nameButton]
 			if btn['ypos'] == 'top':
-				ypos = layerHeight - 17
+				ypos = layerHeight - 20
 			buttonLayer.setPosition((btn['xpos'], ypos))
 			buttonLayer.setSize((btn['width'],14 ))
 
@@ -728,6 +744,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 
 	def showKernList(self, groupname = None, glyphName = None):
+		self.kernListLastSelection = (groupname, glyphName)
 		pairsselected = []
 		pairs = []
 		for idx in self.w.g1.kernListView.getSelectedSceneItems():
@@ -827,7 +844,8 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		index = info['index']
 		# if self.previewMode != 'margins':
 		# 	self.spaceControl.switchMarginsON()
-		self.selectedScene = self.sceneGroups
+		# self.selectedScene = self.sceneGroups
+		self.scenesSelector.setSelectedScene(self.sceneGroups)
 		if self.previewMode != 'margins':
 			self.previewMode = 'margins'
 			self.spaceControl.switchMarginsON()
@@ -844,7 +862,8 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		index = info['index']
 		glyphName = info['item'] #listofglyphs[index] #info['item']
 		if not glyphName: return
-		self.selectedScene = self.sceneFont
+		# self.selectedScene = self.sceneFont
+		self.scenesSelector.setSelectedScene(self.sceneFont)
 		if self.previewMode != 'margins':
 			self.previewMode = 'margins'
 			self.spaceControl.switchMarginsON()
@@ -858,7 +877,8 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		index = info['index']
 		glyphName = info['item']
 		if not glyphName: return
-		self.selectedScene = self.sceneGroupContent
+		# self.selectedScene = self.sceneGroupContent
+		self.scenesSelector.setSelectedScene(self.sceneGroupContent)
 		if self.previewMode != 'margins':
 			self.previewMode = 'margins'
 			self.spaceControl.switchMarginsON()
@@ -978,8 +998,10 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 
 	def deleteSelectedGroupCallback(self, sender):
+		# print('deleteSelectedGroupCallback IN')
 		if self.selectedGroup:
-			if self.selectedScene == self.sceneGroups or self.selectedScene == self.sceneGroupContent:
+			if self.scenesSelector.getSelectedScene() == self.sceneGroups or self.scenesSelector.getSelectedScene() == self.sceneGroupContent:
+				# print('deleteSelectedGroupCallback OUT')
 				listofgroups = self.w.g1.groupView.getSceneItems()
 				itemsIndexes = self.w.g1.groupView.getSelectedSceneItems()
 				glist = [listofgroups[idx] for idx in itemsIndexes]
@@ -1014,23 +1036,24 @@ class TDGroupsControl4(Subscriber): #, WindowController
 	def selectFontCallback(self, sender):
 
 		font = SelectFont(title = self.idName)
-		self.w.g1.fontView.setSceneItems(items = [])
-		self.w.g1.groupView.setSceneItems(items = [])
-		self.w.g1.contentView.setSceneItems(items = [])
-		self.w.g1.kernListView.setSceneItems(items = [])
-		self.hashKernDic.clearHistory()
-		self.font = font
-		# self.langSet = TDLangSet()
-		self.langSet.setupPatternsForFont(self.font)
-		self.hashKernDic.setFont(self.font, self.langSet)
+		if font:
+			self.w.g1.fontView.setSceneItems(items = [])
+			self.w.g1.groupView.setSceneItems(items = [])
+			self.w.g1.contentView.setSceneItems(items = [])
+			self.w.g1.kernListView.setSceneItems(items = [])
+			self.hashKernDic.clearHistory()
+			self.font = font
+			# self.langSet = TDLangSet()
+			self.langSet.setupPatternsForFont(self.font)
+			self.hashKernDic.setFont(self.font, self.langSet)
 
-		self.w.g1.linesPreview.fontsHashKernLib = {self.font: self.hashKernDic}
+			self.w.g1.linesPreview.fontsHashKernLib = {self.font: self.hashKernDic}
 
-		self.spaceControl.fontsHashKernLib = {self.font: self.hashKernDic}
-		self.spaceControl.kernControl.fontsHashKernLib = {self.font: self.hashKernDic}
-		self.spaceControl.marginsControl.fontsHashKernLib = {self.font: self.hashKernDic}
+			self.spaceControl.fontsHashKernLib = {self.font: self.hashKernDic}
+			self.spaceControl.kernControl.fontsHashKernLib = {self.font: self.hashKernDic}
+			self.spaceControl.marginsControl.fontsHashKernLib = {self.font: self.hashKernDic}
 
-		self.refreshGroupsView()
+			self.refreshGroupsView()
 
 
 	def exportHistory (self, sender):
@@ -1191,10 +1214,16 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		sender.eventKeyDown(sender, event)
 
 	def fontKerningDidChange(self, info):
-		if self.selectedScene == self.sceneGroups or self.selectedScene == self.sceneGroupContent:
-			self.showKernList(groupname = self.selectedGroup)
-		elif self.selectedScene == self.sceneFont and self.w.g1.fontView.getSelectedSceneItems():
-			self.showKernList(glyphName = self.w.g1.fontView.getSceneItems()[ self.w.g1.fontView.getSelectedSceneItems()[-1] ])
+		# TODO need rewrite.. need just update current kern list state
+		# print('fontKerningDidChange IN')
+		group, glyph = self.kernListLastSelection
+		self.showKernList(groupname = group, glyphName = glyph)
+		# if self.scenesSelector.getSelectedScene() == self.sceneGroups or self.scenesSelector.getSelectedScene() == self.sceneGroupContent or self.scenesSelector.getSelectedScene() == self.kernList:
+		# 	print('fontKerningDidChange 1')
+		# 	self.showKernList(groupname = self.selectedGroup)
+		# elif self.scenesSelector.getSelectedScene() == self.sceneFont and self.w.g1.fontView.getSelectedSceneItems():
+		# 	print('fontKerningDidChange 2')
+		# 	self.showKernList(glyphName = self.w.g1.fontView.getSceneItems()[ self.w.g1.fontView.getSelectedSceneItems()[-1] ])
 
 	def fontGroupsDidChange(self, info):
 		pass

@@ -919,23 +919,38 @@ class TDHashGroupsDic(object):
 
 
 class TDSpaceControl(object):
-	def __init__(self, fontsHashKernLib, glyphsView, groupsView = None, mode = EDITMODE_OFF, OFFispossible = False):
+	def __init__(self, fontsHashKernLib, glyphsView, groupsView = None, mode = EDITMODE_OFF, OFFispossible = False, scalesKern = None, scalesMargins = None):
 		self.lastValue = 0
 		self.lastMultiply = []
 		self.fontsHashKernLib = fontsHashKernLib
+		self.scalesKern = scalesKern
+		self.scalesMargins = scalesMargins
 		self.glyphsView = glyphsView
 		self.groupsView = groupsView
 		self.editMode = mode
 		self.kerningON = False
 		self.marginsON = False
-		self.kernControl = TDKernControl(fontsHashKernLib, glyphsView, groupsView, ON = True)
-		self.marginsControl = TDMarginsControl(fontsHashKernLib, glyphsView, groupsView, ON = False)
+		self.kernControl = TDKernControl(fontsHashKernLib, glyphsView, groupsView, ON = True, scales = scalesKern)
+		self.marginsControl = TDMarginsControl(fontsHashKernLib, glyphsView, groupsView, ON = False, scales = scalesMargins)
 
 		self.keyCommander = TDKeyCommander()
 		self.keyCommander.registerKeyCommand(KEY_M, callback = self.switchModeCallback)
 
-	def setupSpaceControl(self):
-		pass
+	# def setupSpaceControl(self):
+	# 	pass
+
+	def setupSpaceControl(self, fontsHashKernLib, scalesKern = None, scalesMargins = None):
+		self.fontsHashKernLib = fontsHashKernLib
+		self.scalesKern = None
+		self.scalesMargins = None
+		if self.groupsView:
+			self.groupsView.fontsHashKernLib = fontsHashKernLib
+		if self.glyphsView:
+			self.glyphsView.fontsHashKernLib = fontsHashKernLib
+		self.kernControl.fontsHashKernLib = fontsHashKernLib
+		self.kernControl.scales = scalesKern
+		self.marginsControl.fontsHashKernLib = fontsHashKernLib
+		self.marginsControl.scales = scalesMargins
 
 	def switchKerningON(self):
 		self.kernControl.ON = True
@@ -1015,12 +1030,13 @@ class TDSpaceControl(object):
 			self.groupsView.refreshView(justmoveglyphs = True) #justmoveglyphs = True)
 
 class TDKernControl(object):
-	def __init__ (self, fontsHashKernLib, glyphsView, groupsView = None, ON = False):
+	def __init__ (self, fontsHashKernLib, glyphsView, groupsView = None, ON = False, scales = None):
 		self.lastValue = 0
 		self.lastMultiply = []
 		self.fontsHashKernLib = fontsHashKernLib
 		self.glyphsView = glyphsView
 		self.groupsView = groupsView
+		self.scales = scales
 		self.ON = ON
 		self.keyCommander = TDKeyCommander()
 		self.keyCommander.registerKeyCommand(KEY_BACKSPACE, callback = self.deletePairCallback)
@@ -1036,7 +1052,13 @@ class TDKernControl(object):
 		self.keyCommander.registerSerialKeyCommands([KEY_1,KEY_2,KEY_3,KEY_4,KEY_5,KEY_6,KEY_7,KEY_8,KEY_9,KEY_0],
 		                                            callback = self.setMultiplyLastValueCallback)
 
-
+	def getScaledValue(self, font, value):
+		if not self.scales or not value or value in range(-1,2):
+			return value
+		elif self.scales and font in self.scales and value:
+			return round(value * self.scales[font])
+		else:
+			return value
 
 	def deletePairCallback(self, sender, value):
 		self.setCurrentPairValue(sender, operation = 'remove')
@@ -1091,6 +1113,8 @@ class TDKernControl(object):
 				if multiply == 0:
 					multiply = 10
 				value = (self.lastValue * multiply) - self.lastValue  # simple way, one multiply
+			value = self.getScaledValue(font, value)
+
 			if currentPairForKern in font.kerning and kern(font.kerning[currentPairForKern]):  # != None:
 				self.setValue2Pair(font, pair = currentPair, currentPairForKern = currentPairForKern,
 				                   value = font.kerning[currentPairForKern] + value)
@@ -1151,11 +1175,12 @@ class TDKernControl(object):
 
 
 class TDMarginsControl(object):
-	def __init__ (self, fontsHashKernLib, glyphsView, groupsView = None, ON = False):
+	def __init__ (self, fontsHashKernLib, glyphsView, groupsView = None, ON = False, scales = None):
 		self.lastValue = 0
 		self.lastMultiply = []
 		self.lastSide = SIDE_1
 		self.fontsHashKernLib = fontsHashKernLib
+		self.scales = scales
 		self.glyphsView = glyphsView
 		self.groupsView = groupsView
 		self.ON = ON

@@ -1,10 +1,10 @@
 extensionName: KernTool4
 repository: https://github.com/typedev/KernTool4
 extensionPath: KernTool4.roboFontExt
-description: extension for editing Kerning and Margins in Robofont4
+description: KernTool4 is an extension for working with Kerning and glyph Margins in Robofont4.
 developer: Alexander Lubovenko
 developerURL: https://github.com/typedev
 tags: [ kerning, spacing, margins ]
-icon: https://raw.githubusercontent.com/typedev/KernTool4/master/kt4icon.png
+icon: https://raw.githubusercontent.com/typedev/KernTool4/master/icon.png
 zipPath: https://github.com/typedev/KernTool4/archive/master.zip
-dateAdded: 2021-09-22 11:30:00
+dateAdded: 2022-06-22 12:02:23

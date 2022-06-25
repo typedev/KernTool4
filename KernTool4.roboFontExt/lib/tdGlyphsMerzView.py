@@ -251,21 +251,21 @@ LEFT_SYMBOL_MARGIN = chr(int('25C2', 16)) # 25C0
 RIGHT_SYMBOL_MARGIN = chr(int('25B8', 16)) # 25B6
 TITLE_SYMBOL = '\n' + chr(int('25BC', 16))
 
-class TDView(vanilla.Group):
-	def __init__(self, posSize, backgroundColor=None, delegate=None,
-	             selectionCallback=None,  glyphsLineWillDrawCallback = None,
-	             fontsHashKernLib = None, showKerning = True):
-
-		dropSettings = dict(
-			pasteboardTypes = ["plist"],
-			# dropCandidateEnteredCallback = self.stringDestViewDropCandidateEnteredCallback,
-			dropCandidateCallback = self.stringDestViewDropCandidateCallback,
-			# dropCandidateEndedCallback = self.stringDestViewDropCandidateEndedCallback,
-			# dropCandidateExitedCallback = self.stringDestViewDropCandidateExitedCallback,
-			performDropCallback = self.stringDestViewPerformDropCallback
-		)
-
-		self.g = TDGlyphsMerzView(posSize,backgroundColor,delegate,selectionCallback,glyphsLineWillDrawCallback,fontsHashKernLib,showKerning)
+# class TDView(vanilla.Group):
+# 	def __init__(self, posSize, backgroundColor=None, delegate=None,
+# 	             selectionCallback=None,  glyphsLineWillDrawCallback = None,
+# 	             fontsHashKernLib = None, showKerning = True):
+#
+# 		dropSettings = dict(
+# 			pasteboardTypes = ["plist"],
+# 			# dropCandidateEnteredCallback = self.stringDestViewDropCandidateEnteredCallback,
+# 			dropCandidateCallback = self.stringDestViewDropCandidateCallback,
+# 			# dropCandidateEndedCallback = self.stringDestViewDropCandidateEndedCallback,
+# 			# dropCandidateExitedCallback = self.stringDestViewDropCandidateExitedCallback,
+# 			performDropCallback = self.stringDestViewPerformDropCallback
+# 		)
+#
+# 		self.g = TDGlyphsMerzView(posSize,backgroundColor,delegate,selectionCallback,glyphsLineWillDrawCallback,fontsHashKernLib,showKerning)
 
 	# def stringDestViewPerformDropCallback(self, info):
 	# 	return True
@@ -2036,20 +2036,20 @@ class TDGlyphsMerzView (MerzView):
 					self.controlsElements[n]('mouseDragged', delta)
 					controlHit = True
 
-		if not controlHit and not self.HZscrollHit and not self.VRscrollHit and self.selectedGlyphs:
-			item = dict(
-				typesAndValues = {
-					"plist": dict(letters = self.selectedGlyphs, index = 0, idView = self.id)
-				},
-				image = tdDragTableImageFactory((27,32)),#image,
-				location = location
-			)
-			vanilla.startDraggingSession(
-				view = self,
-				event = event,
-				items = [item],
-				formation = "default"
-			)
+		# if not controlHit and not self.HZscrollHit and not self.VRscrollHit and self.selectedGlyphs:
+		# 	item = dict(
+		# 		typesAndValues = {
+		# 			"plist": dict(letters = self.selectedGlyphs, index = 0, idView = self.id)
+		# 		},
+		# 		image = tdDragTableImageFactory((27,32)),#image,
+		# 		location = location
+		# 	)
+		# 	vanilla.startDraggingSession(
+		# 		view = self,
+		# 		event = event,
+		# 		items = [item],
+		# 		formation = "default"
+		# 	)
 
 
 	def eventMouseDown(self, event):

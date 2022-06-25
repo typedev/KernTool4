@@ -5,7 +5,7 @@ KernTool4 is a set of extensions for working with kerning, glyph margins and gro
 ---
 
 #### Version history:
-
+- `4.1.2` - Added the ability to specify kerning scaling to KernTool ([see description below](#kerning-scaling)). Improved operation of the SelectFonts window. 
 - `4.1.1` - added `GroupsControl` - extension for working with kerning groups ([see description below](#-groupscontrol))
 - `4.0.2` - fixed import of AppKit for Monterey support
 - `4.0.1` - first release
@@ -103,6 +103,12 @@ In the upper part of the window, pairs can be flipped by pressing `[F]lip`, to s
 By entering any text in the edit field, you can change the text of the selected line and, if necessary, save the corrected text to a file.
 
 All kerning changes are instantly made to the font and displayed in the _Space Center_.
+
+### Kerning scaling.
+In the `SelectFonts` window, you can select a kerning scaling factor for each font. This multiplier will be applied to all kerning values entered. So, for example, with a multiplier of `0.8` for the first style, `1` for the second, and `1.2` for the third, if you enter `-10` in the first style, the kerning will change to `-8` (-10*.8), in the second, as usual `-10`, and in the third `-12`. Entering `+5` will give `+4` in the first style, `+5` in the second, and `+6` in the third. The multiplier is also applied to values entered from the keyboard with numbers. The range of the multiplier is unlimited, but applies to all input values except `-1 and 1`. If these values are entered, they will be applied without the multiplier.
+
+Such scaling can also be used if you need to change the standard `10/5` kerning step to something more convenient for the current project.
+
 
 > ### Checking margins
 >
