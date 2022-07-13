@@ -99,6 +99,8 @@ class TDMerzMatrixDesigner (object): #MerzView
 		self.elementXshift = 0
 		self.elementYshift = 0
 		self.elementsQuantity = 0
+		self.fitWidth = True
+		self.listOfwidths = []
 		# if not container:
 		# 	print ('error, no container')
 		# 	return
@@ -144,7 +146,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 	def setupScene(self, size = None, elementSize = (0, 0), elementMargins = (0, 0),
 	               backgroundColor=None, selectionColor = None, controlsColor = None,
 	               selectedBorderColor = None, borderColor = None,
-	                cornerRadius = 0, focusColor = None): # animatedStart = False,
+	                cornerRadius = 0, focusColor = None, fitWidth = True): # animatedStart = False,
 		self.drawBase()
 		if not size:
 			size = (1,1)
@@ -156,6 +158,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 		self.elementHeight = helem
 		self.elementXshift = xshift
 		self.elementYshift = yshift
+		self.fitWidth = fitWidth
 
 		if backgroundColor:
 			self.backgroundColor = backgroundColor
@@ -300,9 +303,6 @@ class TDMerzMatrixDesigner (object): #MerzView
 
 		self.visibleLayers = sum([ self.indexYpos[s] for s in list(filter(lambda p: p > (-y-200) and p < (-y + h + 100), self.indexYpos.keys())) ], [])
 
-		# self.visibleLayers = sum([ self.indexYpos[s] for s in list(filter(lambda p: (p > (-y-200) and p < (-y )) or (p> (-y + h) and p < (-y + h + 200)), self.indexYpos.keys())) ], [])
-
-		# self.visibleLayers = container.findSublayersIntersectedByRect(( 0, 0, w, h ), onlyLayers = ['contentLayer'])
 		with self.documentLayer.sublayerGroup():
 			for layer in self.visibleLayers:
 				# to speed up the work, the rendering function, having received a callback,
@@ -310,19 +310,15 @@ class TDMerzMatrixDesigner (object): #MerzView
 				# just update it or do nothing
 				index = self.getIndexOfLayer(layer)
 				if not index and index != 0 : break # or index>=len(self.items)
-				if not layer.getSublayers():
-					self.layerWillDrawCallback(self, dict( layer = layer, index = index, item = self.items[index] )) # self.documentLayer.getSublayers().index(layer)
+				# if not layer.getSublayers():
+				self.layerWillDrawCallback(self, dict( layer = layer, index = index, item = self.items[index] )) # self.documentLayer.getSublayers().index(layer)
+
 			# clear the layers of contentLayers that are not included in the visibility zone
 			if self.clearHash:
-				# self.visibleLayers.extend(sum([ self.indexYpos[s] for s in list(filter(lambda p: p > (-y ) and p < (-y + h), self.indexYpos.keys())) ], []))
 				for layer in list( set(self.visibleLayers) ^ set(self.documentLayer.getSublayers()) ):
 					layer.clearSublayers()
-				# for layer in self.documentLayer.getSublayers():
-				# 	if layer not in self.visibleLayers:
-				# 		layer.clearSublayers()
 
 		self.drawControlsElements()
-		# hits = container.findSublayersIntersectedByRect((0 - w, tolerance + 30 , w * 2, h - tolerance -30 ), onlyLayers = ['contentLayer'])
 
 
 	# SCROLLBARS STUFF ==============================================
@@ -583,7 +579,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 						self.selection = [selectedIndex]
 						self.drawSelectedLayer(selectedIndex,True)
 
-				self.selectLayerCallback(self, dict(layer = hits[0], index = selectedIndex, item = self.items[selectedIndex])) # , modifiers = modifiers
+				self.selectLayerCallback(self, dict(layer = hits[0], index = selectedIndex, item = self.items[selectedIndex], hits = hits)) # , modifiers = modifiers
 
 
 	def eventMouseDragged(self, event, hits, delta, location):
@@ -680,7 +676,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 			# 		    dict(
 			# 		        name="motionBlur",
 			# 		        filterType="motionBlur",
-			# 		        radius=2.0,
+			# 		        radius=1.0,
 			# 		        angle=90
 			# 		        )
 			# 			)
@@ -712,7 +708,8 @@ class TDMerzMatrixDesigner (object): #MerzView
 	# 	self.drawBase(refresh = True)
 
 	def eventKeyDown(self, sender, event):
-		print ('key down',self, sender, event)
+		pass
+		# print ('key down',self, sender, event)
 		# self.keyCommander.checkCommand(sender, event)
 
 	def eventResizeView(self):
@@ -780,8 +777,18 @@ class TDMerzMatrixDesigner (object): #MerzView
 
 		# self.drawBase(refresh = True)
 	def checkWidthElement(self):
-		if self.elementWidth == 0:
+		if self.elementWidth == 0 and self.fitWidth:
 			return self.baseWidth - self.elementXshift*2
+		# elif self.elementWidth == 0 and not self.fitWidth:
+		# 	m = None
+		# 	if self.listOfwidths:
+		# 		m = max(self.listOfwidths)
+		# 	if m:
+		# 		print ('return real width', m)
+		# 		return m
+		# 	else:
+		# 		print ('return basewidth', self.baseWidth - self.elementXshift * 2)
+		# 		return self.baseWidth - self.elementXshift * 2
 		else:
 			return self.elementWidth
 
@@ -845,12 +852,16 @@ class TDMerzMatrixDesigner (object): #MerzView
 		if self.focusLayer:
 			self.focusLayer.clearSublayers()
 
-	def setSceneItems(self, items, animated = None, **kwargs):
+	def setSceneItems(self, items, animated = None, elementWidth = None, elementHeight = None):
 		#TODO before update scene, need save selected items and restore selection after update
+		if elementWidth:
+			self.elementWidth = elementWidth
+		if elementHeight:
+			self.elementHeight = elementHeight
 		if len(items) > len(self.items):
 			self.updateSceneItems()
 			items2insert = items[len(self.items):]
-			self.insertSceneItems(items = items2insert)
+			self.insertSceneItems(items = items2insert, elementWidth = elementWidth, elementHeight = elementHeight)
 			self.items = items
 			self.reloadSceneItems(items)
 		elif len(items) < len(self.items):
@@ -881,11 +892,12 @@ class TDMerzMatrixDesigner (object): #MerzView
 		ypos = self.baseHeight - helem
 		xpos = self.sceneMarginX
 		self.indexYpos = {}
+		# self.listOfwidths = []
 		with self.documentLayer.sublayerGroup():
-			# for index, item in enumerate(self.items):
 			for layer in self.documentLayer.getSublayers():
 				# layer = self.documentLayer.getSublayers()[index]
 				_w,_h = layer.getSize()
+				# self.listOfwidths.append(_w)
 				if _w != welem:
 					# TODO need more light version of redraw, instead of clearing sublayers
 					layer.clearSublayers()
@@ -908,14 +920,14 @@ class TDMerzMatrixDesigner (object): #MerzView
 	def getSelectedSceneItems(self):
 		return sorted(self.selection)
 
-	def _insertSceneItems(self, items, index = None, elementHeight = None):
+	def _insertSceneItems(self, items, index = None, elementWidth = None, elementHeight = None):
 		xshift = self.elementXshift
 		yshift = self.elementYshift
 		# welem = self.elementWidth
 		welem = self.checkWidthElement()
-		helem = elementHeight
-		if not elementHeight:
-			helem = self.elementHeight
+		# helem = elementHeight
+		# if not elementHeight:
+		helem = self.elementHeight
 
 		ypos = self.baseHeight - helem
 		xpos = self.sceneMarginX
@@ -929,7 +941,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 		self.resizeScene()
 
 
-	def insertSceneItems(self, items, index = None, elementHeight = None):
+	def insertSceneItems(self, items, index = None, elementWidth = None, elementHeight = None):
 		if index == None:
 			self.items.extend(items)
 		else:
@@ -938,9 +950,8 @@ class TDMerzMatrixDesigner (object): #MerzView
 			with self.documentLayer.sublayerGroup():
 				for layer in self.documentLayer.getSublayers()[index:]:
 					layer.clearSublayers()
-
 		self.reCalculateSizeScene()
-		self._insertSceneItems(items, index, elementHeight = elementHeight)
+		self._insertSceneItems(items, index, elementWidth = elementWidth, elementHeight = elementHeight)
 
 		self.drawBase()
 		# if quantityElements <= 1500:
@@ -1023,15 +1034,16 @@ class TDMerzMatrixDesigner (object): #MerzView
 		self.drawBase()
 		# self.drawScrollBars()
 
-	def updateSceneItems(self, itemsIndexes = None):
-		with self.documentLayer.sublayerGroup():
-			if itemsIndexes:
-				for idx in itemsIndexes:
-					layer = self.documentLayer.getSublayers()[idx]
-					layer.clearSublayers()
-			else:
-				for layer in self.documentLayer.getSublayers():
-					layer.clearSublayers()
+	def updateSceneItems(self, itemsIndexes = None, cleanBefore = True):
+		if cleanBefore:
+			with self.documentLayer.sublayerGroup():
+				if itemsIndexes:
+					for idx in itemsIndexes:
+						layer = self.documentLayer.getSublayers()[idx]
+						layer.clearSublayers()
+				else:
+					for layer in self.documentLayer.getSublayers():
+						layer.clearSublayers()
 		self.drawBase()
 
 	def reloadSceneItems(self, items):

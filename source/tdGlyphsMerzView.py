@@ -286,7 +286,8 @@ class TDGlyphsMerzView (MerzView):
 	# 	performDropCallback = self.stringDestViewPerformDropCallback
 	# )
 	def __init__(self, posSize, backgroundColor=None, delegate=None,
-	             selectionCallback=None,  glyphsLineWillDrawCallback = None,
+	             selectionCallback=None,  doubleClickCallback = None,
+	             glyphsLineWillDrawCallback = None,
 	             fontsHashKernLib = None, showKerning = True):
 		super().__init__(posSize)
 		view = self.getNSView()
@@ -309,6 +310,10 @@ class TDGlyphsMerzView (MerzView):
 		self.modeTitles = SHOWTITLES_GLYPH_NAME
 		self.showToolbar = False
 		self.toolbarImage = None
+		self.showMetrics = False
+		self.showSkeleton = False
+		self.showBlueZones = False
+		self.showFamilyZones = False
 
 		self.colorTitles = COLOR_TITLES
 		self.colorGlyphs = (0,0,0,0)
@@ -330,6 +335,7 @@ class TDGlyphsMerzView (MerzView):
 		self.fontsHashKernLib = fontsHashKernLib
 
 		self.selectionCallback = selectionCallback # selection
+		self.doubleClickCallback = doubleClickCallback
 		self.glyphsLineWillDrawCallback = glyphsLineWillDrawCallback # before drawing glyphsline
 
 		self.selectedGlyphs = [] # selected glyphs [glyphsname.uuidXXXXXXX... ]
@@ -399,7 +405,91 @@ class TDGlyphsMerzView (MerzView):
 
 
 
-# ====================================================================================================================
+# ==============================================================================================
+	def drawBlueZones(self, container, glyph, familyBlues = False, showDimentions = False):
+		def pairingzones (t, size=2):
+			it = iter(t)
+			return zip(*[it] * size)
+
+		font = glyph.font
+		width = glyph.width
+		fontname = self.displayFontName
+		pointsize = self.pointSizeMargins
+		color = (0.5,0.5,1,1)
+		blues = dict(
+			postscriptBlueValues = font.info.postscriptOtherBlues + font.info.postscriptBlueValues,
+			postscriptFamilyBlues = font.info.postscriptFamilyOtherBlues + font.info.postscriptFamilyBlues,
+		)
+		if not familyBlues:
+			listblues = list(pairingzones(blues['postscriptBlueValues']))
+		else:
+			listblues = list(pairingzones(blues['postscriptFamilyBlues']))
+			color = (.7,.5,0,1)
+
+		for idx, (y1, y2) in enumerate(listblues):
+			rb = container.appendRectangleSublayer(
+				name = 'blues.%i' % idx,
+				position = (0 + italicShift(font.info.italicAngle, y1), y1 + 600 ),
+				size = (width , (y2 - y1) ),
+				fillColor = color,
+				acceptsHit = False
+			)
+			if showDimentions:
+				shiftx = 0
+				container.appendTextLineSublayer(
+					name = 'blues.label.%s' % idx,
+					font = fontname,
+					position = (width + italicShift(font.info.italicAngle, y1 + shiftx) +50 , y2 + 580),
+					fillColor = color,
+					pointSize = pointsize,
+					text = '%i/%i:%i' % (y1, y2, (y2-y1)),
+					verticalAlignment = 'top',
+					horizontalAlignment = "left"
+				)
+
+
+
+
+	def drawMetrics (self, container, glyph = None, font = None, width = 0, showDimentions = False):
+		font = glyph.font
+		width = glyph.width
+		fontname = self.displayFontName
+		pointsize = self.pointSizeMargins
+
+		dimensions = dict(
+			descender = font.info.descender,
+			baseline = 0,
+			xHeight = font.info.xHeight,
+			caps = font.info.capHeight,
+			ascender = font.info.ascender,
+		)
+		for name, position in dimensions.items():
+			rb = container.appendLineSublayer(
+				name = 'metrics.%s' % name,
+				startPoint = (0 + italicShift(font.info.italicAngle, position), position+600),
+				endPoint = (width + italicShift(font.info.italicAngle, position), position+600),
+				strokeWidth = 1,
+				strokeColor = (.2,.5,.2,1),  # (0,0,0,1),#(.3,.3,.3,.3),
+				# strokeDash = (3, 3)
+			)
+			if showDimentions:
+				shiftx = 0
+				verticalAlignment = 'top'
+				if name == 'ascender':
+					verticalAlignment = 'bottom'
+					shiftx = 120
+				container.appendTextLineSublayer(
+					name = 'metrics.label.%s' % name,
+					font = fontname,
+					position = (-50 + italicShift(font.info.italicAngle, position + shiftx)  , position + 580),
+					fillColor = (.2,.5,.2,1),
+					pointSize = pointsize,
+					text = '%s:%i' % (name[0], position),
+					verticalAlignment = verticalAlignment,
+					horizontalAlignment = "right"
+				)
+
+
 	def drawRayBeam (self, container, width, position, animate = False):
 		# w,h = container.getSize()
 		endp = width + 500
@@ -706,6 +796,7 @@ class TDGlyphsMerzView (MerzView):
 				pointCount = 8
 			)
 		)
+
 	def drawCrossMark(self, container, position, color = COLOR_BLACK):
 		cross = container.appendSymbolSublayer(
 			name = 'kernValue.cross',
@@ -723,12 +814,79 @@ class TDGlyphsMerzView (MerzView):
 		)
 		cross.setRotation(45)
 
-
+	def drawSkeleton (self, container, glyph):
+		yshift = 600
+		opaq = .7
+		with container.sublayerGroup():
+			for contour in glyph.contours:
+				for point in contour.points:
+					if point.type == "move":
+						container.appendSymbolSublayer(
+							position = (point.x, point.y + yshift),
+							imageSettings = dict(
+								name = "star",
+								pointCount = 8,
+								size = (5, 5),
+								fillColor = (.5, .5, 0, opaq)
+							)
+						)
+					elif point.type == "line":
+						container.appendSymbolSublayer(
+							position = (point.x, point.y + yshift),
+							imageSettings = dict(
+								name = "rectangle",
+								size = (5, 5),
+								fillColor = (0, 0, .5, opaq)
+							)
+						)
+					elif point.type == "curve":
+						container.appendSymbolSublayer(
+							position = (point.x, point.y + yshift),
+							imageSettings = dict(
+								name = "oval",
+								size = (5, 5),
+								fillColor = (0.5, 0, 0, opaq)
+							)
+						)
+					elif point.type == "qcurve":
+						container.appendSymbolSublayer(
+							position = (point.x, point.y + yshift),
+							imageSettings = dict(
+								name = "triangle",
+								size = (5, 5),
+								fillColor = (0, 0.5, 0, opaq)
+							)
+						)
+					# elif point.type == "offcurve":
+					# 	container.appendSymbolSublayer(
+					# 		position = (point.x, point.y + yshift),
+					# 		imageSettings = dict(
+					# 			name = "oval",
+					# 			size = (5, 5),
+					# 			fillColor = (.7,0,.5,opaq),
+					# 			# strokeColor = (0, 0, 0, opaq),
+					# 			# strokeWidth = 1
+					# 		)
+					# 	)
 
 	def drawGlyph (self, container, glyph, uniqname=None, position=(0, 0), italicAngle=0,
 	               drawMargins = True,
 	               color_glyph = (0, 0, 0, 1), color_box = (0, 0, 0, 0), color_titles = COLOR_TITLES,
-	               mark = None, scale = 1):
+	               mark = None, scale = 1, showDimentionsMetrics = False, showDimentionsBlues = False):
+
+		def drawGlyphPath(container, glyph, fillColor = (0,0,0,1), strokeColor = None, strokeWidth = 0):
+			glyphLayer = container.appendPathSublayer(
+				name = 'path.' + glyph.name,
+				fillColor = fillColor,
+				position = (0, 600),
+				strokeColor = strokeColor,
+				strokeWidth = strokeWidth,
+				# acceptsHit = True,
+			)
+			glyphPath = _glyph.getRepresentation("merz.CGPath")
+			glyphLayer.setPath(glyphPath)
+
+
 		xpos, ypos = position
 		(leftMargin, rightMargin) = getMargins(glyph)
 		width = glyph.width
@@ -752,6 +910,8 @@ class TDGlyphsMerzView (MerzView):
 			_glyph.width *= scale
 			width = _glyph.width
 		# =========================
+		strokeWidth = 0
+		strokeColor = None
 		with container.sublayerGroup():
 			baselayer = container.appendRectangleSublayer(
 				name = 'glyphbox.' + uniqname, #glyph.name,
@@ -760,21 +920,28 @@ class TDGlyphsMerzView (MerzView):
 				fillColor = color_box,
 				acceptsHit = True
 			)
-			glyphLayer = baselayer.appendPathSublayer(
-				name = 'path.' + glyph.name,
-				fillColor = color_glyph,
-				position = (0, 600),
-				strokeColor = None,
-				strokeWidth = 0,
-				# acceptsHit = True,
-			)
-			glyphPath = _glyph.getRepresentation("merz.CGPath")
-			glyphLayer.setPath(glyphPath)
+			if self.showMetrics and not self.lightMode:
+				self.drawMetrics(container = baselayer, glyph = glyph, showDimentions = showDimentionsMetrics)
+			if self.showBlueZones and not self.lightMode:
+				self.drawBlueZones(container = baselayer, glyph = glyph, showDimentions = showDimentionsBlues)
+			if self.showFamilyZones and not self.lightMode:
+				self.drawBlueZones(container = baselayer, glyph = glyph, familyBlues = self.showFamilyZones, showDimentions = showDimentionsBlues)
+
 
 			selcolor = color_titles
 			if uniqname in self.selectedGlyphs and self.selectionMode != SELECTION_MODE_LINE:
 				selcolor = COLOR_CURSOR
-				self.drawSelectionCursor(container = baselayer, position = ( width/2 - 15 , 170), color = COLOR_CURSOR )
+				self.drawSelectionCursor(container = baselayer, position = (width / 2 - 15, 170), color = COLOR_CURSOR)
+				if self.showSkeleton:
+					color_glyph = None
+					strokeWidth = 1
+					strokeColor = (0,0,0,1)
+					drawGlyphPath(baselayer, glyph, fillColor = color_glyph, strokeColor = strokeColor, strokeWidth = strokeWidth)
+					self.drawSkeleton(baselayer,glyph)
+				else:
+					drawGlyphPath(baselayer, glyph, fillColor = color_glyph, strokeColor = strokeColor, strokeWidth = strokeWidth)
+			else:
+				drawGlyphPath(baselayer, glyph, fillColor = color_glyph, strokeColor = strokeColor, strokeWidth = strokeWidth)
 
 			if self.lightMode: return
 			if drawMargins:
@@ -1123,10 +1290,14 @@ class TDGlyphsMerzView (MerzView):
 						mark = marks[idx]
 					except:
 						print ('error in marks indexes ', idx, marks)
-
+				showDimentionsMetrics = False
+				showDimentionsBlues = False
+				if idx == 0: showDimentionsMetrics = True
+				if idx == len(glyphs)-1: showDimentionsBlues = True
 				self.drawGlyph(container, glyph, uniqname = uniqnames[idx], position = (xpos, 0),
 				               color_glyph = glyphColor, color_titles = color_titles,
-				               italicAngle = italicAngle, drawMargins = self.showMargins, mark = mark, scale = scale )
+				               italicAngle = italicAngle, drawMargins = self.showMargins,
+				               mark = mark, scale = scale, showDimentionsMetrics = showDimentionsMetrics, showDimentionsBlues = showDimentionsBlues )
 				countpairs +=1
 				if self.separatePairs and countpairs == 2:
 					countpairs = 0
@@ -1520,6 +1691,7 @@ class TDGlyphsMerzView (MerzView):
 		# 	font = self.selectedFont
 		glyphsNamesList = tdGlyphparser.translateText(font = CurrentFont(), text = text)
 		self.setGlyphNamesListToCurrentLine(glyphsNamesList)
+		return glyphsNamesList
 
 	def getGlyphsMatrixState(self):
 		container = self.getMerzContainer()
@@ -1751,6 +1923,23 @@ class TDGlyphsMerzView (MerzView):
 			self.setStatus('show:beam', self.useRayBeam)
 
 		self.drawGlyphsMatrix( refresh = True)
+
+	def switchMetrics (self, showMetrics = False):
+		self.showMetrics = showMetrics
+		self.drawGlyphsMatrix(refresh = True)
+
+	def switchBluesZones (self, showBluesZones = False):
+		self.showFamilyZones = False
+		self.showBlueZones = showBluesZones
+		self.drawGlyphsMatrix(refresh = True)
+	def switchFamilyZones (self, showFamilyZones = False):
+		self.showBlueZones = False
+		self.showFamilyZones = showFamilyZones
+		self.drawGlyphsMatrix(refresh = True)
+
+	def switchSkeletonMode (self, showSkeleton = False):
+		self.showSkeleton = showSkeleton
+		self.drawGlyphsMatrix(refresh = True)
 
 	def switchGlyphsInfoMode(self, glyphsInfo = SHOWTITLES_GLYPH_NAME):
 		self.modeTitles = glyphsInfo
@@ -2036,24 +2225,23 @@ class TDGlyphsMerzView (MerzView):
 					self.controlsElements[n]('mouseDragged', delta)
 					controlHit = True
 
-		# if not controlHit and not self.HZscrollHit and not self.VRscrollHit and self.selectedGlyphs:
-		# 	item = dict(
-		# 		typesAndValues = {
-		# 			"plist": dict(letters = self.selectedGlyphs, index = 0, idView = self.id)
-		# 		},
-		# 		image = tdDragTableImageFactory((27,32)),#image,
-		# 		location = location
-		# 	)
-		# 	vanilla.startDraggingSession(
-		# 		view = self,
-		# 		event = event,
-		# 		items = [item],
-		# 		formation = "default"
-		# 	)
+		if not controlHit and not self.HZscrollHit and not self.VRscrollHit and self.selectedGlyphs:
+			item = dict(
+				typesAndValues = {
+					"plist": dict(letters = self.selectedGlyphs, index = 0, idView = self.id)
+				},
+				image = tdDragTableImageFactory((27,32)),#image,
+				location = location
+			)
+			vanilla.startDraggingSession(
+				view = self,
+				event = event,
+				items = [item],
+				formation = "default"
+			)
 
 
 	def eventMouseDown(self, event):
-		# print (event)
 		self.VRscrollHit = False
 		self.HZscrollHit = False
 
@@ -2082,6 +2270,9 @@ class TDGlyphsMerzView (MerzView):
 			for layer in hits:
 				self.selectedGlyphs = []
 				self.selectGlyphLayer(layer, selectionMode = self.selectionMode)
+			if event.clickCount() == 2 and self.selectedGlyphs and self.doubleClickCallback:
+				self.doubleClickCallback(self)
+
 
 	def srollFinishedCallback(self, sender):
 		self.scrollAnimation = False

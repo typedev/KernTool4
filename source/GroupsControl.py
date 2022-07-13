@@ -796,12 +796,23 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		if groupname:
 			if len(self.font.groups[groupname]) == 0:
 				self.w.g1.linesPreview.startDrawGlyphsMatrix([], animatedStart = False)
+				self.showKernList(groupname = groupname)
 				return
-			keyGlyph = self.font[self.hashKernDic.getKeyGlyphByGroupname(groupname)]
+			try:
+				keyGlyph = self.font[self.hashKernDic.getKeyGlyphByGroupname(groupname)]
+			except:
+				self.w.g1.linesPreview.startDrawGlyphsMatrix([], animatedStart = False)
+				self.showKernList(groupname = groupname)
+				return
 			displayTitle = groupname
 			self.showKernList(groupname = groupname)
 		if glyphName:
-			keyGlyph = self.font[glyphName]
+			try:
+				keyGlyph = self.font[glyphName]
+			except:
+				self.w.g1.linesPreview.startDrawGlyphsMatrix([], animatedStart = False)
+				self.showKernList(glyphName = glyphName)
+				return
 			displayTitle = glyphName
 			self.showKernList(glyphName = glyphName)
 

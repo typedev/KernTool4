@@ -382,7 +382,7 @@ _As long as there are no History controls, recording starts from the moment the 
 
 ## Additional features
 
-`Scripts` - calls a window for connecting and running additional external scripts. These scripts can be downloaded from the repository in the [scripts](/scripts) folder and added to `ScriptsBoard`. They use the internal resources of GroupsControl, but so far the API capabilities have not been documented.
+`Scripts` - calls a window for connecting and running additional external scripts. These scripts can be downloaded from the repository in the [scripts](/scripts) folder and added to `ScriptsBoard`. They use the internal resources of `GroupsControl`, but so far the API capabilities have not been documented.
 
 ![](doc/gc-pic5.jpg)
 

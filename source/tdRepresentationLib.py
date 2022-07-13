@@ -118,17 +118,20 @@ def drawGroupStack (container, font, groupName, pointSize = 10, langSet = None):
 
 	maskColor = (.4, .4, .6, .5)
 	keyGlyph = None
+	keyGlyphName = None
 	Xright, Xleft = 0, 0
 	emptyGroup = False
+	Xcenter = layerWidth / 2
 	# groupName = groupsIdx[index]
 	if len(font.groups[groupName]) != 0:
-		keyGlyph = font[font.groups[groupName][0]]
-		markColor = keyGlyph.markColor
-		klm, krm = getMargins(keyGlyph)
-		Xcenter = layerWidth / 2
-		keyWidth = keyGlyph.width
-		Xleft = Xcenter - keyWidth / 2 - 30
-		Xright = Xleft + keyWidth - 30
+		if font.groups[groupName][0] in font:
+			keyGlyph = font[font.groups[groupName][0]]
+			markColor = keyGlyph.markColor
+			keyGlyphName = keyGlyph.name
+			klm, krm = getMargins(keyGlyph)
+			keyWidth = keyGlyph.width
+			Xleft = Xcenter - keyWidth / 2 - 30
+			Xright = Xleft + keyWidth - 30
 	else:
 		emptyGroup = True
 	side = getDirection(groupName)
@@ -209,7 +212,7 @@ def drawGroupStack (container, font, groupName, pointSize = 10, langSet = None):
 						if len(font.groups[groupName]) > 5 and idx > 5:
 							a = .07
 						xpos = None
-						if glyph.name == keyGlyph.name:
+						if glyph.name == keyGlyphName:
 							a = 1
 						if side == SIDE_1:
 							xpos = Xright - glyph.width  # + italicShift(angle,400)
@@ -224,8 +227,8 @@ def drawGroupStack (container, font, groupName, pointSize = 10, langSet = None):
 								markMarginsWarning = True
 						# else:
 						# 	xpos =  -glyph.width / 2
-						if langSet and not crosslang:
-							if not langSet.checkPairBaseScriptCompatibility(font, (keyGlyph.name, glyph.name)):
+						if langSet and not crosslang and keyGlyphName:
+							if not langSet.checkPairBaseScriptCompatibility(font, (keyGlyphName, glyph.name)):
 								crosslang = True
 
 						drawGlyphPath(baselayer, glyph, xpos = xpos, color = (0, 0, 0, a))
