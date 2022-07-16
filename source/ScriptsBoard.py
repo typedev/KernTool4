@@ -208,9 +208,13 @@ class ScriptsBoard:
 		idname, name, path = self._prefs.get('scripts')[idx[0]]
 		self.deleteScriptFromPrefs(idname = idname)
 
+	def close(self):
+		self.w.close()
+
 
 def main (parent = None):
-	ScriptsBoard(parent)
+	return ScriptsBoard(parent)
+
 
 
 if __name__ == "__main__":

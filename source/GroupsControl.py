@@ -405,6 +405,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		self.w.g1.kernListView.addControlElement(name = 'buttonLangs', callback = self.buttonCallback, drawingMethod = self.drawSortingButton)
 
 		self.pointSize = 10
+		self.ScriptsBoardWindow = None
 
 	def started (self):
 		self.w.bind('close', self.windowCloseCallback)
@@ -1215,6 +1216,8 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		self.w.g1.groupView.clearScene()
 		self.w.g1.contentView.clearScene()
 		self.w.g1.kernListView.clearScene()
+		if self.ScriptsBoardWindow:
+			self.ScriptsBoardWindow.close()
 		unregisterCurrentFontSubscriber(self)
 
 	def keyDown (self, sender, event):
@@ -1243,7 +1246,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 	# 	print('fontKerningDidChangePair', info)
 
 	def runScriptsBoardCallback(self, sender):
-		ScriptsBoard.main(parent = self)
+		self.ScriptsBoardWindow = ScriptsBoard.main(parent = self)
 
 	# this section is required for Merz
 	def acceptsFirstResponder (self, info):

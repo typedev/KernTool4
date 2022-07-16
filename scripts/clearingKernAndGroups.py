@@ -2,6 +2,9 @@
 from AppKit import *
 from mojo.UI import *
 from vanilla import *
+from pygments.lexer import RegexLexer, bygroups
+from pygments.token import *
+from pygments.styles import get_style_by_name, get_all_styles
 from fontParts.world import *
 from mojo.UI import CodeEditor
 
@@ -60,15 +63,24 @@ def clearKernAndGroups(parent,
 
 			if glyphs2kill:
 				lostGlyphs = len(glyphs2kill)
-				report.append('Group %s has %i glyphs' % (groupname, len(content)))
-				for gname in glyphs2kill:
-					report.append('\t%s not founded in font' % gname)
+				report.append('@ %s has %i glyphs' % (groupname, len(content)))
 				if lostGlyphs == totalGlyphs:
-					report.append('\t*** The group will be empty')
+					report.append('* The group is empty')
+				report.append('not found: %s' % ' '.join(glyphs2kill))
+				_content = []
+				for g in content:
+					if g not in glyphs2kill:
+						_content.append(g)
+				if _content:
+					report.append('content: %s' % ' '.join(_content))
+
+				# for gname in glyphs2kill:
+				# 	report.append('\t%s not founded in font' % gname)
+
 
 			if deleteHolesInGroup and glyphs2kill:
 				delGlyphsFromGroup(font, groupname, glyphs2kill)
-				report.append('\tremoved: %s' % ' '.join(glyphs2kill))
+				# report.append('- %s' % ' '.join(glyphs2kill))
 
 	report.append('*'*40)
 	report.append('Investigating for Empty Kern groups..')
@@ -78,22 +90,20 @@ def clearKernAndGroups(parent,
 		if 'public.kern' in groupname:
 			totalKernGroup += 1
 			if len(content) == 0:
-				# print ('Empty group founded', groupname)
 				groups2kill.append(groupname)
-				# if deleteEmptyGroup:
-				# 	del font.groups[groupname]
-				# 	print ('and killed...')
+
 	if groups2kill:
 		report.append('Empty groups found:')
-		t = ''
 		for g in groups2kill:
 			if deleteEmptyGroup:
 				del font.groups[g]
-				t = 'removed..'
-			report.append('\t%s %s' % (g, t))
+				report.append('- %s removed' % g)
+			else:
+				report.append('@ %s' % g)
 
-	report.append ('Total Kern Group: %i' % totalKernGroup)
-	report.append ('Empty Kern Group: %i' % len(groups2kill))
+
+	report.append ('= Total Kern Group: %i' % totalKernGroup)
+	report.append ('= Empty Kern Group: %i' % len(groups2kill))
 
 	report.append ('*' * 40)
 	report.append ('Investigating for Lost Pairs..')
@@ -119,11 +129,11 @@ def clearKernAndGroups(parent,
 	if lostPairs:
 		report.append ('Lost Pairs founded:')
 		for pair in lostPairs:
-			t = ''
 			if deleteLostPairs:
 				del font.kerning[pair]
-				t = 'removed..'
-			report.append ('\t%s %s %s' % (pair[0], pair[1], t))
+				report.append ('-\t%s %s removed' % (pair[0], pair[1]))
+			else:
+				report.append('\t%s %s' % (pair[0], pair[1]))
 
 	report.append ('*' * 40)
 	report.append ('Investigating for None kerning values..')
@@ -140,12 +150,12 @@ def clearKernAndGroups(parent,
 	if nullPairs:
 		report.append ('Pairs with None Kerning founded:')
 		for pair in nullPairs:
-			t = ''
 			if deleteNoneKern:
 				del font.kerning[pair]
-				t = 'removed..'
-			report.append ('\t%s %s %s' % (pair[0], pair[1], t))
-		report.append ('Total None pairs: %i' % len(nullPairs))
+				report.append('-\t%s %s removed' % (pair[0], pair[1]))
+			else:
+				report.append('\t%s %s' % (pair[0], pair[1]))
+		report.append ('= Total None pairs: %i' % len(nullPairs))
 
 	report.append ('*' * 40)
 	report.append ('Investigating for Zero kern values..')
@@ -158,23 +168,17 @@ def clearKernAndGroups(parent,
 			rg = parent.getKeyGlyphByGroupname(r)
 			pattern = parent.langSet.wrapPairToPattern(font, (lg, rg))
 			zeroPatterns.append(pattern)
-			# print ('Founded Zero kerning:')
-			# print ('\t',l, r, v)
-			# if deleteZeroKern:
-			# 	del font.kerning[(l, r)]
-			# 	print ('\tfixed')
 
 	if zeroPairs:
-
 		report.append  ('Pairs with Zero value founded:')
 		for pair in zeroPairs:
-			t = ''
 			if deleteZeroKern:
 				del font.kerning[pair]
-				t = 'removed..'
-			report.append ('\t%s %s %s' % (pair[0], pair[1], t))
+				report.append('-\t%s %s removed' % (pair[0], pair[1]))
+			else:
+				report.append('\t%s %s' % (pair[0], pair[1]))
 		if not deleteZeroKern and zeroPatterns:
-			report.append('Patterns to check:')
+			report.append('= Patterns to check:')
 			pattern2line = 8
 			txt = ''
 			p2l = 0
@@ -188,31 +192,51 @@ def clearKernAndGroups(parent,
 					txt = ''
 			if txt:
 				report.append(txt)
-		report.append ('Total Zero value pairs: %i' % len(zeroPairs))
+		report.append ('= Total Zero value pairs: %i' % len(zeroPairs))
+	report.append('\n')
 	return report
 
+class BaseLexerKAGCL(RegexLexer):
+	tokens = {
+        'root': [
+            (r' .*\n', Name),
+            # (r'(before:.*)(".*")(.*)\n', bygroups(Error, Text, Error)),
+	        # (r'(after:.*)(".*")(.*)\n', bygroups(String, Text, String)),
+	        # (r'(content:)(.*)(".*")(.*)\n', bygroups(Keyword, String, Text, String)),
+	        (r'not found:.*\n', Error),
+	        (r'(content:)(.*)\n', bygroups(Keyword, Text)),
+	        (r'-.*\n', Error),
+            (r'@.*\n', Generic.Subheading),
+            (r'\*.*\n', Comment),
+            (r'=.*\n', Keyword),
+	        (r'\t.*', Generic.Emph),
+            (r'.*\n', Text),
+        ],
+    }
 
 
 class TDKernAndGroupsCleaner:
 	def __init__(self, parent = None):
-		_version = '0.2'
+		_version = '0.3'
 		self.parent = parent
 
-		self.w = FloatingWindow((400, 500),minSize = (300, 300), title = 'Groups and Kerning Cleaner v%s' % _version)
+		self.w = FloatingWindow((600, 400),minSize = (300, 300), title = 'Groups and Kerning Cleaner v%s' % _version)
 
 		self.w.label1 = TextBox('auto', '􀀺 Find missing glyphs in Groups')
 		self.w.label2 = TextBox('auto', '􀀼 Find Empty Groups')
 		self.w.label3 = TextBox('auto', '􀀾 Find Lost Pairs')
 		self.w.label4 = TextBox('auto', '􀁀 Find Pairs with None value')
 		self.w.label5 = TextBox('auto', '􀁂 Find Pairs with Zero value')
-		self.w.chkboxDeleteHolesInGroup = CheckBox('auto','and Delete', value=True)
-		self.w.chkboxDeleteEmptyGroup = CheckBox('auto','and Delete', value=True)
-		self.w.chkboxDeleteLostPairs = CheckBox('auto','and Delete', value=True)
-		self.w.chkboxDeleteNoneKern = CheckBox('auto','and Delete', value=True)
+		self.w.chkboxDeleteHolesInGroup = CheckBox('auto','and Delete', value=False)
+		self.w.chkboxDeleteEmptyGroup = CheckBox('auto','and Delete', value=False)
+		self.w.chkboxDeleteLostPairs = CheckBox('auto','and Delete', value=False)
+		self.w.chkboxDeleteNoneKern = CheckBox('auto','and Delete', value=False)
 		self.w.chkboxDeleteZeroKern = CheckBox('auto','and Delete', value=False)
 		self.w.btnRun = Button('auto', title = 'Run', callback = self.btnRunCallback) #,
 
 		self.w.textBox = CodeEditor('auto', text = '', readOnly = True, showLineNumbers = False, checksSpelling = False, lexer = 'text')
+		self.w.textBox.setLexer(BaseLexerKAGCL())
+		self.w.textBox.setHighlightStyle(get_style_by_name('material'))  # solarized-light
 
 		rules = [
 			# Horizontal
