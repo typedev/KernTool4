@@ -220,7 +220,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 		self.font = CurrentFont()
 		self.langSet = TDLangSet()
-		self.langSet.setupPatternsForFont(self.font)
+		self.langSet.setupPatternsForFonts(AllFonts())
 		self.hashKernDic = TDHashGroupsDic(self.font, self.langSet)
 		self.selectedGroup = None #sorted(self.font.groups.keys())[0]
 		self.hideGrouped = True

@@ -227,10 +227,10 @@ class TDKernAndGroupsCleaner:
 		self.w.label3 = TextBox('auto', '􀀾 Find Lost Pairs')
 		self.w.label4 = TextBox('auto', '􀁀 Find Pairs with None value')
 		self.w.label5 = TextBox('auto', '􀁂 Find Pairs with Zero value')
-		self.w.chkboxDeleteHolesInGroup = CheckBox('auto','and Delete', value=False)
-		self.w.chkboxDeleteEmptyGroup = CheckBox('auto','and Delete', value=False)
-		self.w.chkboxDeleteLostPairs = CheckBox('auto','and Delete', value=False)
-		self.w.chkboxDeleteNoneKern = CheckBox('auto','and Delete', value=False)
+		self.w.chkboxDeleteHolesInGroup = CheckBox('auto','and Delete', value=True)
+		self.w.chkboxDeleteEmptyGroup = CheckBox('auto','and Delete', value=True)
+		self.w.chkboxDeleteLostPairs = CheckBox('auto','and Delete', value=True)
+		self.w.chkboxDeleteNoneKern = CheckBox('auto','and Delete', value=True)
 		self.w.chkboxDeleteZeroKern = CheckBox('auto','and Delete', value=False)
 		self.w.btnRun = Button('auto', title = 'Run', callback = self.btnRunCallback) #,
 
