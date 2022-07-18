@@ -43,7 +43,7 @@ def getListLanguagesFromFont(self, font):
 					listlanguages.append(lang)
 	return listlanguages
 
-def transferKern(self, masterfont, targetfonts, language = 'cyrillic'):
+def transferKern(self, masterfont, targetfonts, language = 'cyrillic', applyTransfer = False):
 	# pathname = os.path.dirname(sys.argv[0])
 	workPath = os.path.join(masterfont.path.replace(os.path.basename(masterfont.path),''))
 
@@ -85,6 +85,8 @@ def transferKern(self, masterfont, targetfonts, language = 'cyrillic'):
 						else:
 							pattern = self.langSet.wrapPairToPattern(masterfont, (lg, rg))
 							pairs2transfer.append((l,r,lg,rg,llang,rlang,v, pattern))
+							if applyTransfer:
+								targetfont.kerning[(l,r)] = masterfont.kerning[(l,r)]
 
 		if pairs2transfer:
 			pattern2transfer = []
@@ -100,11 +102,12 @@ def transferKern(self, masterfont, targetfonts, language = 'cyrillic'):
 				s1, lp, rp, s2 = pattern
 				pattern = ('space', lp, rp, 'space')
 				pattern2transferSpace.append(pattern)
+
 			fpairspath = os.path.join(workPath, 'PairsList for transfer - %s %s.txt' % (targetfont.info.familyName, targetfont.info.styleName))
 			fpattern = os.path.join(workPath, 'Patterns to check - %s %s.txt' % (targetfont.info.familyName, targetfont.info.styleName))
 			fpatternS = os.path.join(workPath, 'Patterns wSpace to check - %s %s.txt' % (targetfont.info.familyName, targetfont.info.styleName))
-
-			saveKerning(pairs2filetransfer, fpairspath)
+			if not applyTransfer:
+				saveKerning(pairs2filetransfer, fpairspath)
 			saveKernPattern(pattern2transfer, fpattern)
 			saveKernPattern(pattern2transferSpace, fpatternS)
 
