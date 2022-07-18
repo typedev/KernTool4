@@ -14,7 +14,7 @@ In order for scripts to run, they must follow this format:
 """
 
 import os, sys, importlib
-from AppKit import *
+# from AppKit import *
 from mojo.UI import *
 from vanilla import *
 from vanilla.dialogs import getFile

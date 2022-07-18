@@ -1,5 +1,5 @@
 
-from AppKit import *
+#from AppKit import *
 from mojo.UI import *
 from vanilla import *
 from pygments.lexer import RegexLexer, bygroups

@@ -107,7 +107,7 @@ if __name__ == "__main__":
 			tags = '[ %s ]' % tags,
 			icon = iconRepo,
 			zipPath = zipPath,
-			dateAdded = datetime.now().strftime('%Y-%m-%y %-H:%M:%S')
+			dateAdded = datetime.now().strftime('%Y-%m-%d %-H:%M:%S')
 		)
 
 		text = '\n'.join(['%s: %s' % (k,v) for k,v in mechanic2info.items()])
