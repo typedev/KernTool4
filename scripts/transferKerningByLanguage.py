@@ -217,7 +217,7 @@ class TDTransferKernWindow(object):
 			"H:|-border-[fontA]-border-|",
 			"H:|-border-[label2]-border-|",
 			"H:|-border-[fontB]-border-|",
-			"H:|-border-[lang]-border-[applyTransfer]-border-|",
+			"H:|-border-[lang]-border-[applyTransfer(120)]-border-|",
 			"H:|-border-[btnRun]-border-|",
 			"H:|-0-[textBox]-0-|",
 			# Vertical
