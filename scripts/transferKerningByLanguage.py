@@ -229,7 +229,6 @@ class TDTransferKernWindow(object):
 			"space": 8
 		}
 		self.w.addAutoPosSizeRules(rules, metrics)
-		# self.w.textBox.set(SAMPLECODE)
 		self.collectFonts()
 		self.w.open()
 
@@ -239,6 +238,7 @@ class TDTransferKernWindow(object):
 		report = transferKern(host = self.parent.hashKernDic, masterfont = fontA, targetfont = fontB, applyTransfer = self.w.applyTransfer.get())
 		self.w.textBox.set('\n'.join(report))
 
+#
 	def getFontName (self, font, fonts):
 		# by Andy Clymer, June 2018
 		# A helper to get the font name, starting with the preferred name and working back to the PostScript name
