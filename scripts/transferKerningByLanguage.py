@@ -42,10 +42,10 @@ def saveKernPattern(patternlist, filename, pattern2line = 8):
 	# report.append('= Done.')
 	return report
 
-def getListLanguagesFromFont(self, font):
+def getListLanguagesFromFont(host, font):
 	listlanguages = []
 	for glyph in font:
-		langset = self.langSet.getBaseScriptByGlyphName(font, glyph.name)
+		langset = host.langSet.getBaseScriptByGlyphName(font, glyph.name)
 		if langset:
 			for lang in langset:
 				if lang not in listlanguages:
@@ -193,18 +193,24 @@ class BaseLexerTKBL(RegexLexer):
         ],
     }
 
+def checkPatternsLib(host, fonts):
+	for font in fonts:
+		if font not in host.langSet.libPatterns:
+			host.langSet.setupPatternsForFont(font)
+
 class TDTransferKernWindow(object):
 	def __init__ (self, parent=None):
 		_version = '0.3'
 		self.parent = parent
 		self.fontNames = []
-
+		langs = ['cyrillic']
+		# langs = getListLanguagesFromFont(self.parent.hashKernDic, CurrentFont())
 		self.w = vanilla.FloatingWindow((500, 600), minSize = (300, 300), title = 'Transfer Kerning by Language v%s' % _version)
 		self.w.label1 = vanilla.TextBox('auto', 'Choose Master font:')
 		self.w.fontA = vanilla.PopUpButton('auto', [], sizeStyle = "regular")
 		self.w.label2 = vanilla.TextBox('auto', 'Choose Target font:')
 		self.w.fontB = vanilla.PopUpButton('auto', [], sizeStyle = "regular") # , callback = self.optionsChanged
-		self.w.lang = vanilla.PopUpButton('auto', ['cyrillic'], sizeStyle = "regular")
+		self.w.lang = vanilla.PopUpButton('auto', langs, sizeStyle = "regular")
 		self.w.applyTransfer = vanilla.CheckBox('auto', 'Apply Transfer', value = True)
 		self.w.btnRun = vanilla.Button('auto', title = 'Run', callback = self.btnRunCallback)  # ,
 		self.w.textBox = CodeEditor('auto', text = '', readOnly = True, showLineNumbers = False, checksSpelling = False)
@@ -235,6 +241,7 @@ class TDTransferKernWindow(object):
 	def btnRunCallback (self, sender):
 		fontA = self.fonts[self.w.fontA.get()]
 		fontB = self.fonts[self.w.fontB.get()]
+		checkPatternsLib(host = self.parent.hashKernDic, fonts = [fontA, fontB])
 		report = transferKern(host = self.parent.hashKernDic, masterfont = fontA, targetfont = fontB, applyTransfer = self.w.applyTransfer.get())
 		self.w.textBox.set('\n'.join(report))
 
