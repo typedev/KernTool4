@@ -26,6 +26,40 @@ def diffOrderOnly (g1, g2):
 		return True
 
 
+def saveKernPattern(patternlist, filename, pattern2line = 8):
+	report = []
+	report.append('* Saving Pattern to file:')
+	fn = filename
+	report.append(fn)
+	groupsfile = open(fn, mode = 'w')
+	txt = ''
+	p2l = 0
+	for pattern in patternlist:
+		s1, lp, rp, s2 = pattern
+		txt += '/%s/%s/%s/%s' % (s1, lp, rp, s2)
+		p2l += 1
+		if p2l == pattern2line:
+			txt += '\n'
+			p2l = 0
+	groupsfile.write(txt)
+	groupsfile.close()
+	# report.append('= Done.')
+	return report
+
+def makePatternsFromPairsList(host, font, pairslist):
+	patterns = []
+	pairs = []
+	for pair in pairslist.keys():
+		l, r = pair
+		lg = host.getKeyGlyphByGroupname(l)
+		rg = host.getKeyGlyphByGroupname(r)
+		pairs.append((lg,rg))
+	for pair in sorted(pairs):
+		l, r = pair
+		pattern = host.langSet.wrapPairToPattern(font, (l, r))
+		patterns.append(pattern)
+	return patterns
+
 def diffGroups (masterfont, targetfont):
 	groupsNotInTarget = {}
 	groupsNotInMaster = {}
@@ -49,9 +83,9 @@ def diffGroups (masterfont, targetfont):
 
 	report.append('=' * 40)
 	report.append('Groups differences report')
-	report.append('+ master: %s %s' % (masterfont.info.familyName, masterfont.info.styleName) )
+	report.append('+ master: %s %s' % (masterfont.info.familyName, masterfont.info.styleName))
 	report.append('+ groups: %i' % len(masterfont.groups))
-	report.append('- target: %s %s' % (targetfont.info.familyName, targetfont.info.styleName) )
+	report.append('- target: %s %s' % (targetfont.info.familyName, targetfont.info.styleName))
 	report.append('- groups: %i' % len(targetfont.groups))
 	if groupsNotInTarget:
 		report.append('*' * 40)
@@ -86,39 +120,56 @@ def diffGroups (masterfont, targetfont):
 	return report
 
 
-#
-# def diffKerning(oldTable, newTable, labelFrom = 'old', labelTo = 'new'):
-#     newPairs = {}
-#     delPairs = {}
-#     chgPairs = {}
-#     nulPairs = {}
-#     report = tdReport.Report(process='diffKern')
-#     report.stroke('=')
-#     report.add('Kerning report:')
-#     for (l, r), v in newTable.items():
-#         if v == 0:
-#             nulPairs[l, r] = v
-#         elif not oldTable.has_key((l, r)):
-#             newPairs[l, r] = v
-#             report.add('New Pair: %s %s %i' % (l, r, v))
-#         elif oldTable[l, r] != newTable[l, r]:
-#             chgPairs[l, r] = [oldTable[l, r], newTable[l, r]]
-#             report.add('Changed Pair: %s %s' % (l, r))
-#             report.add('%s: %i\t%s: %i' % (labelFrom,
-#              oldTable[l, r],
-#              labelTo,
-#              newTable[l, r]), level=1)
-#
-#     for (l, r), v in oldTable.items():
-#         if not newTable.has_key((l, r)):
-#             delPairs[l, r] = v
-#             report.add('Pair Deleted: %s %s %i' % (l, r, v))
-#
-#     report.add('Pairs TOTAL: Added=%i Deleted=%i Changed=%i Null pairs (ignored)=%i' % (len(newPairs),
-#      len(delPairs),
-#      len(chgPairs),
-#      len(nulPairs)))
-#     return report.gettext()
+def diffKerning (masterfont, targetfont, host = None):
+	pairsNotInTarget = {}
+	pairsNotInMaster = {}
+	pairsDiff = {}
+	pairsEqual = {}
+	report = []
+
+	for (l, r), v in masterfont.kerning.items():
+		if (l, r) not in targetfont.kerning:
+			pairsNotInTarget[l, r] = v
+		elif masterfont.kerning[l, r] != targetfont.kerning[l, r]:
+			pairsDiff[l, r] = (masterfont.kerning[l, r], targetfont.kerning[l, r])
+		elif masterfont.kerning[l, r] == targetfont.kerning[l, r]:
+			pairsEqual[l, r] = (masterfont.kerning[l, r], targetfont.kerning[l, r])
+
+	for (l, r), v in targetfont.kerning.items():
+		if (l, r) not in masterfont.kerning:
+			pairsNotInMaster[l, r] = v
+
+	report.append('=' * 40)
+	report.append('Kerning differences report:')
+	report.append('+ master: %s %s' % (masterfont.info.familyName, masterfont.info.styleName))
+	report.append('+ pairs: %i' % len(masterfont.kerning))
+	report.append('- target: %s %s' % (targetfont.info.familyName, targetfont.info.styleName))
+	report.append('- pairs: %i' % len(targetfont.kerning))
+	report.append('=' * 40)
+	report.append('+ Not In Master=%i \n- Not In Target=%i \n@ Diff=%i \n= Equal=%i' % (len(pairsNotInMaster),
+	                                                                                    len(pairsNotInTarget),
+	                                                                                    len(pairsDiff),
+	                                                                                    len(pairsEqual)))
+	workPath = os.path.join(masterfont.path.replace(os.path.basename(masterfont.path),''))
+	if pairsNotInTarget:
+		fpattern = os.path.join(workPath, 'Not In Target Patterns - %s %s.txt' % (targetfont.info.familyName, targetfont.info.styleName))
+		patterns = makePatternsFromPairsList(host, masterfont, pairsNotInTarget)
+		report.extend(saveKernPattern(patterns, fpattern))
+	if pairsNotInMaster:
+		fpattern = os.path.join(workPath, 'Not In Master Patterns - %s %s.txt' % (targetfont.info.familyName, targetfont.info.styleName))
+		patterns = makePatternsFromPairsList(host, masterfont, pairsNotInMaster)
+		report.extend(saveKernPattern(patterns, fpattern))
+	if pairsDiff:
+		fpattern = os.path.join(workPath, 'Diff Pairs Patterns - %s %s.txt' % (targetfont.info.familyName, targetfont.info.styleName))
+		patterns = makePatternsFromPairsList(host, masterfont, pairsDiff)
+		report.extend(saveKernPattern(patterns, fpattern))
+	if pairsEqual:
+		fpattern = os.path.join(workPath, 'Equal Pairs Patterns - %s %s.txt' % (targetfont.info.familyName, targetfont.info.styleName))
+		patterns = makePatternsFromPairsList(host, masterfont, pairsEqual)
+		report.extend(saveKernPattern(patterns, fpattern))
+
+	report.append('\n')
+	return report
 
 
 class BaseLexerDGAKW(RegexLexer):
@@ -180,8 +231,9 @@ class TDDiffGroupsAndKerningWindow(object):
 	def btnRunCallback (self, sender):
 		fontA = self.fonts[self.w.fontA.get()]
 		fontB = self.fonts[self.w.fontB.get()]
-		report = diffGroups(masterfont = fontA, targetfont = fontB)
-		self.w.textBox.set('\n'.join(report))
+		reportA = diffGroups(masterfont = fontA, targetfont = fontB)
+		reportB = diffKerning(masterfont = fontA, targetfont = fontB, host = self.parent.hashKernDic)
+		self.w.textBox.set('\n'.join(reportA) + '\n'.join(reportB))
 
 	#
 	def getFontName (self, font, fonts):
