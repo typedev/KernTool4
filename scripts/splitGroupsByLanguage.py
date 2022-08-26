@@ -2,7 +2,7 @@ from fontParts.world import *
 __doc__ = """
 Script for separating groups and kerning based on language. 
 
-Groups with base language (such as Latin, identified by the first glyph in the group) will remain with names like public.kern1.A, and for other languages will be formed classes like public.kern1.A_cyrillic or public.kern1.A_greek with the language name suffix through an underscore '_', kerning will be transferred to all related classes accordingly, and cross-language pairs are removed.
+Groups with base language (such as Latin, identified by the first glyph in the group) will remain with names like public.kern1.A, and for other languages will be formed classes like public.kern1.A_cyrillic or public.kern1.A_greek with the language name suffix through an underscore '_', kerning will be transferred to all related classes accordingly. As a result of the script, cross-language pairs may appear. To remove them, you can use the [removeCrossLanguagePairs.py] script.
 ***The script works only from GroupsControl***
 """
 
@@ -48,37 +48,37 @@ def splitGroupByLanguage (parent, groupname, removeCrossLanguagePairs=False):  #
 					newPairs.append(pair)
 			# newPairs.extend(_newPairs)
 
-			if removeCrossLanguagePairs:
-				pairs2remove = []
-				for pair in newPairs:
-					if pair in self.font.kerning:
-						if not self.checkPairLanguageCompatibilityGroupped(pair, level = 1):
-							pairs2remove.append(pair)
-
-					for pair in pairs2remove:
-						self.font.kerning.remove(pair)
-						if pair in newPairs:
-							newPairs.remove(pair)
+			# if removeCrossLanguagePairs:
+			# 	pairs2remove = []
+			# 	for pair in newPairs:
+			# 		if pair in self.font.kerning:
+			# 			if not self.checkPairLanguageCompatibilityGroupped(pair, level = 1):
+			# 				pairs2remove.append(pair)
+			#
+			# 		for pair in pairs2remove:
+			# 			self.font.kerning.remove(pair)
+			# 			if pair in newPairs:
+			# 				newPairs.remove(pair)
 		self.makeReverseGroupsMapping()
 	return newPairs
 
-def removeCrossLanguagePairs(parent):
-	self = parent.hashKernDic
-	pairs2remove = []
-	for pair in self.font.kerning:
-		if not self.checkPairLanguageCompatibilityGroupped(pair, level = 1):
-			pairs2remove.append(pair)
-	for pair in pairs2remove:
-		self.font.kerning.remove(pair)
-	return pairs2remove
+# def removeCrossLanguagePairs(parent):
+# 	self = parent.hashKernDic
+# 	pairs2remove = []
+# 	for pair in self.font.kerning:
+# 		if not self.checkPairLanguageCompatibilityGroupped(pair, level = 1):
+# 			pairs2remove.append(pair)
+# 	for pair in pairs2remove:
+# 		self.font.kerning.remove(pair)
+# 	return pairs2remove
 
 def main (parent = None):
 	if not parent: return
 	print ('Start splitting groups by language')
 	for groupname in parent.font.groups:
 		splitGroupByLanguage(parent, groupname = groupname)
-	print('Removing Cross-language pairs')
-	removeCrossLanguagePairs(parent)
+	# print('Removing Cross-language pairs')
+	# removeCrossLanguagePairs(parent)
 	parent.refreshGroupsView()
 
 

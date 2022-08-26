@@ -15,28 +15,3 @@ It is also possible to check and delete pairs according to the second level of c
 The script collects groups with language suffixes like `_cyrillic` `_greek` and so on, will be combined with similar Latin ones.
 This script is currently under development. Main problem - a lot of exceptions are thrown.
 
-### `clearingKernAndGroups.py`
-Script to check kerning and groups.
-
-Finds and removes lost glyphs in groups, empty groups, lost pairs, pairs with None and Zero value. For pairs with a Zero value, a list will be collected for checking.
-
-### `fixingKeyGlyphPositionInGroups.py`
-The script finds and corrects the position of the KeyGlyph in the group.
-
-It is believed that in UFO the order of glyphs in a group does not matter, however, to simplify some functions in `GroupsControl`, it was decided to consider the first glyph in the group as the key one and determine the difference in margins for the remaining glyphs, as well as the language compatibility of glyphs in the group.
-
-Most often, the group name matches the key glyph. If this is not the case, confusion is possible. The script determines the key glyph from the group name and puts it in the first position.
-```
-Valid group names:
-public.kern1.glyphname
-public.kern1.glyphname.suffix1.suffix2...
-public.kern1.glyphname_suffix1_suffix2...
-```
-
-> For these scripts to work, you need to use `ScriptsBoard` from `GroupsControl`
-
-
-
-
-
-

@@ -9,7 +9,7 @@
 name = "KernTool4"
 description = 'KernTool4 is an extension for working with Kerning and glyph Margins in Robofont4.'
 tags = 'kerning, spacing, margins'
-version = "4.1.3"
+version = "4.1.4"
 mainScriptsList = ['KernTool4', 'GroupsControl']
 
 developer = "Alexander Lubovenko"
@@ -107,7 +107,7 @@ if __name__ == "__main__":
 			tags = '[ %s ]' % tags,
 			icon = iconRepo,
 			zipPath = zipPath,
-			dateAdded = datetime.now().strftime('%Y-%m-%y %-H:%M:%S')
+			dateAdded = datetime.now().strftime('%Y-%m-%d %-H:%M:%S')
 		)
 
 		text = '\n'.join(['%s: %s' % (k,v) for k,v in mechanic2info.items()])

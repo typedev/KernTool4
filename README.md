@@ -5,6 +5,7 @@ KernTool4 is a set of extensions for working with kerning, glyph margins and gro
 ---
 
 #### Version history:
+- `4.1.4` - `GroupsControl:` fixed a bug with the closing of the SсriptsBoard when the `GC` was closed. LangSet now will make patterns library for AllFonts. Updated `Scripts` for `GC`.
 - `4.1.3` - `GroupsControl` fixed bug with missing key glyph in group 
 - `4.1.2` - Added the ability to specify kerning scaling to KernTool ([see description below](#kerning-scaling)). Improved operation of the SelectFonts window. 
 - `4.1.1` - added `GroupsControl` - extension for working with kerning groups ([see description below](#-groupscontrol))
