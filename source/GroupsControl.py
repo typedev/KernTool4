@@ -366,6 +366,10 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			'buttonLangs': dict(xpos = 15 + 5 + 100 + 5 + 100 + 5 + 40 + 5 + 20 + 5, ypos = 'top',width = 20, value = False),
 			# 'buttonDelete': dict(xpos = 15 + 5, ypos = 'bottom', width = 100, value = False),
 		}
+		self.schemaButtonsBottom = {
+			'buttonDelete': dict(xpos = 15 + 5, ypos = 'bottom', width = 148, value = 'Delete 􀆛'),
+			'buttonSend': dict(xpos = 15 + 5 + 148 + 5, ypos = 'bottom', width = 148, value = 'Send to KernTool 􀅇'),
+		}
 
 		self.kernList = self.w.g1.kernListView.setupScene(
 			layerWillDrawCallback = self.layerKernWillDrawCallback,
@@ -403,6 +407,9 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		self.w.g1.kernListView.addControlElement(name = 'buttonValue', callback = self.buttonCallback, drawingMethod = self.drawSortingButton)
 		self.w.g1.kernListView.addControlElement(name = 'buttonExcpt', callback = self.buttonCallback, drawingMethod = self.drawSortingButton)
 		self.w.g1.kernListView.addControlElement(name = 'buttonLangs', callback = self.buttonCallback, drawingMethod = self.drawSortingButton)
+
+		self.w.g1.kernListView.addControlElement(name = 'buttonDelete', callback = self.buttonBottomCallback, drawingMethod = self.drawBottomButton)
+		self.w.g1.kernListView.addControlElement(name = 'buttonSend', callback = self.buttonBottomCallback, drawingMethod = self.drawBottomButton)
 
 		self.pointSize = 10
 		self.ScriptsBoardWindow = None
@@ -491,7 +498,12 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		if not container: return
 		drawKernListControlButton(container, nameButton, self.kernListSortOrder, self.kernListSortReverse, self.schemaButtons)
 
-
+	def buttonBottomCallback(self, eventname, point, nameButton):
+		if eventname =='mouseUp':
+			print(eventname, point, nameButton)
+	def drawBottomButton(self, container, nameButton):
+		if not container: return
+		drawKernListBottomControlButton(container, nameButton, self.schemaButtonsBottom)
 
 	def glyphsLineWillDrawCallback (self, sender, container):
 		if not sender.selectedGlyphs: return

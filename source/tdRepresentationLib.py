@@ -568,3 +568,43 @@ def drawKernListControlButton (container, nameButton, selectedButton, direction,
 			else:
 				symbolLayer.setRotation(-90)
 			symbolLayer.setImageSettingsValue('fillColor', (.8, .8, .8, .8))
+
+def drawKernListBottomControlButton(container, nameButton, schemaButtons):
+	buttonLayer = container.getSublayer(nameButton)
+	(layerWidth, layerHeight) = container.getSize()
+	ypos = 0
+	if not buttonLayer:
+		(layerWidth, layerHeight) = container.getSize()
+		btn = schemaButtons[nameButton]
+		if btn['ypos'] == 'bottom':
+			ypos = 6
+		# if btn['value']:
+		# 	colorBack = (.3, .3, .3, .8)
+		# 	colorSelect = (.8, .8, .8, .8)
+		# else:
+		# 	colorBack = (.8, .8, .8, .8)
+		# 	colorSelect = (.3, .3, .3, .8)
+		with container.sublayerGroup():
+			baselayer = container.appendBaseSublayer(
+				name = nameButton,
+				position = (btn['xpos'], ypos),  # * (btn['width'] * layerWidth/15)
+				size = (btn['width'], 14),  # * layerWidth/15
+				backgroundColor = (.3, .3, .3, .8),
+				cornerRadius = 4,
+				acceptsHit = True,
+			)
+			baselayer.appendTextLineSublayer(
+				name = 'value',
+				position = (10, ypos+7),
+				fillColor = (1,1,1,1),
+				pointSize = 9,
+				text = btn['value'],
+				horizontalAlignment = "left",
+				# offset = (0, yoffset)
+			)
+	else:
+		btn = schemaButtons[nameButton]
+		if btn['ypos'] == 'bottom':
+			ypos = 6
+		buttonLayer.setPosition((btn['xpos'], ypos))
+		buttonLayer.setSize((btn['width'], 14))
