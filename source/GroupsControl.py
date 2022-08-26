@@ -473,27 +473,11 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			for idx in self.w.g1.kernListView.getSelectedSceneItems():
 				pairsselected.append(self.w.g1.kernListView.getSceneItems()[idx][0])
 
+			if self.kernListSortOrder == nameButton:
+				self.kernListSortReverse = not self.kernListSortReverse
+			else:
+				self.kernListSortReverse = False
 			self.kernListSortOrder = nameButton
-			for name, button in self.kernListButtons.items():
-				if name != nameButton:
-					# print('unselected button', name)
-					button.setBackgroundColor((.8, .8, .8, .8))
-					symbolLayer = button.getSublayer('sortpoint')
-					symbolLayer.setImageSettingsValue('fillColor', (.3, .3, .3, .8))
-					symbolLayer.setRotation(-90)
-				else:
-					# print('selected button', name)
-					button.setBackgroundColor((.3, .3, .3, .8))
-					symbolLayer = button.getSublayer('sortpoint')
-					if self.kernListSortReverse:
-						symbolLayer.setRotation(90)
-					else:
-						symbolLayer.setRotation(-90)
-					symbolLayer.setImageSettingsValue('fillColor', (.8, .8, .8, .8))
-				if self.kernListSortOrder == nameButton:
-					self.kernListSortReverse = not self.kernListSortReverse
-				else:
-					self.kernListSortReverse = False
 
 			p = self.makeSortedList(self.kernListPairs, self.kernListSortOrder, self.kernListSortReverse)
 			self.w.g1.kernListView.setSceneItems(items = p)
@@ -505,47 +489,8 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 	def drawSortingButton(self, container, nameButton):
 		if not container: return
-		buttonLayer = container.getSublayer(nameButton)
-		(layerWidth, layerHeight) = container.getSize()
-		if not buttonLayer:
-			(layerWidth, layerHeight) = container.getSize()
-			btn = self.schemaButtons[nameButton]
-			if btn['ypos'] == 'top':
-				ypos = layerHeight - 20
-			if btn['value']:
-				colorBack = (.3, .3, .3, .8)
-				colorSelect = (.8, .8, .8, .8)
-			else:
-				colorBack = (.8, .8, .8, .8)
-				colorSelect = (.3, .3, .3, .8)
-			with container.sublayerGroup():
-				baselayer = container.appendBaseSublayer(
-					name = nameButton,
-					position = (btn['xpos'], ypos), # * (btn['width'] * layerWidth/15)
-					size = (btn['width'], 14), # * layerWidth/15
-					backgroundColor = colorBack,
-					cornerRadius = 4,
-					acceptsHit = True,
-				)
-				symbolLayer = baselayer.appendSymbolSublayer(
-					name = 'sortpoint',
-					position = (btn['width']/2, 7)
-				)
-				symbolLayer.setImageSettings(
-					dict(
-						name = "triangle",
-						size = (7, 10),
-						fillColor = colorSelect
-					)
-				)
-				symbolLayer.setRotation(-90)
-				self.kernListButtons[nameButton] = baselayer
-		else:
-			btn = self.schemaButtons[nameButton]
-			if btn['ypos'] == 'top':
-				ypos = layerHeight - 20
-			buttonLayer.setPosition((btn['xpos'], ypos))
-			buttonLayer.setSize((btn['width'],14 ))
+		drawKernListControlButton(container, nameButton, self.kernListSortOrder, self.kernListSortReverse, self.schemaButtons)
+
 
 
 	def glyphsLineWillDrawCallback (self, sender, container):
