@@ -72,21 +72,21 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		self.idName = 'PairsList'
 		self.w = vanilla.Window((340, 800), minSize = (340, 400), title = self.idName )
 
-		toolbarItems = [
-			{
-				'itemIdentifier': "toolbarSelectFonts",
-				'label': 'Select Font',
-				'callback': self.selectFontCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_selectfont%s.pdf' % darkm),
-			},
-			{
-				'itemIdentifier': AppKit.NSToolbarSpaceItemIdentifier,
-			},
-	
-
-		]
-		self.w.addToolbar("PairsListControlToolbar", toolbarItems)
-		# self.w.getNSWindow().toolbar().setSelectedItemIdentifier_('toolbarSide1')
+		# toolbarItems = [
+		# 	{
+		# 		'itemIdentifier': "toolbarSelectFonts",
+		# 		'label': 'Select Font',
+		# 		'callback': self.selectFontCallback,
+		# 		'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_selectfont%s.pdf' % darkm),
+		# 	},
+		# 	{
+		# 		'itemIdentifier': AppKit.NSToolbarSpaceItemIdentifier,
+		# 	},
+		#
+		#
+		# ]
+		# self.w.addToolbar("PairsListControlToolbar", toolbarItems)
+		# # self.w.getNSWindow().toolbar().setSelectedItemIdentifier_('toolbarSide1')
 
 		self.font = CurrentFont()
 		self.langSet = TDLangSet()
@@ -96,14 +96,11 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		self.groupPrefix = ID_KERNING_GROUP
 		self.groupsSide = SIDE_1
 
-		defaultSets = getSmartSets()
-		fontSets = getSmartSets(self.font)
-		glyphsSets = ['All Glyphs']
-		glyphsSets.extend([gset.name for gset in defaultSets])
-		glyphsSets.extend([gset.name for gset in fontSets])
-
-
-		#TODO
+		# defaultSets = getSmartSets()
+		# fontSets = getSmartSets(self.font)
+		# glyphsSets = ['All Glyphs']
+		# glyphsSets.extend([gset.name for gset in defaultSets])
+		# glyphsSets.extend([gset.name for gset in fontSets])
 
 		self.w.kernListView = TDMerzMatrixView('auto', delegate = self)
 
@@ -167,6 +164,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 	def started (self):
 		self.w.bind('close', self.windowCloseCallback)
 		self.w.open()
+		self.w.setTitle('%s - %s %s' % (self.idName, self.font.info.familyName, self.font.info.styleName))
 
 		self.showKernList()
 		self.scenesSelector.setSelectedScene(self.kernList)
@@ -329,6 +327,8 @@ class TDPairsListControl4(Subscriber): #, WindowController
 	def selectFontCallback(self, sender):
 		font = SelectFont(title = self.idName)
 		if font:
+			self.w.setTitle('%s - %s %s' % (self.idName, self.font.info.familyName, self.font.info.styleName))
+
 			self.w.kernListView.setSceneItems(items = [])
 			self.hashKernDic.clearHistory()
 			self.font = font
