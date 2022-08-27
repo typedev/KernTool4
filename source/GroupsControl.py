@@ -16,6 +16,7 @@ from mojo.smartSet import getSmartSets
 from vanilla.dialogs import getFile, putFile
 from mojo.subscriber import Subscriber, registerCurrentFontSubscriber, unregisterCurrentFontSubscriber
 from mojo.UI import SelectFont
+from mojo.events import postEvent
 
 import tdSpaceControl
 importlib.reload(tdSpaceControl)
@@ -367,8 +368,8 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			# 'buttonDelete': dict(xpos = 15 + 5, ypos = 'bottom', width = 100, value = False),
 		}
 		self.schemaButtonsBottom = {
-			'buttonDelete': dict(xpos = 15 + 5, ypos = 'bottom', width = 148, value = 'Delete 􀆛'),
-			'buttonSend': dict(xpos = 15 + 5 + 148 + 5, ypos = 'bottom', width = 148, value = 'Send to KernTool 􀅇'),
+			'buttonDelete': dict(xpos = 15 + 5, ypos = 'bottom', width = 148, value = 'Delete'),
+			'buttonSend': dict(xpos = 15 + 5 + 148 + 5, ypos = 'bottom', width = 148, value = 'Send to KernTool'),
 		}
 
 		self.kernList = self.w.g1.kernListView.setupScene(
@@ -410,6 +411,10 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 		self.w.g1.kernListView.addControlElement(name = 'buttonDelete', callback = self.buttonBottomCallback, drawingMethod = self.drawBottomButton)
 		self.w.g1.kernListView.addControlElement(name = 'buttonSend', callback = self.buttonBottomCallback, drawingMethod = self.drawBottomButton)
+
+		# self.keyCommander = TDKeyCommander()
+		# self.keyCommander.registerKeyCommand(KEY_BACKSPACE, callback = self.deleteSelectedPairs)
+		# self.keyCommander.registerKeyCommand(KEY_ENTER, callback = self.sendSelectedPairs2KernTool)
 
 		self.pointSize = 10
 		self.ScriptsBoardWindow = None
@@ -498,9 +503,42 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		if not container: return
 		drawKernListControlButton(container, nameButton, self.kernListSortOrder, self.kernListSortReverse, self.schemaButtons)
 
+	def sendSelectedPairs2KernTool(self,sender, value):
+		pairs = []
+		for idx in self.w.g1.kernListView.getSelectedSceneItems():
+			pair = self.w.g1.kernListView.getSceneItems()[idx]
+			l, r = pair[0]
+			sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs = pair[1]
+			p1, lw, rw, p2 = list(self.langSet.wrapPairToPattern(self.font, (keyGlyphL, keyGlyphR)))
+			pairs.append('/%s/%s/%s/%s' % (p1, lw, rw, p2))
+		line = ''.join(pairs)
+		postEvent('typedev.KernTool.observerSetText',
+		          glyphsLine = line,
+		          glyphsready = True,
+		          targetpair = None,
+		          fontID = getFontID(self.font),
+		          # observerID = self.observerID)
+		          )
+
+	def deleteSelectedPairs(self, sender, value):
+		pairs = []
+		for idx in self.w.g1.kernListView.getSelectedSceneItems():
+			pair = self.w.g1.kernListView.getSceneItems()[idx]
+			l, r = pair[0]
+			pairs.append((l,r))
+		for pair in pairs:
+			if pair in self.font.kerning:
+				self.font.kerning.remove(pair)
+		# print(pairs)
+		self.w.g1.linesPreview.refreshView()
+
 	def buttonBottomCallback(self, eventname, point, nameButton):
 		if eventname =='mouseUp':
-			print(eventname, point, nameButton)
+			if nameButton == 'buttonSend':
+				self.sendSelectedPairs2KernTool(None,None)
+			elif nameButton == 'buttonDelete':
+				self.deleteSelectedPairs(None,None)
+
 	def drawBottomButton(self, container, nameButton):
 		if not container: return
 		drawKernListBottomControlButton(container, nameButton, self.schemaButtonsBottom)
@@ -1179,6 +1217,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 	def keyDown (self, sender, event):
 		self.spaceControl.checkCommand(sender, event)
+		# self.keyCommander.checkCommand(sender, event)
 		self.w.g1.contentView.setSceneItems(items = list(self.font.groups[self.selectedGroup]), animated = 'shake')  # scene = destinationScene,
 		self.w.g1.groupView.updateSceneItems(  # scene = self.sceneGroups,
 			itemsIndexes = [self.w.g1.groupView.getSceneItems().index(self.selectedGroup)])  # self.sceneGroups
