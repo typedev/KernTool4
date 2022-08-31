@@ -15,7 +15,7 @@ import importlib
 from mojo.smartSet import getSmartSets
 from vanilla.dialogs import getFile, putFile
 from mojo.subscriber import Subscriber, registerCurrentFontSubscriber, unregisterCurrentFontSubscriber
-from mojo.UI import SelectFont
+from mojo.UI import SelectFont, AskString
 from mojo.events import postEvent
 
 import tdSpaceControl
@@ -181,12 +181,12 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			# {
 			# 	'itemIdentifier': AppKit.NSToolbarSpaceItemIdentifier,
 			# },
-			# {
-			# 	'itemIdentifier': "toolbarRenameGroup",
-			# 	'label': 'Rename Group',
-			# 	'callback': self.allCallbacks,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_rename_group%s.pdf' % darkm),
-			# },
+			{
+				'itemIdentifier': "toolbarRenameGroup",
+				'label': 'Rename Group',
+				'callback': self.renameGroupCallback,
+				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_rename_group%s.pdf' % darkm),
+			},
 			# {
 			# 	'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
 			# },
@@ -207,6 +207,9 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			# {
 			# 	'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
 			# },
+			{
+				'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
+			},
 			{
 				'itemIdentifier': "toolbarScripts",
 				'label': 'Scripts',
@@ -1021,6 +1024,15 @@ class TDGroupsControl4(Subscriber): #, WindowController
 						items = list(self.font.groups[self.selectedGroup]),  # len(self.kern), #
 						animated = 'shake'
 					)
+
+	def renameGroupCallback(self, sender):
+		oldname = self.selectedGroup
+		newname = AskString('Enter new name', value = oldname, title = 'Rename Group')
+		if newname and newname != oldname:
+			self.hashKernDic.renameGroup(oldname, newname)
+			self.selectedGroup = newname
+			self.refreshGroupsView()
+
 
 
 	def selectorGroupsCallback(self, sender):
