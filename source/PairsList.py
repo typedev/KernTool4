@@ -15,7 +15,7 @@ import importlib
 from mojo.smartSet import getSmartSets
 from vanilla.dialogs import getFile, putFile
 from mojo.subscriber import Subscriber, registerCurrentFontSubscriber, unregisterCurrentFontSubscriber
-from mojo.UI import SelectFont
+from mojo.UI import SelectFont, SimpleStatus, StatusBar, LightStatusBar
 
 import tdSpaceControl
 importlib.reload(tdSpaceControl)
@@ -70,7 +70,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		if KERNTOOL_UI_DARKMODE:
 			darkm = '-dark'
 		self.idName = 'PairsList'
-		self.w = vanilla.Window((340, 800), minSize = (340, 400), title = self.idName )
+		self.w = vanilla.Window((340, 700), minSize = (340, 400), title = self.idName )
 
 		# toolbarItems = [
 		# 	{
@@ -103,10 +103,12 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		# glyphsSets.extend([gset.name for gset in fontSets])
 
 		self.w.kernListView = TDMerzMatrixView('auto', delegate = self)
+		self.w.statusBar = SimpleStatus('auto', horizontalLine=False)# textAlign='left', , textPosLeft = 0
 
 		rules1 = [
 			"H:|-0-[kernListView]-0-|",
-			"V:|-0-[kernListView]-0-|"
+			"H:|-0-[statusBar]-0-|",
+			"V:|[kernListView]-space-[statusBar(==18)]|"
 			# "V:||",
 		]
 		metrics1 = {
@@ -140,8 +142,8 @@ class TDPairsListControl4(Subscriber): #, WindowController
 			focusColor = (.7, .7, .72, .8)
 		)
 
-		self.scenesSelector = TDScenesSelector()
-		self.scenesSelector.addScene(self.kernList, self.w.kernListView)
+		# self.scenesSelector = TDScenesSelector()
+		# self.scenesSelector.addScene(self.kernList, self.w.kernListView)
 
 		self.kernListButtons = {}
 		self.kernListSortOrder = 'buttonSide1'
@@ -167,10 +169,10 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		self.w.setTitle('%s - %s %s' % (self.idName, self.font.info.familyName, self.font.info.styleName))
 
 		self.showKernList()
-		self.scenesSelector.setSelectedScene(self.kernList)
+		# self.scenesSelector.setSelectedScene(self.kernList)
 
 	def selectPairLayerCallback(self, sender, info):
-		self.scenesSelector.setSelectedScene(self.kernList)
+		# self.scenesSelector.setSelectedScene(self.kernList)
 
 		pairs = []
 		for idx in self.w.kernListView.getSelectedSceneItems():
@@ -179,6 +181,8 @@ class TDPairsListControl4(Subscriber): #, WindowController
 			sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs = pair[1]
 			pairwrapped = list(self.langSet.wrapPairToPattern(self.font,(keyGlyphL,keyGlyphR)))
 			pairs.extend(pairwrapped)
+		self.w.statusBar.set(['pairs: %i | viewed: %i | selected: %i' % (
+		len(self.font.kerning), len(self.w.kernListView.getSceneItems()), len(self.w.kernListView.getSelectedSceneItems()))])
 
 
 	def layerKernWillDrawCallback(self, sender, info):
@@ -323,6 +327,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 				# print ('sel', p)
 				selection.append(idx)
 		self.w.kernListView.setSelection(itemsIndexes = selection)
+		self.w.statusBar.set(['pairs: %i | viewed: %i | selected: %i' % (len(self.font.kerning),len(self.w.kernListView.getSceneItems()),len(self.w.kernListView.getSelectedSceneItems()))])
 
 	def selectFontCallback(self, sender):
 		font = SelectFont(title = self.idName)
