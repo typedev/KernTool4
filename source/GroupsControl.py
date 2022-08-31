@@ -371,8 +371,8 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			# 'buttonDelete': dict(xpos = 15 + 5, ypos = 'bottom', width = 100, value = False),
 		}
 		self.schemaButtonsBottom = {
-			'buttonDelete': dict(xpos = 15 + 5, ypos = 'bottom', width = 148, value = 'Delete'),
-			'buttonSend': dict(xpos = 15 + 5 + 148 + 5, ypos = 'bottom', width = 148, value = 'Send to KernTool'),
+			'buttonDelete': dict(xpos = 15 + 5, ypos = 'bottom', width = 148, value = 'Delete selected'),
+			'buttonSend': dict(xpos = 15 + 5 + 148 + 5, ypos = 'bottom', width = 148, value = 'Send selected to KernTool'),
 		}
 
 		self.kernList = self.w.g1.kernListView.setupScene(
