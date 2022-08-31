@@ -1028,22 +1028,32 @@ class TDGroupsControl4(Subscriber): #, WindowController
 	def renameGroupCallback(self, sender):
 		oldname = self.selectedGroup
 		newname = AskString('Enter new name', value = oldname, title = 'Rename Group')
-		if newname and newname != oldname:
+		if newname and newname != oldname and ID_KERNING_GROUP in newname:
 			self.hashKernDic.renameGroup(oldname, newname)
 			self.selectedGroup = newname
 			self.refreshGroupsView()
+			self.setSelectedGroup(groupname = newname)
 
+	def setSelectedGroup(self, groupname = None, index = None):
+		if groupname:
+			if self.selectedGroup != groupname:
+				index = self.w.g1.groupView.getSceneItems().index(groupname)
+				self.selectedGroup = groupname
+		elif index:
+			self.selectedGroup = self.w.g1.groupView.getSceneItems()[index]
+
+		if index:
+			self.w.g1.groupView.setSelection(itemsIndexes = [index], selected = True, animate = True)
+			self.w.g1.contentView.setSceneItems(  # scene = self.sceneGroupContent,
+				items = list(self.font.groups[self.selectedGroup]),  # len(self.kern), #
+				animated = 'shake'
+			)
+			self.showDependencies(groupname = self.selectedGroup)
 
 
 	def selectorGroupsCallback(self, sender):
 		index = sender.get()
-		self.selectedGroup = self.w.g1.groupView.getSceneItems()[index]
-		self.w.g1.groupView.setSelection(itemsIndexes = [index], selected = True, animate = True)
-		self.w.g1.contentView.setSceneItems(  # scene = self.sceneGroupContent,
-			items = list(self.font.groups[self.selectedGroup]),  # len(self.kern), #
-			animated = 'shake'
-		)
-		self.showDependencies(groupname = self.selectedGroup)
+		self.setSelectedGroup(index = index)
 
 
 	def checkKeepKerningCallback(self, sender):
