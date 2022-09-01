@@ -116,6 +116,7 @@ class TDRemoveCrossPairsWindow(object):
 				patterns.append(txt)
 				p2l = 0
 				txt = ''
+		patterns.append('\n')
 		self.w.textBox.set('\n'.join(patterns))
 
 	# def getFontName (self, font, fonts):

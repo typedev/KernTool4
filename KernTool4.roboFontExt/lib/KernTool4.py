@@ -648,7 +648,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 					tline.append('{break}')
 
 		if tline:
-			tm = TDGlyphsMatrix(CurrentFont(), width = 15000)
+			tm = TDGlyphsMatrix(CurrentFont(), width = 25000)
 			tm.setGlyphs(tline, insertVirtual = True)
 			tm.buildMatrix()
 

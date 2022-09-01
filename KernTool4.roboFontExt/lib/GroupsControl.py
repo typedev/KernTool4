@@ -15,7 +15,8 @@ import importlib
 from mojo.smartSet import getSmartSets
 from vanilla.dialogs import getFile, putFile
 from mojo.subscriber import Subscriber, registerCurrentFontSubscriber, unregisterCurrentFontSubscriber
-from mojo.UI import SelectFont
+from mojo.UI import SelectFont, AskString
+from mojo.events import postEvent
 
 import tdSpaceControl
 importlib.reload(tdSpaceControl)
@@ -180,12 +181,12 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			# {
 			# 	'itemIdentifier': AppKit.NSToolbarSpaceItemIdentifier,
 			# },
-			# {
-			# 	'itemIdentifier': "toolbarRenameGroup",
-			# 	'label': 'Rename Group',
-			# 	'callback': self.allCallbacks,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_rename_group%s.pdf' % darkm),
-			# },
+			{
+				'itemIdentifier': "toolbarRenameGroup",
+				'label': 'Rename Group',
+				'callback': self.renameGroupCallback,
+				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_rename_group%s.pdf' % darkm),
+			},
 			# {
 			# 	'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
 			# },
@@ -206,6 +207,9 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			# {
 			# 	'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
 			# },
+			{
+				'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
+			},
 			{
 				'itemIdentifier': "toolbarScripts",
 				'label': 'Scripts',
@@ -366,6 +370,10 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			'buttonLangs': dict(xpos = 15 + 5 + 100 + 5 + 100 + 5 + 40 + 5 + 20 + 5, ypos = 'top',width = 20, value = False),
 			# 'buttonDelete': dict(xpos = 15 + 5, ypos = 'bottom', width = 100, value = False),
 		}
+		self.schemaButtonsBottom = {
+			'buttonDelete': dict(xpos = 15 + 5, ypos = 'bottom', width = 148, value = 'Delete selected'),
+			'buttonSend': dict(xpos = 15 + 5 + 148 + 5, ypos = 'bottom', width = 148, value = 'Send selected to KernTool'),
+		}
 
 		self.kernList = self.w.g1.kernListView.setupScene(
 			layerWillDrawCallback = self.layerKernWillDrawCallback,
@@ -403,6 +411,13 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		self.w.g1.kernListView.addControlElement(name = 'buttonValue', callback = self.buttonCallback, drawingMethod = self.drawSortingButton)
 		self.w.g1.kernListView.addControlElement(name = 'buttonExcpt', callback = self.buttonCallback, drawingMethod = self.drawSortingButton)
 		self.w.g1.kernListView.addControlElement(name = 'buttonLangs', callback = self.buttonCallback, drawingMethod = self.drawSortingButton)
+
+		self.w.g1.kernListView.addControlElement(name = 'buttonDelete', callback = self.buttonBottomCallback, drawingMethod = self.drawBottomButton)
+		self.w.g1.kernListView.addControlElement(name = 'buttonSend', callback = self.buttonBottomCallback, drawingMethod = self.drawBottomButton)
+
+		# self.keyCommander = TDKeyCommander()
+		# self.keyCommander.registerKeyCommand(KEY_BACKSPACE, callback = self.deleteSelectedPairs)
+		# self.keyCommander.registerKeyCommand(KEY_ENTER, callback = self.sendSelectedPairs2KernTool)
 
 		self.pointSize = 10
 		self.ScriptsBoardWindow = None
@@ -473,27 +488,11 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			for idx in self.w.g1.kernListView.getSelectedSceneItems():
 				pairsselected.append(self.w.g1.kernListView.getSceneItems()[idx][0])
 
+			if self.kernListSortOrder == nameButton:
+				self.kernListSortReverse = not self.kernListSortReverse
+			else:
+				self.kernListSortReverse = False
 			self.kernListSortOrder = nameButton
-			for name, button in self.kernListButtons.items():
-				if name != nameButton:
-					# print('unselected button', name)
-					button.setBackgroundColor((.8, .8, .8, .8))
-					symbolLayer = button.getSublayer('sortpoint')
-					symbolLayer.setImageSettingsValue('fillColor', (.3, .3, .3, .8))
-					symbolLayer.setRotation(-90)
-				else:
-					# print('selected button', name)
-					button.setBackgroundColor((.3, .3, .3, .8))
-					symbolLayer = button.getSublayer('sortpoint')
-					if self.kernListSortReverse:
-						symbolLayer.setRotation(90)
-					else:
-						symbolLayer.setRotation(-90)
-					symbolLayer.setImageSettingsValue('fillColor', (.8, .8, .8, .8))
-				if self.kernListSortOrder == nameButton:
-					self.kernListSortReverse = not self.kernListSortReverse
-				else:
-					self.kernListSortReverse = False
 
 			p = self.makeSortedList(self.kernListPairs, self.kernListSortOrder, self.kernListSortReverse)
 			self.w.g1.kernListView.setSceneItems(items = p)
@@ -505,48 +504,47 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 	def drawSortingButton(self, container, nameButton):
 		if not container: return
-		buttonLayer = container.getSublayer(nameButton)
-		(layerWidth, layerHeight) = container.getSize()
-		if not buttonLayer:
-			(layerWidth, layerHeight) = container.getSize()
-			btn = self.schemaButtons[nameButton]
-			if btn['ypos'] == 'top':
-				ypos = layerHeight - 20
-			if btn['value']:
-				colorBack = (.3, .3, .3, .8)
-				colorSelect = (.8, .8, .8, .8)
-			else:
-				colorBack = (.8, .8, .8, .8)
-				colorSelect = (.3, .3, .3, .8)
-			with container.sublayerGroup():
-				baselayer = container.appendBaseSublayer(
-					name = nameButton,
-					position = (btn['xpos'], ypos), # * (btn['width'] * layerWidth/15)
-					size = (btn['width'], 14), # * layerWidth/15
-					backgroundColor = colorBack,
-					cornerRadius = 4,
-					acceptsHit = True,
-				)
-				symbolLayer = baselayer.appendSymbolSublayer(
-					name = 'sortpoint',
-					position = (btn['width']/2, 7)
-				)
-				symbolLayer.setImageSettings(
-					dict(
-						name = "triangle",
-						size = (7, 10),
-						fillColor = colorSelect
-					)
-				)
-				symbolLayer.setRotation(-90)
-				self.kernListButtons[nameButton] = baselayer
-		else:
-			btn = self.schemaButtons[nameButton]
-			if btn['ypos'] == 'top':
-				ypos = layerHeight - 20
-			buttonLayer.setPosition((btn['xpos'], ypos))
-			buttonLayer.setSize((btn['width'],14 ))
+		drawKernListControlButton(container, nameButton, self.kernListSortOrder, self.kernListSortReverse, self.schemaButtons)
 
+	def sendSelectedPairs2KernTool(self,sender, value):
+		pairs = []
+		for idx in self.w.g1.kernListView.getSelectedSceneItems():
+			pair = self.w.g1.kernListView.getSceneItems()[idx]
+			l, r = pair[0]
+			sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs = pair[1]
+			p1, lw, rw, p2 = list(self.langSet.wrapPairToPattern(self.font, (keyGlyphL, keyGlyphR)))
+			pairs.append('/%s/%s/%s/%s' % (p1, lw, rw, p2))
+		line = ''.join(pairs)
+		postEvent('typedev.KernTool.observerSetText',
+		          glyphsLine = line,
+		          glyphsready = True,
+		          targetpair = None,
+		          fontID = getFontID(self.font),
+		          # observerID = self.observerID)
+		          )
+
+	def deleteSelectedPairs(self, sender, value):
+		pairs = []
+		for idx in self.w.g1.kernListView.getSelectedSceneItems():
+			pair = self.w.g1.kernListView.getSceneItems()[idx]
+			l, r = pair[0]
+			pairs.append((l,r))
+		for pair in pairs:
+			if pair in self.font.kerning:
+				self.font.kerning.remove(pair)
+		# print(pairs)
+		self.w.g1.linesPreview.refreshView()
+
+	def buttonBottomCallback(self, eventname, point, nameButton):
+		if eventname =='mouseUp':
+			if nameButton == 'buttonSend':
+				self.sendSelectedPairs2KernTool(None,None)
+			elif nameButton == 'buttonDelete':
+				self.deleteSelectedPairs(None,None)
+
+	def drawBottomButton(self, container, nameButton):
+		if not container: return
+		drawKernListBottomControlButton(container, nameButton, self.schemaButtonsBottom)
 
 	def glyphsLineWillDrawCallback (self, sender, container):
 		if not sender.selectedGlyphs: return
@@ -1027,16 +1025,35 @@ class TDGroupsControl4(Subscriber): #, WindowController
 						animated = 'shake'
 					)
 
+	def renameGroupCallback(self, sender):
+		oldname = self.selectedGroup
+		newname = AskString('Enter new name', value = oldname, title = 'Rename Group')
+		if newname and newname != oldname and ID_KERNING_GROUP in newname:
+			self.hashKernDic.renameGroup(oldname, newname)
+			self.selectedGroup = newname
+			self.refreshGroupsView()
+			self.setSelectedGroup(groupname = newname)
+
+	def setSelectedGroup(self, groupname = None, index = None):
+		if groupname:
+			if self.selectedGroup != groupname:
+				index = self.w.g1.groupView.getSceneItems().index(groupname)
+				self.selectedGroup = groupname
+		elif index:
+			self.selectedGroup = self.w.g1.groupView.getSceneItems()[index]
+
+		if index:
+			self.w.g1.groupView.setSelection(itemsIndexes = [index], selected = True, animate = True)
+			self.w.g1.contentView.setSceneItems(  # scene = self.sceneGroupContent,
+				items = list(self.font.groups[self.selectedGroup]),  # len(self.kern), #
+				animated = 'shake'
+			)
+			self.showDependencies(groupname = self.selectedGroup)
+
 
 	def selectorGroupsCallback(self, sender):
 		index = sender.get()
-		self.selectedGroup = self.w.g1.groupView.getSceneItems()[index]
-		self.w.g1.groupView.setSelection(itemsIndexes = [index], selected = True, animate = True)
-		self.w.g1.contentView.setSceneItems(  # scene = self.sceneGroupContent,
-			items = list(self.font.groups[self.selectedGroup]),  # len(self.kern), #
-			animated = 'shake'
-		)
-		self.showDependencies(groupname = self.selectedGroup)
+		self.setSelectedGroup(index = index)
 
 
 	def checkKeepKerningCallback(self, sender):
@@ -1222,6 +1239,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 	def keyDown (self, sender, event):
 		self.spaceControl.checkCommand(sender, event)
+		# self.keyCommander.checkCommand(sender, event)
 		self.w.g1.contentView.setSceneItems(items = list(self.font.groups[self.selectedGroup]), animated = 'shake')  # scene = destinationScene,
 		self.w.g1.groupView.updateSceneItems(  # scene = self.sceneGroups,
 			itemsIndexes = [self.w.g1.groupView.getSceneItems().index(self.selectedGroup)])  # self.sceneGroups

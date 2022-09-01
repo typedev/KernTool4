@@ -852,7 +852,8 @@ class TDHashGroupsDic(object):
 			self.history.append(('rename', group, newname, checkKerning, checkLanguageCompatibility))
 		if group in self.font.groups and newname not in self.font.groups:
 			content = list(self.font.groups[group])
-			self.font.groups[newname] = ()
+			# self.font.groups[newname] = ()
+			self.font.groups[newname] = tuple(content)
 			if self.isKerningGroup(group):
 				if checkKerning:
 					if self.isLeftSideGroup(group):
@@ -875,7 +876,7 @@ class TDHashGroupsDic(object):
 							deletedPairs.append((l,r))
 			self.font.groups.remove(group)
 			# if content:
-			self.font.groups[newname] = tuple(content)
+
 			self.makeReverseGroupsMapping()
 		# if report:
 		# 	for i in report:

@@ -15,17 +15,16 @@ Script to transfer all kerning groups and kerning from master font
 
 def transferGroupsAndKerning (masterfont, targetfont, transferGroups=True, transferPairs=True):
 	missingGlyphs = []
-	groups2kill = []
 	report = []
-	for groupname, content in targetfont.groups.items():
-		if groupname.startswith('public.kern'):
-			groups2kill.append(groupname)
-	for groupname in groups2kill:
-		del targetfont.groups[groupname]
-
-	targetfont.kerning.clear()
 
 	if transferGroups:
+		groups2kill = []
+		for groupname, content in targetfont.groups.items():
+			if groupname.startswith('public.kern'):
+				groups2kill.append(groupname)
+		for groupname in groups2kill:
+			del targetfont.groups[groupname]
+
 		countgroup = 0
 		for groupname, content in masterfont.groups.items():
 
@@ -44,6 +43,8 @@ def transferGroupsAndKerning (masterfont, targetfont, transferGroups=True, trans
 		print('transfered:', len(targetfont.groups))
 
 	if transferPairs:
+		targetfont.kerning.clear()
+
 		countpairs = 0
 		for (l, r), v in masterfont.kerning.items():
 			targetfont.kerning[(l, r)] = v
@@ -102,6 +103,9 @@ class TDTransferGroupsAndKerningWindow(object):
 		self.w.fontA = vanilla.PopUpButton('auto', [], sizeStyle = "regular")
 		self.w.label2 = vanilla.TextBox('auto', 'Choose Target font:')
 		self.w.fontB = vanilla.PopUpButton('auto', [], sizeStyle = "regular")  # , callback = self.optionsChanged
+		self.w.applyGroups = vanilla.CheckBox('auto', 'Copy Groups', value = True )
+		self.w.applyPairs = vanilla.CheckBox('auto', 'Copy Kerning', value = True )
+
 		self.w.btnRun = vanilla.Button('auto', title = 'Run', callback = self.btnRunCallback)  # ,
 		self.w.textBox = CodeEditor('auto', text = '', readOnly = True, showLineNumbers = False, checksSpelling = False)
 		self.w.textBox.setLexer(BaseLexerTGAKW())
@@ -113,10 +117,13 @@ class TDTransferGroupsAndKerningWindow(object):
 			"H:|-border-[fontA]-border-|",
 			"H:|-border-[label2]-border-|",
 			"H:|-border-[fontB]-border-|",
+			"H:|-border-[applyGroups]-space-[applyPairs(==applyGroups)]-border-|",
 			"H:|-border-[btnRun]-border-|",
 			"H:|-0-[textBox]-0-|",
 			# Vertical
-			"V:|-border-[label1]-space-[fontA]-border-[label2]-space-[fontB]-border-[btnRun]-border-[textBox]-0-|",
+			"V:|-border-[label1]-space-[fontA]-border-[label2]-space-[fontB]-border-[applyGroups]-border-[btnRun]-border-[textBox]-0-|",
+			"V:|-border-[label1]-space-[fontA]-border-[label2]-space-[fontB]-border-[applyPairs]-border-[btnRun]-border-[textBox]-0-|",
+
 		]
 		metrics = {
 			"border": 15,
@@ -129,7 +136,8 @@ class TDTransferGroupsAndKerningWindow(object):
 	def btnRunCallback (self, sender):
 		fontA = self.fonts[self.w.fontA.get()]
 		fontB = self.fonts[self.w.fontB.get()]
-		report = transferGroupsAndKerning(masterfont = fontA, targetfont = fontB)
+		report = transferGroupsAndKerning(masterfont = fontA, targetfont = fontB,
+		                                  transferGroups = self.w.applyGroups.get(), transferPairs = self.w.applyPairs.get())
 		self.w.textBox.set('\n'.join(report))
 
 	#
