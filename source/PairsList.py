@@ -101,20 +101,56 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		# glyphsSets = ['All Glyphs']
 		# glyphsSets.extend([gset.name for gset in defaultSets])
 		# glyphsSets.extend([gset.name for gset in fontSets])
+		self.w.toolbar = vanilla.Group('auto')
+		self.w.toolbar.btnSelectFont = vanilla.Button('auto','􁉽', callback = self.selectFontCallback)
+		self.w.toolbar.btnAppendPairs = vanilla.Button('auto', '􀑎', callback = self.selectFontCallback)
+		self.w.toolbar.btnSavePairs = vanilla.Button('auto', '􀯵', callback = self.selectFontCallback)
+		self.w.toolbar.flex1 = vanilla.Group('auto')
+		segments1 = [{'width': 0, 'title': '􀚇'}, {'width': 0, 'title': '􀇵'}]
+		self.w.toolbar.btnSwitchSelection = vanilla.SegmentedButton('auto',
+		                                               segmentDescriptions = segments1,
+		                                               selectionStyle = 'one',
+		                                               callback = self.selectFontCallback,
+		                                               sizeStyle = 'regular')
+		self.w.toolbar.btnSwitchSelection.set(0)
+		self.w.toolbar.flex2 = vanilla.Group('auto')
+		segments2 = [{'width': 0, 'title': '􀤶'}, {'width': 0, 'title': '􀧉'}, {'width': 0, 'title': '􀤷'}]
+		self.w.toolbar.btnSwitchSide = vanilla.SegmentedButton('auto',
+		                                                           segmentDescriptions = segments2,
+		                                                           selectionStyle = 'one',
+		                                                           callback = self.selectFontCallback,
+		                                                           sizeStyle = 'regular')
+		self.w.toolbar.btnSwitchSide.set(1)
+		self.w.toolbar.flex3 = vanilla.Group('auto')
+
+
+		rulesTB = [
+			"H:|-border-[btnSelectFont]-border-[btnAppendPairs]-border-[btnSavePairs]-[flex1]-[btnSwitchSelection]-[flex2(==flex1)]-[btnSwitchSide]-border-|",
+			"V:|-space-[btnSelectFont]-border-|",
+			"V:|-space-[btnAppendPairs]-border-|",
+			"V:|-space-[btnSavePairs]-border-|",
+			"V:|-space-[flex1]-border-|",
+			"V:|-space-[btnSwitchSelection]-border-|",
+			"V:|-space-[flex2]-border-|",
+			"V:|-space-[btnSwitchSide]-border-|",
+			"V:|-space-[flex3]-border-|"
+		]
 
 		self.w.kernListView = TDMerzMatrixView('auto', delegate = self)
 		self.w.statusBar = SimpleStatus('auto', horizontalLine=False)# textAlign='left', , textPosLeft = 0
 
 		rules1 = [
+			"H:|-0-[toolbar]-0-|",
 			"H:|-0-[kernListView]-0-|",
 			"H:|-0-[statusBar]-0-|",
-			"V:|[kernListView]-space-[statusBar(==18)]|"
+			"V:|-border-[toolbar]-space-[kernListView]-space-[statusBar(==18)]|"
 			# "V:||",
 		]
 		metrics1 = {
-			"border": 1,
+			"border": 5,
 			"space": 1
 		}
+		self.w.toolbar.addAutoPosSizeRules(rulesTB, metrics1)
 		self.w.addAutoPosSizeRules(rules1, metrics1)
 
 		self.schemaButtons = {
