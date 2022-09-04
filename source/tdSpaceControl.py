@@ -108,6 +108,24 @@ def getDisplayNameGroup(groupname):
 	else:
 		return groupname
 
+def getDisplayNameGroupClipped(groupname):
+	# RF3 style
+	if not groupname: return
+	mask1 = ID_GROUP_MASK_1#ID_KERNING_GROUP.replace('.kern', '') + ID_GROUP_LEFT
+	mask2 = ID_GROUP_MASK_2#ID_KERNING_GROUP.replace('.kern', '') + ID_GROUP_RIGHT
+	mask3 = ID_GROUP_MARGINS_MASK_1
+	mask4 = ID_GROUP_MARGINS_MASK_2
+	if mask1 in groupname:
+		return groupname.replace(mask1, '') # '@_'
+	elif mask2 in groupname:
+		return groupname.replace(mask2, '')
+	elif mask3 in groupname:
+		return groupname.replace(mask3, '')
+	elif mask4 in groupname:
+		return groupname.replace(mask4, '')
+	else:
+		return groupname
+
 def getMargins(glyph, rounded = True, useRayBeam = False, rayBeamPosition = 0):
 	italicAngle = 0
 	if glyph.font:
