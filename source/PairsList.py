@@ -16,6 +16,7 @@ from mojo.smartSet import getSmartSets
 from vanilla.dialogs import getFile, putFile
 from mojo.subscriber import Subscriber, registerCurrentFontSubscriber, unregisterCurrentFontSubscriber
 from mojo.UI import SelectFont, SimpleStatus, StatusBar, LightStatusBar
+from mojo.events import addObserver, removeObserver
 
 import tdSpaceControl
 importlib.reload(tdSpaceControl)
@@ -103,10 +104,10 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		# glyphsSets.extend([gset.name for gset in fontSets])
 		self.w.toolbar = vanilla.Group('auto')
 		self.w.toolbar.btnSelectFont = vanilla.Button('auto','􁉽', callback = self.selectFontCallback)
-		self.w.toolbar.btnAppendPairs = vanilla.Button('auto', '􀑎', callback = self.selectFontCallback)
-		self.w.toolbar.btnSavePairs = vanilla.Button('auto', '􀯵', callback = self.selectFontCallback)
+		self.w.toolbar.btnAppendPairs = vanilla.Button('auto', '􀐇', callback = self.selectFontCallback) # 􀑎
+		self.w.toolbar.btnSavePairs = vanilla.Button('auto', '􀈧', callback = self.selectFontCallback) # 􀈧 􀯵
 		self.w.toolbar.flex1 = vanilla.Group('auto')
-		segments1 = [{'width': 0, 'title': '􀚇'}, {'width': 0, 'title': '􀇵'}]
+		segments1 = [{'width': 0, 'title': '􀇷'}, {'width': 0, 'title': '􀂔'}] # 􀚇 􀇵
 		self.w.toolbar.btnSwitchSelection = vanilla.SegmentedButton('auto',
 		                                               segmentDescriptions = segments1,
 		                                               selectionStyle = 'one',
@@ -200,12 +201,15 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		self.ScriptsBoardWindow = None
 
 	def started (self):
+		addObserver(self, "glyphChanged", "currentGlyphChanged")
 		self.w.bind('close', self.windowCloseCallback)
 		self.w.open()
 		self.w.setTitle('%s - %s %s' % (self.idName, self.font.info.familyName, self.font.info.styleName))
-
 		self.showKernList()
 		# self.scenesSelector.setSelectedScene(self.kernList)
+
+	def glyphChanged(self, info):
+		print ('currentGlyphChanged', info)
 
 	def selectPairLayerCallback(self, sender, info):
 		# self.scenesSelector.setSelectedScene(self.kernList)
@@ -316,44 +320,22 @@ class TDPairsListControl4(Subscriber): #, WindowController
 			return sorted(_pairslist.items(), key = lambda p: (p[1][8]), reverse = reverse) #, p[1][0], p[1][1]
 
 
-	def showKernList(self, groupname = None, glyphName = None):
-		self.kernListLastSelection = (groupname, glyphName)
+	def showKernList(self, glyphNames = None):
+		self.kernListLastSelection = glyphNames
 		pairsselected = []
 		pairs = []
 		for idx in self.w.kernListView.getSelectedSceneItems():
 			pairsselected.append(self.w.kernListView.getSceneItems()[idx][0])
-
 		self.w.kernListView.setSceneItems(items = [])
-		# if groupname:
-		# 	groupnames = [groupname]
-		# 	if len(self.w.g1.groupView.getSelectedSceneItems()) > 1:
-		# 		groupnames =[]
-		# 		for idx in self.w.g1.groupView.getSelectedSceneItems():
-		# 			gn = self.w.g1.groupView.getSceneItems()[idx]
-		# 			groupnames.append(gn)
-		# 	pairs = []
-		# 	for groupname in groupnames:
-		# 		_pairs = self.hashKernDic.getPairsBy(groupname, self.groupsSide)
-		# 		pairs.extend(pair for pair, value in _pairs)
-		# 		if len(self.font.groups[groupname]) != 0:
-		# 			for glyphname in self.font.groups[groupname]:
-		# 				_pairs = self.hashKernDic.getPairsBy(glyphname, self.groupsSide)
-		# 				if _pairs:
-		# 					pairs.extend(pair for pair, value in _pairs)
-		#
-		# if glyphName:
-		# 	glyphNames = [glyphName]
-		# 	if len(self.w.g1.fontView.getSelectedSceneItems()) > 1:
-		# 		glyphNames = []
-		# 		for idx in self.w.g1.fontView.getSelectedSceneItems():
-		# 			gn = self.w.g1.fontView.getSceneItems()[idx]
-		# 			glyphNames.append(gn)
-		# 	pairs = []
-		# 	for glyphName in glyphNames:
-		# 		_pairs = self.hashKernDic.getPairsBy(glyphName, self.groupsSide)
-		# 		pairs.extend(pair for pair, value in _pairs)
 
-		self.kernListPairs = self.font.kerning.keys()
+		if glyphNames:
+			pairs = []
+			for name in glyphNames:
+				_pairs = self.hashKernDic.getPairsBy(name, self.groupsSide)
+				pairs.extend(pair for pair, value in _pairs)
+			self.kernListPairs = pairs
+		else:
+			self.kernListPairs = self.font.kerning.keys()
 		p = self.makeSortedList(self.kernListPairs, self.kernListSortOrder, self.kernListSortReverse)
 		self.w.kernListView.setSceneItems(items = p)  # , animated = 'bottom'
 
@@ -380,6 +362,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 
 
 	def windowCloseCallback(self, sender):
+		removeObserver(self, "currentGlyphChanged")
 		self.w.kernListView.clearScene()
 		if self.ScriptsBoardWindow:
 			self.ScriptsBoardWindow.close()
@@ -390,15 +373,8 @@ class TDPairsListControl4(Subscriber): #, WindowController
 
 	def fontKerningDidChange(self, info):
 		# TODO need rewrite.. need just update current kern list state
-		# print('fontKerningDidChange IN')
-		group, glyph = self.kernListLastSelection
-		self.showKernList(groupname = group, glyphName = glyph)
-		# if self.scenesSelector.getSelectedScene() == self.sceneGroups or self.scenesSelector.getSelectedScene() == self.sceneGroupContent or self.scenesSelector.getSelectedScene() == self.kernList:
-		# 	print('fontKerningDidChange 1')
-		# 	self.showKernList(groupname = self.selectedGroup)
-		# elif self.scenesSelector.getSelectedScene() == self.sceneFont and self.w.g1.fontView.getSelectedSceneItems():
-		# 	print('fontKerningDidChange 2')
-		# 	self.showKernList(glyphName = self.w.g1.fontView.getSceneItems()[ self.w.g1.fontView.getSelectedSceneItems()[-1] ])
+		self.showKernList(glyphNames = self.kernListLastSelection)
+
 
 	def fontGroupsDidChange(self, info):
 		pass

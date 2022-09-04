@@ -349,10 +349,10 @@ def drawFontGlyph (containder, font, glyphname, pointSize  =10):
 		baselayer.setMaskToFrame(True)
 
 
-def drawKernPairListed( container, font, columns, hashKernDic, pairX, pointSize = 11):
+def drawKernPairListed( container, font, columns, hashKernDic, pairInfo, pointSize = 11):
 	# print (pair, pair[0])
-	pair = pairX[0]
-	info = pairX[1]
+	pair = pairInfo[0]
+	info = pairInfo[1]
 	sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs = info
 	l, r = pair
 	_pair = pair
@@ -372,10 +372,10 @@ def drawKernPairListed( container, font, columns, hashKernDic, pairX, pointSize 
 		# kgr = hashKernDic.getKeyGlyphByGroupname(kgr)
 		r = r.replace('@ ', '')
 		# gr = True
-	if len(l) > 15:
-		pointSize1 = pointSize - 1.5
-	if len(r) > 15:
-		pointSize2 = pointSize - 1.5
+	# if len(l) > 15:
+	# 	pointSize1 = pointSize - 1.5
+	# if len(r) > 15:
+	# 	pointSize2 = pointSize - 1.5
 	if not container.getSublayers():
 		with container.sublayerGroup():
 			baselayer = container.appendBaseSublayer(
@@ -401,9 +401,8 @@ def drawKernPairListed( container, font, columns, hashKernDic, pairX, pointSize 
 					text = '@',  # % ('@'),
 					horizontalAlignment = "left",
 					offset = (0, yoffset)  # -(self.pointSize/2)+2
-
 				)
-			baselayer.appendTextLineSublayer(
+			lt = baselayer.appendTextLineSublayer(
 				name = 'side1',
 				position = (columns['buttonSide1']['xpos'] - 3, 5),
 				fillColor = (0, 0, 0, 1),
@@ -411,7 +410,6 @@ def drawKernPairListed( container, font, columns, hashKernDic, pairX, pointSize 
 				text = '%s' % (l),
 				horizontalAlignment = "left",
 				offset = (0, yoffset)  # -(self.pointSize/2)+2
-
 			)
 			# baselayer.appendBaseSublayer(
 			# 	position = (self.schema['buttonSide2']['xpos'] - 20, 0),
@@ -429,7 +427,7 @@ def drawKernPairListed( container, font, columns, hashKernDic, pairX, pointSize 
 					offset = (0, yoffset)
 				)
 
-			baselayer.appendTextLineSublayer(
+			rt = baselayer.appendTextLineSublayer(
 				name = 'side2',
 				position = (columns['buttonSide2']['xpos'] - 3, 5),
 				fillColor = (0, 0, 0, 1),
@@ -508,6 +506,13 @@ def drawKernPairListed( container, font, columns, hashKernDic, pairX, pointSize 
 				strokeWidth = 1,
 				strokeColor = (.9, .9, .9, .6)
 			)
+		with container.sublayerGroup():
+			w, h = lt.getTextSize()
+			if w > columns['buttonSide2']['xpos'] - columns['buttonSide1']['xpos']:
+				lt.setPointSize(pointSize - 1.5)
+			w, h = rt.getTextSize()
+			if w > columns['buttonValue']['xpos'] - columns['buttonSide2']['xpos']:
+				rt.setPointSize(pointSize - 1.5)
 
 def drawKernListControlButton (container, nameButton, selectedButton, direction, schemaButtons ):
 	buttonLayer = container.getSublayer(nameButton)
