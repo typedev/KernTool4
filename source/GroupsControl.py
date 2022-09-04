@@ -504,7 +504,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 	def drawSortingButton(self, container, nameButton):
 		if not container: return
-		drawKernListControlButton(container, nameButton, self.kernListSortOrder, self.kernListSortReverse, self.schemaButtons)
+		drawKernListSortButton(container, nameButton, self.kernListSortOrder, self.kernListSortReverse, self.schemaButtons)
 
 	def sendSelectedPairs2KernTool(self,sender, value):
 		pairs = []

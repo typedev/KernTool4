@@ -350,7 +350,6 @@ def drawFontGlyph (containder, font, glyphname, pointSize  =10):
 
 
 def drawKernPairListed( container, font, columns, hashKernDic, pairInfo, pointSize = 11):
-	# print (pair, pair[0])
 	pair = pairInfo[0]
 	info = pairInfo[1]
 	sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs = info
@@ -359,23 +358,14 @@ def drawKernPairListed( container, font, columns, hashKernDic, pairInfo, pointSi
 	if pair not in font.kerning: return
 	layerWidth, layerHeight = container.getSize()
 	pointSize1, pointSize2 = pointSize, pointSize
-	# gl = False
-	# gr = False
 	kgl, kgr = l, r
 	l = getDisplayNameGroup(l)
 	if '@' in l:
-		# kgl = hashKernDic.getKeyGlyphByGroupname(kgl)
 		l = l.replace('@ ', '')
-		# gl = True
 	r = getDisplayNameGroup(r)
 	if '@' in r:
-		# kgr = hashKernDic.getKeyGlyphByGroupname(kgr)
 		r = r.replace('@ ', '')
-		# gr = True
-	# if len(l) > 15:
-	# 	pointSize1 = pointSize - 1.5
-	# if len(r) > 15:
-	# 	pointSize2 = pointSize - 1.5
+
 	if not container.getSublayers():
 		with container.sublayerGroup():
 			baselayer = container.appendBaseSublayer(
@@ -396,15 +386,15 @@ def drawKernPairListed( container, font, columns, hashKernDic, pairInfo, pointSi
 				baselayer.appendTextLineSublayer(
 					name = 'side1g',
 					position = (columns['buttonSide1']['xpos'] - 15, 5),
-					fillColor = (.3, .3, .7, 1),
+					fillColor = (.3, .3, .7, .6),
 					pointSize = pointSize1,
-					text = '@',  # % ('@'),
+					text = '􀚓',  # % ('@'),
 					horizontalAlignment = "left",
 					offset = (0, yoffset)  # -(self.pointSize/2)+2
 				)
 			lt = baselayer.appendTextLineSublayer(
 				name = 'side1',
-				position = (columns['buttonSide1']['xpos'] - 3, 5),
+				position = (columns['buttonSide1']['xpos'] , 5),
 				fillColor = (0, 0, 0, 1),
 				pointSize = pointSize1,
 				text = '%s' % (l),
@@ -420,16 +410,16 @@ def drawKernPairListed( container, font, columns, hashKernDic, pairInfo, pointSi
 				baselayer.appendTextLineSublayer(
 					name = 'side2',
 					position = (columns['buttonSide2']['xpos'] - 15, 5),
-					fillColor = (.3, .3, .7, 1),
+					fillColor = (.3, .3, .7, .6),
 					pointSize = pointSize2,
-					text = '@',  # % (r),
+					text = '􀚔',  # % (r),
 					horizontalAlignment = "left",
 					offset = (0, yoffset)
 				)
 
 			rt = baselayer.appendTextLineSublayer(
 				name = 'side2',
-				position = (columns['buttonSide2']['xpos'] - 3, 5),
+				position = (columns['buttonSide2']['xpos'] , 5),
 				fillColor = (0, 0, 0, 1),
 				pointSize = pointSize2,
 				text = '%s' % (r),
@@ -514,15 +504,169 @@ def drawKernPairListed( container, font, columns, hashKernDic, pairInfo, pointSi
 			if w > columns['buttonValue']['xpos'] - columns['buttonSide2']['xpos']:
 				rt.setPointSize(pointSize - 1.5)
 
-def drawKernListControlButton (container, nameButton, selectedButton, direction, schemaButtons ):
+def drawKernPairListed2( container, font, columns, hashKernDic, pairInfo, pointSize = 11):
+	pair = pairInfo[0]
+	info = pairInfo[1]
+	sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs = info
+	l, r = pair
+	_pair = pair
+	if pair not in font.kerning: return
+	layerWidth, layerHeight = container.getSize()
+	pointSize1, pointSize2 = pointSize, pointSize
+	kgl, kgr = l, r
+	l = sortL # getDisplayNameGroupClipped(l)
+	# if '@' in l:
+	# l = l.replace('@ ', '')
+	r = sortR #getDisplayNameGroupClipped(r)
+	# if '@' in r:
+	# r = r.replace('@ ', '')
+
+	btnWidth = 0
+	btnXpos = 0
+	btnValue = False
+	layersXpos = []
+	layersWidth = []
+	for idx, button in enumerate(columns):
+		btnWidth = (layerWidth) * (button['widthperсent'] / 100)
+		layersWidth.append(btnWidth)
+		layersXpos.append(btnXpos)
+		btnXpos += btnWidth # + 5
+
+	if not container.getSublayers():
+		with container.sublayerGroup():
+			baselayer = container.appendBaseSublayer(
+				name = 'base',
+				position = (0, 0),
+				size = (layerWidth, layerHeight),
+				backgroundColor = (0, 0, 0, 0),
+				cornerRadius = 0
+			)
+			yoffset = pointSize
+
+			if grouppedL:
+				baselayer.appendTextLineSublayer(
+					name = 'side1g',
+					position = (layersXpos[0], 5), # - 15
+					fillColor = (.3, .3, .7, .6),
+					pointSize = pointSize1,
+					text = '􀚓',  # % ('@'),
+					horizontalAlignment = "left",
+					offset = (0, yoffset)  # -(self.pointSize/2)+2
+				)
+			lt = baselayer.appendTextLineSublayer(
+				name = 'side1',
+				position = (layersXpos[0] + 15 , 5),
+				fillColor = (0, 0, 0, 1),
+				pointSize = pointSize1,
+				text = l,
+				horizontalAlignment = "left",
+				offset = (0, yoffset)  # -(self.pointSize/2)+2
+			)
+
+			if grouppedR:
+				baselayer.appendTextLineSublayer(
+					name = 'side2',
+					position = (layersXpos[1], 5), #  - 15
+					fillColor = (.3, .3, .7, .6),
+					pointSize = pointSize2,
+					text = '􀚔',  # % (r),
+					horizontalAlignment = "left",
+					offset = (0, yoffset)
+				)
+
+			rt = baselayer.appendTextLineSublayer(
+				name = 'side2',
+				position = (layersXpos[1] + 15, 5),
+				fillColor = (0, 0, 0, 1),
+				pointSize = pointSize2,
+				text = r,
+				horizontalAlignment = "left",
+				offset = (0, yoffset)
+			)
+
+			v = font.kerning[pair]
+			if v < 0:
+				colorvalue = (.6, .1, .1, 1)
+			else:
+				colorvalue = (.3, .5, .3, 1)
+			if note == 1:
+				baselayer.appendSymbolSublayer(
+					name = 'kernValue.exception',
+					position = ((layersXpos[3] + layersWidth[3]/2, 12)), # - 7
+					imageSettings = dict(
+						name = KernToolExceptionSymbolLeftSide,
+						size = (23, 15),
+						color = colorvalue,
+					)
+				)
+
+			elif note == 2:
+				baselayer.appendSymbolSublayer(
+					name = 'kernValue.exception',
+					position = ((layersXpos[3] + layersWidth[3]/2 , 12)),
+					imageSettings = dict(
+						name = KernToolExceptionSymbolRightSide,
+						size = (23, 15),
+						color = colorvalue,
+					)
+				)
+
+			elif note == 3:
+				baselayer.appendSymbolSublayer(
+					name = 'kernValue.exception',
+					position = ((layersXpos[3] + layersWidth[3]/2 , 12)),
+					imageSettings = dict(
+						name = KernToolExceptionSymbolOrphan,
+						size = (23, 15),
+						color = colorvalue,
+					)
+				)
+
+			baselayer.appendTextLineSublayer(
+				name = 'value',
+				position = (layersXpos[3] - 12, 5), #  + 15
+				fillColor = colorvalue,
+				pointSize = pointSize,
+				text = '%i' % v,
+				horizontalAlignment = "right",
+				offset = (0, yoffset)
+			)
+			if langs == 1:
+				drawCrossMark(container, position = (layersXpos[4] + layersWidth[4]/2, 9), size = 10, color = (.6, .1, .1, 1) ) #  - 10
+			if langs == 2:
+				drawCrossMark(container, position = (layersXpos[4] + layersWidth[4]/2, 9), size = 10, color = (.3, .5, .3, 1) )
+
+			baselayer.appendLineSublayer(
+				name = 'baseline',
+				startPoint = (0, 0),
+				endPoint = (layerWidth, 0),
+				strokeWidth = 1,
+				strokeColor = (.9, .9, .9, .6)
+			)
+		with container.sublayerGroup():
+			w, h = lt.getTextSize()
+			x, y = lt.getPosition()
+			if w > layersWidth[0]-20:
+				lt.setPointSize(pointSize - 2)
+				lt.setPosition((x, y-2))
+			w, h = rt.getTextSize()
+			x, y = rt.getPosition()
+			if w > layersWidth[1]-20:
+				rt.setPointSize(pointSize - 2)
+				rt.setPosition((x, y - 2))
+
+
+
+def drawKernListSortButton (container, nameButton, selectedButton, direction, schemaButtons):
 	buttonLayer = container.getSublayer(nameButton)
 	(layerWidth, layerHeight) = container.getSize()
-	ypos = 0
+	# ypos = 0
+	ypos = layerHeight - 20
 	if not buttonLayer:
-		(layerWidth, layerHeight) = container.getSize()
+		# (layerWidth, layerHeight) = container.getSize()
 		btn = schemaButtons[nameButton]
-		if btn['ypos'] == 'top':
-			ypos = layerHeight - 20
+		# if btn['ypos'] == 'top':
+		# 	ypos = layerHeight - 20
 		if btn['value']:
 			colorBack = (.3, .3, .3, .8)
 			colorSelect = (.8, .8, .8, .8)
@@ -553,8 +697,8 @@ def drawKernListControlButton (container, nameButton, selectedButton, direction,
 			# self.kernListButtons[nameButton] = baselayer
 	else:
 		btn = schemaButtons[nameButton]
-		if btn['ypos'] == 'top':
-			ypos = layerHeight - 20
+		# if btn['ypos'] == 'top':
+		# 	ypos = layerHeight - 20
 		buttonLayer.setPosition((btn['xpos'], ypos))
 		buttonLayer.setSize((btn['width'], 14))
 
@@ -573,6 +717,76 @@ def drawKernListControlButton (container, nameButton, selectedButton, direction,
 			else:
 				symbolLayer.setRotation(-90)
 			symbolLayer.setImageSettingsValue('fillColor', (.8, .8, .8, .8))
+
+def drawKernListSortButton2 (container, nameButton, selectedButton, direction, schemaButtons):
+	if not container: return
+	buttonLayer = container.getSublayer(nameButton)
+	(layerWidth, layerHeight) = container.getSize()
+	ypos = layerHeight - 20
+	btnWidth = 0
+	btnXpos = 20
+	btnValue = False
+	for idx, button in enumerate(schemaButtons):
+		btnWidth = (layerWidth - 60) * (button['widthperсent'] / 100)
+		if button['name'] == nameButton:
+			btnValue = button['value']
+			break
+		else:
+			btnXpos += btnWidth + 5
+
+	if not buttonLayer:
+		if btnValue:
+			colorBack = (.3, .3, .3, .8)
+			colorSelect = (.8, .8, .8, .8)
+		else:
+			colorBack = (.8, .8, .8, .8)
+			colorSelect = (.3, .3, .3, .8)
+		with container.sublayerGroup():
+			baselayer = container.appendBaseSublayer(
+				name = nameButton,
+				position = (btnXpos, ypos),  # * (btn['width'] * layerWidth/15)
+				size = (btnWidth, 14),  # * layerWidth/15
+				backgroundColor = colorBack,
+				cornerRadius = 4,
+				acceptsHit = True,
+			)
+			symbolLayer = baselayer.appendSymbolSublayer(
+				name = 'sortpoint',
+				position = (btnWidth / 2, 7)
+			)
+			symbolLayer.setImageSettings(
+				dict(
+					name = "triangle",
+					size = (7, 10),
+					fillColor = colorSelect
+				)
+			)
+			symbolLayer.setRotation(-90)
+			# self.kernListButtons[nameButton] = baselayer
+	else:
+
+		with container.sublayerGroup():
+			buttonLayer.setPosition((btnXpos, ypos))
+			buttonLayer.setSize((btnWidth, 14))
+
+			if selectedButton != nameButton:
+				# print('unselected button', name)
+				buttonLayer.setBackgroundColor((.8, .8, .8, .8))
+				symbolLayer = buttonLayer.getSublayer('sortpoint')
+				symbolLayer.setImageSettingsValue('fillColor', (.3, .3, .3, .8))
+				symbolLayer.setRotation(-90)
+				symbolLayer.setPosition((btnWidth / 2, 7))
+			else:
+				# print('selected button', name)
+				buttonLayer.setBackgroundColor((.3, .3, .3, .8))
+				symbolLayer = buttonLayer.getSublayer('sortpoint')
+				if direction:
+					symbolLayer.setRotation(90)
+				else:
+					symbolLayer.setRotation(-90)
+				symbolLayer.setImageSettingsValue('fillColor', (.8, .8, .8, .8))
+				symbolLayer.setPosition((btnWidth / 2, 7))
+
 
 def drawKernListBottomControlButton(container, nameButton, schemaButtons):
 	buttonLayer = container.getSublayer(nameButton)

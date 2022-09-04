@@ -162,6 +162,13 @@ class TDPairsListControl4(Subscriber): #, WindowController
 			'buttonLangs': dict(xpos = 15 + 5 + 100 + 5 + 100 + 5 + 40 + 5 + 20 + 5, ypos = 'top',width = 20, value = False),
 			# 'buttonDelete': dict(xpos = 15 + 5, ypos = 'bottom', width = 100, value = False),
 		}
+		self.schemaButtons2 = [
+			dict(name = 'buttonSide1', widthperсent = 36, value = True),
+			dict(name = 'buttonSide2', widthperсent = 36, value = False),
+			dict(name = 'buttonValue', widthperсent = 14, value = False),
+			dict(name = 'buttonExcpt', widthperсent = 7, value = False),
+			dict(name = 'buttonLangs', widthperсent = 7, value = False),
+		]
 
 		self.kernList = self.w.kernListView.setupScene(
 			layerWillDrawCallback = self.layerKernWillDrawCallback,
@@ -230,7 +237,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		index = info['index']
 		pair = info['item']
 		if not container.getSublayers():
-			drawKernPairListed(container, self.font, self.schemaButtons, self.hashKernDic, pair)
+			drawKernPairListed2(container, self.font, self.schemaButtons2, self.hashKernDic, pair)
 
 	def buttonCallback(self, eventname, point, nameButton):
 		if eventname =='mouseUp':
@@ -254,8 +261,9 @@ class TDPairsListControl4(Subscriber): #, WindowController
 
 
 	def drawSortingButton(self, container, nameButton):
-		if not container: return
-		drawKernListControlButton(container, nameButton, self.kernListSortOrder, self.kernListSortReverse, self.schemaButtons)
+		drawKernListSortButton2(container, nameButton, self.kernListSortOrder, self.kernListSortReverse, self.schemaButtons2)
+		# drawKernListSortButton(container, nameButton, self.kernListSortOrder, self.kernListSortReverse, self.schemaButtons)
+
 
 	def makeSortedList(self, pairslist = None, order = 'left', reverse = False):
 		# if not pairslist:
@@ -373,7 +381,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 
 	def fontKerningDidChange(self, info):
 		# TODO need rewrite.. need just update current kern list state
-		self.showKernList(glyphNames = self.kernListLastSelection)
+		self.showKernList() #glyphNames = self.kernListLastSelection
 
 
 	def fontGroupsDidChange(self, info):
