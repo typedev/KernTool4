@@ -513,13 +513,8 @@ def drawKernPairListed2( container, font, columns, hashKernDic, pairInfo, pointS
 	if pair not in font.kerning: return
 	layerWidth, layerHeight = container.getSize()
 	pointSize1, pointSize2 = pointSize, pointSize
-	kgl, kgr = l, r
-	l = sortL # getDisplayNameGroupClipped(l)
-	# if '@' in l:
-	# l = l.replace('@ ', '')
-	r = sortR #getDisplayNameGroupClipped(r)
-	# if '@' in r:
-	# r = r.replace('@ ', '')
+	l = sortL
+	r = sortR
 
 	btnWidth = 0
 	btnXpos = 0
@@ -553,7 +548,7 @@ def drawKernPairListed2( container, font, columns, hashKernDic, pairInfo, pointS
 					horizontalAlignment = "left",
 					offset = (0, yoffset)  # -(self.pointSize/2)+2
 				)
-			lt = baselayer.appendTextLineSublayer(
+			baselayer.appendTextLineSublayer(
 				name = 'side1',
 				position = (layersXpos[0] + 15 , 5),
 				fillColor = (0, 0, 0, 1),
@@ -565,7 +560,7 @@ def drawKernPairListed2( container, font, columns, hashKernDic, pairInfo, pointS
 
 			if grouppedR:
 				baselayer.appendTextLineSublayer(
-					name = 'side2',
+					name = 'side2g',
 					position = (layersXpos[1], 5), #  - 15
 					fillColor = (.3, .3, .7, .6),
 					pointSize = pointSize2,
@@ -574,7 +569,7 @@ def drawKernPairListed2( container, font, columns, hashKernDic, pairInfo, pointS
 					offset = (0, yoffset)
 				)
 
-			rt = baselayer.appendTextLineSublayer(
+			baselayer.appendTextLineSublayer(
 				name = 'side2',
 				position = (layersXpos[1] + 15, 5),
 				fillColor = (0, 0, 0, 1),
@@ -599,7 +594,6 @@ def drawKernPairListed2( container, font, columns, hashKernDic, pairInfo, pointS
 						color = colorvalue,
 					)
 				)
-
 			elif note == 2:
 				baselayer.appendSymbolSublayer(
 					name = 'kernValue.exception',
@@ -610,7 +604,6 @@ def drawKernPairListed2( container, font, columns, hashKernDic, pairInfo, pointS
 						color = colorvalue,
 					)
 				)
-
 			elif note == 3:
 				baselayer.appendSymbolSublayer(
 					name = 'kernValue.exception',
@@ -632,9 +625,9 @@ def drawKernPairListed2( container, font, columns, hashKernDic, pairInfo, pointS
 				offset = (0, yoffset)
 			)
 			if langs == 1:
-				drawCrossMark(container, position = (layersXpos[4] + layersWidth[4]/2, 9), size = 10, color = (.6, .1, .1, 1) ) #  - 10
+				drawCrossMark(baselayer, position = (layersXpos[4] + layersWidth[4]/2, 9), size = 10, color = (.6, .1, .1, 1) ) #  - 10
 			if langs == 2:
-				drawCrossMark(container, position = (layersXpos[4] + layersWidth[4]/2, 9), size = 10, color = (.3, .5, .3, 1) )
+				drawCrossMark(baselayer, position = (layersXpos[4] + layersWidth[4]/2, 9), size = 10, color = (.3, .5, .3, 1) )
 
 			baselayer.appendLineSublayer(
 				name = 'baseline',
@@ -643,17 +636,46 @@ def drawKernPairListed2( container, font, columns, hashKernDic, pairInfo, pointS
 				strokeWidth = 1,
 				strokeColor = (.9, .9, .9, .6)
 			)
-		with container.sublayerGroup():
-			w, h = lt.getTextSize()
-			x, y = lt.getPosition()
-			if w > layersWidth[0]-20:
-				lt.setPointSize(pointSize - 2)
-				lt.setPosition((x, y-2))
-			w, h = rt.getTextSize()
-			x, y = rt.getPosition()
-			if w > layersWidth[1]-20:
-				rt.setPointSize(pointSize - 2)
-				rt.setPosition((x, y - 2))
+	with container.sublayerGroup():
+		base = container.getSublayer('base')
+		if base:
+			baseline = base.getSublayer('baseline')
+			baseline.setEndPoint((layerWidth,0))
+
+			ltg = base.getSublayer('side1g')
+			if ltg:
+				ltg.setPosition((layersXpos[0] , 5))
+			lt = base.getSublayer('side1')
+			if lt:
+				w, h = lt.getTextSize()
+				if w > layersWidth[0]-20:
+					lt.setPointSize(pointSize - 2)
+					lt.setPosition((layersXpos[0] + 15, 3))
+				else:
+					lt.setPointSize(pointSize)
+					lt.setPosition((layersXpos[0] + 15, 5 ))
+
+			rtg = base.getSublayer('side2g')
+			if rtg:
+				rtg.setPosition((layersXpos[1] , 5))
+			rt = base.getSublayer('side2')
+			if rt:
+				w, h = rt.getTextSize()
+				if w > layersWidth[1]-20:
+					rt.setPointSize(pointSize - 2)
+					rt.setPosition((layersXpos[1] + 15, 3))
+				else:
+					rt.setPointSize(pointSize)
+					rt.setPosition((layersXpos[1] + 15, 5 ))
+			vt = base.getSublayer('value')
+			if vt:
+				vt.setPosition((layersXpos[3] - 12, 5))
+			et = base.getSublayer('kernValue.exception')
+			if et:
+				et.setPosition((layersXpos[3] + layersWidth[3]/2 , 12))
+			lnt = base.getSublayer('kernValue.cross')
+			if lnt:
+				lnt.setPosition((layersXpos[4] + layersWidth[4]/2, 9))
 
 
 
@@ -764,7 +786,6 @@ def drawKernListSortButton2 (container, nameButton, selectedButton, direction, s
 			symbolLayer.setRotation(-90)
 			# self.kernListButtons[nameButton] = baselayer
 	else:
-
 		with container.sublayerGroup():
 			buttonLayer.setPosition((btnXpos, ypos))
 			buttonLayer.setSize((btnWidth, 14))
