@@ -236,8 +236,8 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		container = info['layer']
 		index = info['index']
 		pair = info['item']
-		if not container.getSublayers():
-			drawKernPairListed2(container, self.font, self.schemaButtons2, self.hashKernDic, pair)
+		# if not container.getSublayers():
+		drawKernPairListed2(container, self.font, self.schemaButtons2, self.hashKernDic, pair)
 
 	def buttonCallback(self, eventname, point, nameButton):
 		if eventname =='mouseUp':

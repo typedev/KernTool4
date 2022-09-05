@@ -900,7 +900,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 				# self.listOfwidths.append(_w)
 				if _w != welem:
 					# TODO need more light version of redraw, instead of clearing sublayers
-					layer.clearSublayers()
+					# layer.clearSublayers()
 					# layer.setInfoValue('update', 'size')
 					layer.setSize((welem,_h))
 				layer.setPosition((xpos, ypos))
