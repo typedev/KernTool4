@@ -57,6 +57,16 @@ kernToolBundle = mojo.extensions.ExtensionBundle(path=pathForBundle, resourcesNa
 # else:
 # 	kernToolBundle = mojo.extensions.ExtensionBundle("KernTool4")
 
+SELECTION_MODE_ALLPAIRS_PL = 0
+SELECTION_MODE_SELECTEDGLYPHS_PL = 1
+
+FILRER_SIDE_1_PL = 0
+FILTER_SIDE_BOTH_PL = 1
+FILRER_SIDE_2_PL = 2
+
+
+
+
 class TDPairsListControl4(Subscriber): #, WindowController
 
 	debug = True
@@ -73,22 +83,6 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		self.idName = 'PairsList'
 		self.w = vanilla.Window((340, 700), minSize = (340, 400), title = self.idName )
 
-		# toolbarItems = [
-		# 	{
-		# 		'itemIdentifier': "toolbarSelectFonts",
-		# 		'label': 'Select Font',
-		# 		'callback': self.selectFontCallback,
-		# 		'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_selectfont%s.pdf' % darkm),
-		# 	},
-		# 	{
-		# 		'itemIdentifier': AppKit.NSToolbarSpaceItemIdentifier,
-		# 	},
-		#
-		#
-		# ]
-		# self.w.addToolbar("PairsListControlToolbar", toolbarItems)
-		# # self.w.getNSWindow().toolbar().setSelectedItemIdentifier_('toolbarSide1')
-
 		self.font = CurrentFont()
 		self.langSet = TDLangSet()
 		self.langSet.setupPatternsForFonts(AllFonts())
@@ -97,31 +91,31 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		self.groupPrefix = ID_KERNING_GROUP
 		self.groupsSide = SIDE_1
 
-		# defaultSets = getSmartSets()
-		# fontSets = getSmartSets(self.font)
-		# glyphsSets = ['All Glyphs']
-		# glyphsSets.extend([gset.name for gset in defaultSets])
-		# glyphsSets.extend([gset.name for gset in fontSets])
 		self.w.toolbar = vanilla.Group('auto')
 		self.w.toolbar.btnSelectFont = vanilla.Button('auto','􁉽', callback = self.selectFontCallback)
 		self.w.toolbar.btnAppendPairs = vanilla.Button('auto', '􀐇', callback = self.selectFontCallback) # 􀑎
 		self.w.toolbar.btnSavePairs = vanilla.Button('auto', '􀈧', callback = self.selectFontCallback) # 􀈧 􀯵
 		self.w.toolbar.flex1 = vanilla.Group('auto')
-		segments1 = [{'width': 0, 'title': '􀇷'}, {'width': 0, 'title': '􀂔'}] # 􀚇 􀇵
+		segments1 = [{'width': 0, 'title': '􀌃'}, {'width': 0, 'title': '􀝰'}] # 􀚇 􀇵 􀂔 􀇷 􀉆 􀕹 􀊫
 		self.w.toolbar.btnSwitchSelection = vanilla.SegmentedButton('auto',
 		                                               segmentDescriptions = segments1,
 		                                               selectionStyle = 'one',
-		                                               callback = self.selectFontCallback,
+		                                               callback = self.switchSelectionCallback,
 		                                               sizeStyle = 'regular')
-		self.w.toolbar.btnSwitchSelection.set(0)
+		self.w.toolbar.btnSwitchSelection.set(SELECTION_MODE_ALLPAIRS_PL)
+		self.selectionMode = SELECTION_MODE_ALLPAIRS_PL
+
 		self.w.toolbar.flex2 = vanilla.Group('auto')
 		segments2 = [{'width': 0, 'title': '􀤶'}, {'width': 0, 'title': '􀧉'}, {'width': 0, 'title': '􀤷'}]
 		self.w.toolbar.btnSwitchSide = vanilla.SegmentedButton('auto',
 		                                                           segmentDescriptions = segments2,
 		                                                           selectionStyle = 'one',
-		                                                           callback = self.selectFontCallback,
+		                                                           callback = self.switchFilterSideCallback,
 		                                                           sizeStyle = 'regular')
-		self.w.toolbar.btnSwitchSide.set(1)
+
+		self.w.toolbar.btnSwitchSide.set(FILTER_SIDE_BOTH_PL)
+		self.filterMode = FILTER_SIDE_BOTH_PL
+		self.w.toolbar.btnSwitchSide.enable(False)
 		self.w.toolbar.flex3 = vanilla.Group('auto')
 
 
@@ -186,23 +180,17 @@ class TDPairsListControl4(Subscriber): #, WindowController
 			focusColor = (.7, .7, .72, .8)
 		)
 
-		# self.scenesSelector = TDScenesSelector()
-		# self.scenesSelector.addScene(self.kernList, self.w.kernListView)
-
 		self.kernListButtons = {}
 		self.kernListSortOrder = 'buttonSide1'
 		self.kernListSortReverse = False
 		self.kernListPairs = {}
 		self.kernListLastSelection = None
 
-		# self.selectedScene = self.sceneGroups
-		# self.scenesSelector.selectedScene(self.sceneGroups)
-
-		self.w.kernListView.addControlElement(name = 'buttonSide1', callback = self.buttonCallback, drawingMethod = self.drawSortingButton)
-		self.w.kernListView.addControlElement(name = 'buttonSide2', callback = self.buttonCallback, drawingMethod = self.drawSortingButton)
-		self.w.kernListView.addControlElement(name = 'buttonValue', callback = self.buttonCallback, drawingMethod = self.drawSortingButton)
-		self.w.kernListView.addControlElement(name = 'buttonExcpt', callback = self.buttonCallback, drawingMethod = self.drawSortingButton)
-		self.w.kernListView.addControlElement(name = 'buttonLangs', callback = self.buttonCallback, drawingMethod = self.drawSortingButton)
+		self.w.kernListView.addControlElement(name = 'buttonSide1', callback = self.sortingButtonCallback, drawingMethod = self.drawSortingButton)
+		self.w.kernListView.addControlElement(name = 'buttonSide2', callback = self.sortingButtonCallback, drawingMethod = self.drawSortingButton)
+		self.w.kernListView.addControlElement(name = 'buttonValue', callback = self.sortingButtonCallback, drawingMethod = self.drawSortingButton)
+		self.w.kernListView.addControlElement(name = 'buttonExcpt', callback = self.sortingButtonCallback, drawingMethod = self.drawSortingButton)
+		self.w.kernListView.addControlElement(name = 'buttonLangs', callback = self.sortingButtonCallback, drawingMethod = self.drawSortingButton)
 
 		self.pointSize = 10
 		self.ScriptsBoardWindow = None
@@ -217,6 +205,24 @@ class TDPairsListControl4(Subscriber): #, WindowController
 
 	def glyphChanged(self, info):
 		print ('currentGlyphChanged', info)
+
+	def switchSelectionCallback(self, sender):
+		if sender.get() == 0:
+			self.selectionMode = SELECTION_MODE_ALLPAIRS_PL
+			self.w.toolbar.btnSwitchSide.enable(False)
+		elif sender.get() == 1:
+			self.selectionMode = SELECTION_MODE_SELECTEDGLYPHS_PL
+			self.w.toolbar.btnSwitchSide.enable(True)
+		#TODO
+
+	def switchFilterSideCallback(self, sender):
+		if sender.get() == 0:
+			self.filterMode = FILRER_SIDE_1_PL
+		elif sender.get() == 1:
+			self.filterMode = FILTER_SIDE_BOTH_PL
+		elif sender.get() == 2:
+			self.filterMode = FILRER_SIDE_2_PL
+		#TODO
 
 	def selectPairLayerCallback(self, sender, info):
 		# self.scenesSelector.setSelectedScene(self.kernList)
@@ -236,10 +242,11 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		container = info['layer']
 		index = info['index']
 		pair = info['item']
+		mode = info['drawmode']
 		# if not container.getSublayers():
-		drawKernPairListed2(container, self.font, self.schemaButtons2, self.hashKernDic, pair)
+		drawKernPairListed2(container, self.font, self.schemaButtons2, self.hashKernDic, pair, mode)
 
-	def buttonCallback(self, eventname, point, nameButton):
+	def sortingButtonCallback(self, eventname, point, nameButton):
 		if eventname =='mouseUp':
 			pairsselected = []
 			for idx in self.w.kernListView.getSelectedSceneItems():
@@ -257,8 +264,13 @@ class TDPairsListControl4(Subscriber): #, WindowController
 			for idx, p in enumerate(self.w.kernListView.getSceneItems()):
 				if p[0] in pairsselected:
 					selection.append(idx)
-			self.w.kernListView.setSelection(itemsIndexes = selection)
-
+			if selection:
+				# print(selection)
+				self.w.kernListView.setSelection(itemsIndexes = selection)
+			# else:
+			# 	self.w.kernListView.setSelection(itemsIndexes = [0], selected = False, animate = True)
+				# self.w.kernListView.setSelection(itemsIndexes = [0], selected = False)
+				# self.w.kernListView.setSelection(itemsIndexes = [0])
 
 	def drawSortingButton(self, container, nameButton):
 		drawKernListSortButton2(container, nameButton, self.kernListSortOrder, self.kernListSortReverse, self.schemaButtons2)
@@ -371,6 +383,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 
 	def windowCloseCallback(self, sender):
 		removeObserver(self, "currentGlyphChanged")
+		merz.SymbolImageVendor.unregisterImageFactory(TDPairsListGroupSymbol)
 		self.w.kernListView.clearScene()
 		if self.ScriptsBoardWindow:
 			self.ScriptsBoardWindow.close()
