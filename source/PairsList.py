@@ -168,7 +168,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 			layerWillDrawCallback = self.layerKernWillDrawCallback,
 			selectLayerCallback = self.selectPairLayerCallback,
 			# dropCallback = self.dropContentCallback,
-			clearHash = False,
+			clearHash = True,
 			# dropStyle = DROP_STYLE_SCENE,
 			elementSize = (0, 18),
 			elementMargins = (0, 0),
