@@ -204,7 +204,10 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		# self.scenesSelector.setSelectedScene(self.kernList)
 
 	def glyphChanged(self, info):
-		print ('currentGlyphChanged', info)
+		if self.selectionMode == SELECTION_MODE_SELECTEDGLYPHS_PL:
+			# print (self.font.selection)
+			self.showKernList(glyphNames = list(self.font.selection))
+		# print ('currentGlyphChanged', info)
 
 	def switchSelectionCallback(self, sender):
 		if sender.get() == 0:
@@ -350,8 +353,36 @@ class TDPairsListControl4(Subscriber): #, WindowController
 
 		if glyphNames:
 			pairs = []
+			_pairs = None
 			for name in glyphNames:
-				_pairs = self.hashKernDic.getPairsBy(name, self.groupsSide)
+				if self.filterMode == FILRER_SIDE_1_PL:
+					_pairs = self.hashKernDic.getPairsBy(name, SIDE_1)
+					gname = self.hashKernDic.getGroupNameByGlyph(name, side = SIDE_1)
+					if gname != name:
+						_pairsG = self.hashKernDic.getPairsBy(gname, SIDE_1)
+						_pairs += _pairsG
+
+				elif self.filterMode == FILRER_SIDE_2_PL:
+					_pairs = self.hashKernDic.getPairsBy(name, SIDE_2)
+					gname = self.hashKernDic.getGroupNameByGlyph(name, side = SIDE_2)
+					if gname != name:
+						_pairsG = self.hashKernDic.getPairsBy(gname, SIDE_2)
+						_pairs += _pairsG
+
+				elif self.filterMode == FILTER_SIDE_BOTH_PL:
+					_pairs1 = self.hashKernDic.getPairsBy(name, SIDE_1)
+					gname = self.hashKernDic.getGroupNameByGlyph(name, side = SIDE_1)
+					if gname != name:
+						_pairsG = self.hashKernDic.getPairsBy(gname, SIDE_1)
+						_pairs1 += _pairsG
+
+					_pairs2 = self.hashKernDic.getPairsBy(name, SIDE_2)
+					gname = self.hashKernDic.getGroupNameByGlyph(name, side = SIDE_2)
+					if gname != name:
+						_pairsG = self.hashKernDic.getPairsBy(gname, SIDE_2)
+						_pairs2 += _pairsG
+
+					_pairs = _pairs1 + _pairs2
 				pairs.extend(pair for pair, value in _pairs)
 			self.kernListPairs = pairs
 		else:
