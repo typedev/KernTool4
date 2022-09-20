@@ -479,6 +479,14 @@ class TDMerzMatrixDesigner (object): #MerzView
 
 	def drawSelectedLayer(self, index, selected = False):
 		layer = self.documentLayer.getSublayers()[index]
+
+		backgroundColor = (0, 0, 0, 0)
+		borderColor = self.borderColor
+		filters = layer.getFilters()
+		for filter in filters:
+			if filter['name'] == 'saturation':
+				layer.removeFilter('saturation')
+
 		if selected:
 			backgroundColor = self.selectionColor
 			borderColor = self.selectedBorderColor
@@ -490,13 +498,13 @@ class TDMerzMatrixDesigner (object): #MerzView
 					brightness = 0,
 				)
 			)
-		else:
-			backgroundColor = (0,0,0,0)
-			borderColor = self.borderColor
-			filters = layer.getFilters()
-			for filter in filters:
-				if filter['name'] == 'saturation':
-					layer.removeFilter('saturation')
+		# else:
+		# 	backgroundColor = (0,0,0,0)
+		# 	borderColor = self.borderColor
+		# 	filters = layer.getFilters()
+		# 	for filter in filters:
+		# 		if filter['name'] == 'saturation':
+		# 			layer.removeFilter('saturation')
 			# layer.clearAnimation()
 			# layer.setOpacity(1)
 		layer.setBackgroundColor((backgroundColor))

@@ -678,6 +678,8 @@ def drawKernPairListed2( container, font, columns, hashKernDic, pairInfo, mode =
 		# bw, bh = base.getSize()
 		if base:
 			lt = base.getSublayer('side1')
+			# if mode == 2: # DRAWING_BASE_MODE_RESIZE
+
 			# w, h = lt.getTextSize()
 			# if w > layersWidth[0] - 25:
 			# 	lt.setPointSize(pointSize - 2)
@@ -688,6 +690,8 @@ def drawKernPairListed2( container, font, columns, hashKernDic, pairInfo, mode =
 				lt.setPosition((layersXpos[0] + 15, 5))
 
 			rt = base.getSublayer('side2')
+			# if mode == 2: # DRAWING_BASE_MODE_RESIZE
+
 			# w, h = rt.getTextSize()
 			# if w > layersWidth[1] - 25:
 			# 	rt.setPointSize(pointSize - 2)
