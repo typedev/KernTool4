@@ -102,8 +102,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		                                               selectionStyle = 'one',
 		                                               callback = self.switchSelectionCallback,
 		                                               sizeStyle = 'regular')
-		self.w.toolbar.btnSwitchSelection.set(SELECTION_MODE_ALLPAIRS_PL)
-		self.selectionMode = SELECTION_MODE_ALLPAIRS_PL
+
 
 		self.w.toolbar.flex2 = vanilla.Group('auto')
 		segments2 = [{'width': 0, 'title': '􀤶'}, {'width': 0, 'title': '􀧉'}, {'width': 0, 'title': '􀤷'}]
@@ -112,6 +111,9 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		                                                           selectionStyle = 'one',
 		                                                           callback = self.switchFilterSideCallback,
 		                                                           sizeStyle = 'regular')
+
+		self.w.toolbar.btnSwitchSelection.set(SELECTION_MODE_ALLPAIRS_PL)
+		self.selectionMode = SELECTION_MODE_ALLPAIRS_PL
 
 		self.w.toolbar.btnSwitchSide.set(FILTER_SIDE_BOTH_PL)
 		self.filterMode = FILTER_SIDE_BOTH_PL
@@ -213,10 +215,11 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		if sender.get() == 0:
 			self.selectionMode = SELECTION_MODE_ALLPAIRS_PL
 			self.w.toolbar.btnSwitchSide.enable(False)
+			self.showKernList()
 		elif sender.get() == 1:
 			self.selectionMode = SELECTION_MODE_SELECTEDGLYPHS_PL
 			self.w.toolbar.btnSwitchSide.enable(True)
-		#TODO
+			self.showKernList(glyphNames = list(self.font.selection))
 
 	def switchFilterSideCallback(self, sender):
 		if sender.get() == 0:
@@ -225,7 +228,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 			self.filterMode = FILTER_SIDE_BOTH_PL
 		elif sender.get() == 2:
 			self.filterMode = FILRER_SIDE_2_PL
-		#TODO
+		self.showKernList(glyphNames = self.kernListLastSelection)
 
 	def selectPairLayerCallback(self, sender, info):
 		# self.scenesSelector.setSelectedScene(self.kernList)
@@ -409,6 +412,14 @@ class TDPairsListControl4(Subscriber): #, WindowController
 			# self.langSet = TDLangSet()
 			self.langSet.setupPatternsForFont(self.font)
 			self.hashKernDic.setFont(self.font, self.langSet)
+
+			self.w.toolbar.btnSwitchSelection.set(SELECTION_MODE_ALLPAIRS_PL)
+			self.selectionMode = SELECTION_MODE_ALLPAIRS_PL
+
+			self.w.toolbar.btnSwitchSide.set(FILTER_SIDE_BOTH_PL)
+			self.filterMode = FILTER_SIDE_BOTH_PL
+			self.w.toolbar.btnSwitchSide.enable(False)
+
 			self.showKernList()
 
 
@@ -425,7 +436,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 
 	def fontKerningDidChange(self, info):
 		# TODO need rewrite.. need just update current kern list state
-		self.showKernList() #glyphNames = self.kernListLastSelection
+		self.showKernList(glyphNames = self.kernListLastSelection) #glyphNames = self.kernListLastSelection
 
 
 	def fontGroupsDidChange(self, info):
