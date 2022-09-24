@@ -283,8 +283,8 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 
 		rules1 = [
-			"H:|[fontView]-space-[groupView(==fontView)]-space-[kernListView(==340)]|",
-			"H:|[fontView]-space-[contentView(==fontView)]-space-[kernListView(==340)]|",
+			"H:|[fontView]-space-[groupView(>=fontView)]-space-[kernListView(>=340)]|",
+			"H:|[fontView]-space-[contentView(>=fontView)]-space-[kernListView(>=340)]|",
 			"H:|[linesPreview]|",
 			"V:|[fontView]-space-[linesPreview(==175)]|",
 			"V:|[groupView]-space-[contentView(==195)]-space-[linesPreview(==175)]|",
@@ -362,14 +362,13 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			cornerRadius = 5,
 			focusColor = (1, 1, 1, .5)
 		)
-		self.schemaButtons = {
-			'buttonSide1': dict(xpos = 15 + 5, ypos = 'top', width = 100, value = True),
-			'buttonSide2': dict(xpos = 15 + 5 + 100 + 5, ypos = 'top',width = 100, value = False),
-			'buttonValue': dict(xpos = 15 + 5 + 100 + 5 + 100 + 5, ypos = 'top',width = 40, value = False),
-			'buttonExcpt': dict(xpos = 15 + 5 + 100 + 5 + 100 + 5 + 40 + 5, ypos = 'top',width = 20, value = False),
-			'buttonLangs': dict(xpos = 15 + 5 + 100 + 5 + 100 + 5 + 40 + 5 + 20 + 5, ypos = 'top',width = 20, value = False),
-			# 'buttonDelete': dict(xpos = 15 + 5, ypos = 'bottom', width = 100, value = False),
-		}
+		self.schemaButtons = [
+			dict(name = 'buttonSide1', widthperсent = 36, value = True),
+			dict(name = 'buttonSide2', widthperсent = 36, value = False),
+			dict(name = 'buttonValue', widthperсent = 14, value = False),
+			dict(name = 'buttonExcpt', widthperсent = 7, value = False),
+			dict(name = 'buttonLangs', widthperсent = 7, value = False),
+		]
 		self.schemaButtonsBottom = {
 			'buttonDelete': dict(xpos = 15 + 5, ypos = 'bottom', width = 148, value = 'Delete selected'),
 			'buttonSend': dict(xpos = 15 + 5 + 148 + 5, ypos = 'bottom', width = 148, value = 'Send selected to KernTool'),
@@ -379,7 +378,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			layerWillDrawCallback = self.layerKernWillDrawCallback,
 			selectLayerCallback = self.selectPairLayerCallback,
 			# dropCallback = self.dropContentCallback,
-			clearHash = False,
+			clearHash = True,
 			# dropStyle = DROP_STYLE_SCENE,
 			elementSize = (0, 18),
 			elementMargins = (0, 0),
@@ -455,8 +454,8 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		container = info['layer']
 		index = info['index']
 		pair = info['item']
-		if not container.getSublayers():
-			drawKernPairListed(container, self.font, self.schemaButtons, self.hashKernDic, pair)
+		# if not container.getSublayers():
+		drawKernPairListed(container, self.font, self.schemaButtons, self.hashKernDic, pair)
 
 
 	def layerGroupWillDrawCallback (self, sender, info):

@@ -150,15 +150,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		self.w.toolbar.addAutoPosSizeRules(rulesTB, metrics1)
 		self.w.addAutoPosSizeRules(rules1, metrics1)
 
-		self.schemaButtons = {
-			'buttonSide1': dict(xpos = 15 + 5, ypos = 'top', width = 100, value = True),
-			'buttonSide2': dict(xpos = 15 + 5 + 100 + 5, ypos = 'top',width = 100, value = False),
-			'buttonValue': dict(xpos = 15 + 5 + 100 + 5 + 100 + 5, ypos = 'top',width = 40, value = False),
-			'buttonExcpt': dict(xpos = 15 + 5 + 100 + 5 + 100 + 5 + 40 + 5, ypos = 'top',width = 20, value = False),
-			'buttonLangs': dict(xpos = 15 + 5 + 100 + 5 + 100 + 5 + 40 + 5 + 20 + 5, ypos = 'top',width = 20, value = False),
-			# 'buttonDelete': dict(xpos = 15 + 5, ypos = 'bottom', width = 100, value = False),
-		}
-		self.schemaButtons2 = [
+		self.schemaButtons = [
 			dict(name = 'buttonSide1', widthperсent = 36, value = True),
 			dict(name = 'buttonSide2', widthperсent = 36, value = False),
 			dict(name = 'buttonValue', widthperсent = 14, value = False),
@@ -207,9 +199,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 
 	def glyphChanged(self, info):
 		if self.selectionMode == SELECTION_MODE_SELECTEDGLYPHS_PL:
-			# print (self.font.selection)
 			self.showKernList(glyphNames = list(self.font.selection))
-		# print ('currentGlyphChanged', info)
 
 	def switchSelectionCallback(self, sender):
 		if sender.get() == 0:
@@ -231,8 +221,6 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		self.showKernList(glyphNames = self.kernListLastSelection)
 
 	def selectPairLayerCallback(self, sender, info):
-		# self.scenesSelector.setSelectedScene(self.kernList)
-
 		pairs = []
 		for idx in self.w.kernListView.getSelectedSceneItems():
 			pair = self.w.kernListView.getSceneItems()[idx]
@@ -250,7 +238,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		pair = info['item']
 		mode = info['drawmode']
 		# if not container.getSublayers():
-		drawKernPairListed2(container, self.font, self.schemaButtons2, self.hashKernDic, pair, mode)
+		drawKernPairListed(container, self.font, self.schemaButtons, self.hashKernDic, pair, mode)
 
 	def sortingButtonCallback(self, eventname, point, nameButton):
 		if eventname =='mouseUp':
@@ -271,7 +259,6 @@ class TDPairsListControl4(Subscriber): #, WindowController
 				if p[0] in pairsselected:
 					selection.append(idx)
 			if selection:
-				# print(selection)
 				self.w.kernListView.setSelection(itemsIndexes = selection)
 			# else:
 			# 	self.w.kernListView.setSelection(itemsIndexes = [0], selected = False, animate = True)
@@ -279,14 +266,10 @@ class TDPairsListControl4(Subscriber): #, WindowController
 				# self.w.kernListView.setSelection(itemsIndexes = [0])
 
 	def drawSortingButton(self, container, nameButton):
-		drawKernListSortButton2(container, nameButton, self.kernListSortOrder, self.kernListSortReverse, self.schemaButtons2)
-		# drawKernListSortButton(container, nameButton, self.kernListSortOrder, self.kernListSortReverse, self.schemaButtons)
+		drawKernListSortButton(container, nameButton, self.kernListSortOrder, self.kernListSortReverse, self.schemaButtons)
 
 
 	def makeSortedList(self, pairslist = None, order = 'left', reverse = False):
-		# if not pairslist:
-		# 	pairslist = self.db
-		# # self.indexList = {}
 		_pairslist = {}
 		_mask1id = 'public.kern1.'#ID_KERNING_GROUP.replace('.kern', '') + ID_GROUP_DIRECTION_POSITION_LEFT
 		_mask2id = 'public.kern2.'#ID_KERNING_GROUP.replace('.kern', '') + ID_GROUP_DIRECTION_POSITION_RIGHT
@@ -396,7 +379,6 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		selection = []
 		for idx, p in enumerate(self.w.kernListView.getSceneItems()):
 			if p[0] in pairsselected:
-				# print ('sel', p)
 				selection.append(idx)
 		self.w.kernListView.setSelection(itemsIndexes = selection)
 		self.w.statusBar.set(['pairs: %i | viewed: %i | selected: %i' % (len(self.font.kerning),len(self.w.kernListView.getSceneItems()),len(self.w.kernListView.getSelectedSceneItems()))])
@@ -435,8 +417,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		sender.eventKeyDown(sender, event)
 
 	def fontKerningDidChange(self, info):
-		# TODO need rewrite.. need just update current kern list state
-		self.showKernList(glyphNames = self.kernListLastSelection) #glyphNames = self.kernListLastSelection
+		self.showKernList(glyphNames = self.kernListLastSelection)
 
 
 	def fontGroupsDidChange(self, info):
