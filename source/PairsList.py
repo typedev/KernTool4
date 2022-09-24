@@ -16,7 +16,7 @@ from mojo.smartSet import getSmartSets
 from vanilla.dialogs import getFile, putFile
 from mojo.subscriber import Subscriber, registerCurrentFontSubscriber, unregisterCurrentFontSubscriber
 from mojo.UI import SelectFont, SimpleStatus, StatusBar, LightStatusBar
-from mojo.events import addObserver, removeObserver
+from mojo.events import addObserver, removeObserver, postEvent
 
 import tdSpaceControl
 importlib.reload(tdSpaceControl)
@@ -186,6 +186,10 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		self.w.kernListView.addControlElement(name = 'buttonExcpt', callback = self.sortingButtonCallback, drawingMethod = self.drawSortingButton)
 		self.w.kernListView.addControlElement(name = 'buttonLangs', callback = self.sortingButtonCallback, drawingMethod = self.drawSortingButton)
 
+		self.keyCommander = TDKeyCommander()
+		self.keyCommander.registerKeyCommand(KEY_BACKSPACE, callback = self.deleteSelectedPairs)
+		self.keyCommander.registerKeyCommand(KEY_ENTER, callback = self.sendSelectedPairs2KernTool)
+
 		self.pointSize = 10
 		self.ScriptsBoardWindow = None
 
@@ -200,6 +204,35 @@ class TDPairsListControl4(Subscriber): #, WindowController
 	def glyphChanged(self, info):
 		if self.selectionMode == SELECTION_MODE_SELECTEDGLYPHS_PL:
 			self.showKernList(glyphNames = list(self.font.selection))
+
+	def sendSelectedPairs2KernTool(self,sender, value):
+		pairs = []
+		for idx in self.w.kernListView.getSelectedSceneItems():
+			pair = self.w.kernListView.getSceneItems()[idx]
+			l, r = pair[0]
+			sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs = pair[1]
+			p1, lw, rw, p2 = list(self.langSet.wrapPairToPattern(self.font, (keyGlyphL, keyGlyphR)))
+			pairs.append('/%s/%s/%s/%s' % (p1, lw, rw, p2))
+		line = ''.join(pairs)
+		postEvent('typedev.KernTool.observerSetText',
+		          glyphsLine = line,
+		          glyphsready = True,
+		          targetpair = None,
+		          fontID = getFontID(self.font),
+		          # observerID = self.observerID)
+		          )
+
+	def deleteSelectedPairs(self, sender, value):
+		pairs = []
+		for idx in self.w.kernListView.getSelectedSceneItems():
+			pair = self.w.kernListView.getSceneItems()[idx]
+			l, r = pair[0]
+			pairs.append((l,r))
+		for pair in pairs:
+			if pair in self.font.kerning:
+				self.font.kerning.remove(pair)
+		self.showKernList(glyphNames = self.kernListLastSelection)
+
 
 	def switchSelectionCallback(self, sender):
 		if sender.get() == 0:
@@ -414,6 +447,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		unregisterCurrentFontSubscriber(self)
 
 	def keyDown (self, sender, event):
+		self.keyCommander.checkCommand(sender, event)
 		sender.eventKeyDown(sender, event)
 
 	def fontKerningDidChange(self, info):
