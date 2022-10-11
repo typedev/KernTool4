@@ -81,7 +81,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		if KERNTOOL_UI_DARKMODE:
 			darkm = '-dark'
 		self.idName = 'PairsList'
-		self.w = vanilla.Window((340, 700), minSize = (340, 400), title = self.idName )
+		self.w = vanilla.Window((370, 700), minSize = (340, 400), title = self.idName )
 
 		self.font = CurrentFont()
 		self.langSet = TDLangSet()
@@ -120,6 +120,11 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		self.w.toolbar.btnSwitchSide.enable(False)
 		self.w.toolbar.flex3 = vanilla.Group('auto')
 
+		self.w.toolbar2 = vanilla.Group('auto')
+		self.w.toolbar2.btnDelete = vanilla.Button('auto', '􀈑', callback = self.deleteSelectedPairs)
+		self.w.toolbar2.flex1 = vanilla.Group('auto')
+		self.w.toolbar2.btnSend2KernTool = vanilla.Button('auto', '􀻵', callback = self.sendSelectedPairs2KernTool)
+
 
 		rulesTB = [
 			"H:|-border-[btnSelectFont]-border-[btnAppendPairs]-border-[btnSavePairs]-[flex1]-[btnSwitchSelection]-[flex2(==flex1)]-[btnSwitchSide]-border-|",
@@ -133,14 +138,22 @@ class TDPairsListControl4(Subscriber): #, WindowController
 			"V:|-space-[flex3]-border-|"
 		]
 
+		rulesTB2 = [
+			"H:|-border-[btnDelete]-[flex1]-[btnSend2KernTool]-border-|",
+			"V:|-border-[btnDelete]-border-|",
+			"V:|-border-[flex1]-border-|",
+			"V:|-border-[btnSend2KernTool]-border-|",
+		]
+
 		self.w.kernListView = TDMerzMatrixView('auto', delegate = self)
 		self.w.statusBar = SimpleStatus('auto', horizontalLine=False)# textAlign='left', , textPosLeft = 0
 
 		rules1 = [
 			"H:|-0-[toolbar]-0-|",
 			"H:|-0-[kernListView]-0-|",
+			"H:|-0-[toolbar2]-0-|",
 			"H:|-0-[statusBar]-0-|",
-			"V:|-border-[toolbar]-space-[kernListView]-space-[statusBar(==18)]|"
+			"V:|-border-[toolbar]-space-[kernListView]-space-[toolbar2]-space-[statusBar(==18)]|"
 			# "V:||",
 		]
 		metrics1 = {
@@ -148,14 +161,16 @@ class TDPairsListControl4(Subscriber): #, WindowController
 			"space": 1
 		}
 		self.w.toolbar.addAutoPosSizeRules(rulesTB, metrics1)
+		self.w.toolbar2.addAutoPosSizeRules(rulesTB2, metrics1)
 		self.w.addAutoPosSizeRules(rules1, metrics1)
 
 		self.schemaButtons = [
-			dict(name = 'buttonSide1', widthperсent = 36, value = True),
-			dict(name = 'buttonSide2', widthperсent = 36, value = False),
-			dict(name = 'buttonValue', widthperсent = 14, value = False),
+			dict(name = 'buttonSide1', widthperсent = 32, value = True),
+			dict(name = 'buttonSide2', widthperсent = 32, value = False),
+			dict(name = 'buttonValue', widthperсent = 15, value = False),
 			dict(name = 'buttonExcpt', widthperсent = 7, value = False),
 			dict(name = 'buttonLangs', widthperсent = 7, value = False),
+			dict(name = 'buttonError', widthperсent = 7, value = False),
 		]
 
 		self.kernList = self.w.kernListView.setupScene(
@@ -185,10 +200,12 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		self.w.kernListView.addControlElement(name = 'buttonValue', callback = self.sortingButtonCallback, drawingMethod = self.drawSortingButton)
 		self.w.kernListView.addControlElement(name = 'buttonExcpt', callback = self.sortingButtonCallback, drawingMethod = self.drawSortingButton)
 		self.w.kernListView.addControlElement(name = 'buttonLangs', callback = self.sortingButtonCallback, drawingMethod = self.drawSortingButton)
+		self.w.kernListView.addControlElement(name = 'buttonError', callback = self.sortingButtonCallback, drawingMethod = self.drawSortingButton)
 
-		self.keyCommander = TDKeyCommander()
-		self.keyCommander.registerKeyCommand(KEY_BACKSPACE, callback = self.deleteSelectedPairs)
-		self.keyCommander.registerKeyCommand(KEY_ENTER, callback = self.sendSelectedPairs2KernTool)
+
+		# self.keyCommander = TDKeyCommander()
+		# self.keyCommander.registerKeyCommand(KEY_BACKSPACE, callback = self.deleteSelectedPairs)
+		# self.keyCommander.registerKeyCommand(KEY_ENTER, callback = self.sendSelectedPairs2KernTool)
 
 		self.pointSize = 10
 		self.ScriptsBoardWindow = None
@@ -205,12 +222,12 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		if self.selectionMode == SELECTION_MODE_SELECTEDGLYPHS_PL:
 			self.showKernList(glyphNames = list(self.font.selection))
 
-	def sendSelectedPairs2KernTool(self,sender, value):
+	def sendSelectedPairs2KernTool(self, sender): # , value
 		pairs = []
 		for idx in self.w.kernListView.getSelectedSceneItems():
 			pair = self.w.kernListView.getSceneItems()[idx]
 			l, r = pair[0]
-			sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs = pair[1]
+			sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs, hasError = pair[1]
 			p1, lw, rw, p2 = list(self.langSet.wrapPairToPattern(self.font, (keyGlyphL, keyGlyphR)))
 			pairs.append('/%s/%s/%s/%s' % (p1, lw, rw, p2))
 		line = ''.join(pairs)
@@ -222,7 +239,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		          # observerID = self.observerID)
 		          )
 
-	def deleteSelectedPairs(self, sender, value):
+	def deleteSelectedPairs(self, sender): # , value
 		pairs = []
 		for idx in self.w.kernListView.getSelectedSceneItems():
 			pair = self.w.kernListView.getSceneItems()[idx]
@@ -258,7 +275,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		for idx in self.w.kernListView.getSelectedSceneItems():
 			pair = self.w.kernListView.getSceneItems()[idx]
 			l,r = pair[0]
-			sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs = pair[1]
+			sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs, hasError = pair[1]
 			pairwrapped = list(self.langSet.wrapPairToPattern(self.font,(keyGlyphL,keyGlyphR)))
 			pairs.extend(pairwrapped)
 		self.w.statusBar.set(['pairs: %i | viewed: %i | selected: %i' % (
@@ -331,16 +348,26 @@ class TDPairsListControl4(Subscriber): #, WindowController
 				langs = 2
 			grouppedR = False
 			sortR = r
+			hasError = 0
 			# print('ref', l,r, _l,_r, note)
 			if r.startswith(ID_KERNING_GROUP):
 				grouppedR = True
 				sortR = r.replace(_mask2id, '')
+				if r in self.hashKernDic.groupsHasErrorList:
+					hasError = 20
+			else:
+				if r not in self.font:
+					hasError = 25
 
 			if l.startswith(ID_KERNING_GROUP):
 				sortL = l.replace(_mask1id, '')
-				_pairslist[(l, r)] = (sortL, sortR, True, grouppedR, v, note, keyGlyphL, keyGlyphR, langs)
+				if l in self.hashKernDic.groupsHasErrorList:
+					hasError = 10
+				_pairslist[(l, r)] = (sortL, sortR, True, grouppedR, v, note, keyGlyphL, keyGlyphR, langs, hasError)
 			else:
-				_pairslist[(l, r)] = (l, sortR, False, grouppedR, v, note, keyGlyphL, keyGlyphR, langs)
+				if l not in self.font:
+					hasError = 15
+				_pairslist[(l, r)] = (l, sortR, False, grouppedR, v, note, keyGlyphL, keyGlyphR, langs, hasError)
 			# else:
 			# 	print ('kerning has error', (l,r), (keyGlyphL,keyGlyphR))
 
@@ -360,6 +387,9 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		elif order == 'buttonLangs':
 			reverse = not reverse
 			return sorted(_pairslist.items(), key = lambda p: (p[1][8]), reverse = reverse) #, p[1][0], p[1][1]
+		elif order == 'buttonError':
+			reverse = not reverse
+			return sorted(_pairslist.items(), key = lambda p: (p[1][9]), reverse = reverse) #, p[1][0], p[1][1]
 
 
 	def showKernList(self, glyphNames = None):
@@ -447,7 +477,7 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		unregisterCurrentFontSubscriber(self)
 
 	def keyDown (self, sender, event):
-		self.keyCommander.checkCommand(sender, event)
+		# self.keyCommander.checkCommand(sender, event)
 		sender.eventKeyDown(sender, event)
 
 	def fontKerningDidChange(self, info):
