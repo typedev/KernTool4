@@ -443,7 +443,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		for idx in self.w.g1.kernListView.getSelectedSceneItems():
 			pair = self.w.g1.kernListView.getSceneItems()[idx]
 			l,r = pair[0]
-			sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs = pair[1]
+			sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs, hasError = pair[1]
 			pairwrapped = list(self.langSet.wrapPairToPattern(self.font,(keyGlyphL,keyGlyphR)))
 			pairs.extend(pairwrapped)
 		matrix = prepareGlyphsMatrix([pairs], [self.font]) #, lineinfo = '%s // %s' % (l, r)
@@ -510,7 +510,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		for idx in self.w.g1.kernListView.getSelectedSceneItems():
 			pair = self.w.g1.kernListView.getSceneItems()[idx]
 			l, r = pair[0]
-			sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs = pair[1]
+			sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs, hasError = pair[1]
 			p1, lw, rw, p2 = list(self.langSet.wrapPairToPattern(self.font, (keyGlyphL, keyGlyphR)))
 			pairs.append('/%s/%s/%s/%s' % (p1, lw, rw, p2))
 		line = ''.join(pairs)
@@ -710,6 +710,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 				langs = 2
 			grouppedR = False
 			sortR = r
+			hasError = 0
 			# print('ref', l,r, _l,_r, note)
 			if r.startswith(ID_KERNING_GROUP):
 				grouppedR = True
@@ -717,9 +718,9 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 			if l.startswith(ID_KERNING_GROUP):
 				sortL = l.replace(_mask1id, '')
-				_pairslist[(l, r)] = (sortL, sortR, True, grouppedR, v, note, keyGlyphL, keyGlyphR, langs)
+				_pairslist[(l, r)] = (sortL, sortR, True, grouppedR, v, note, keyGlyphL, keyGlyphR, langs, hasError)
 			else:
-				_pairslist[(l, r)] = (l, sortR, False, grouppedR, v, note, keyGlyphL, keyGlyphR, langs)
+				_pairslist[(l, r)] = (l, sortR, False, grouppedR, v, note, keyGlyphL, keyGlyphR, langs, hasError)
 			# else:
 			# 	print ('kerning has error', (l,r), (keyGlyphL,keyGlyphR))
 

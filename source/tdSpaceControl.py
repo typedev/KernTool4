@@ -70,6 +70,11 @@ PAIR_INFO_ATTENTION = 10
 PAIR_INFO_EXCEPTION_DELETED = 100
 PAIR_INFO_ERROR = 90
 
+GROUP_NOT_FOUNDED = 10
+GROUP_IS_EMPTY = 20
+GROUP_MISSING_GLYPH = 30
+
+
 
 def italicShift (angle, Ypos):
 	if angle:
@@ -456,6 +461,7 @@ class TDHashGroupsDic(object):
 		self.langSet = langSet
 		self.history = []
 		self.trackHistory = True
+		self.groupsHasErrorList = []
 		self.makeReverseGroupsMapping()
 		# self.langSet = TDLangSet()
 
@@ -469,6 +475,7 @@ class TDHashGroupsDic(object):
 		self.font = font
 		self.langSet = langSet
 		self.history = []
+		self.groupsHasErrorList = []
 		self.makeReverseGroupsMapping()
 
 	def clearHistory(self):
@@ -515,25 +522,35 @@ class TDHashGroupsDic(object):
 		for groupname, content in self.font.groups.items():
 			if content:
 				self.dicOfKeyGlyphsByGroup[groupname] = content[0]
+			else:
+				self.groupsHasErrorList.append(groupname)
 			if self.isKerningGroup(groupname):
 				if self.isLeftSideGroup(groupname):
 					for glyphname in content:
 						# self.leftDic[glyphname] = groupname
 						self.checkMapAndAddGlyph2hashMap(self.leftDic, glyphname, groupname)
+						if glyphname not in self.font:
+							self.groupsHasErrorList.append(groupname)
 				else:
 					for glyphname in content:
 						# self.rightDic[glyphname] = groupname
 						self.checkMapAndAddGlyph2hashMap(self.rightDic, glyphname, groupname)
+						if glyphname not in self.font:
+							self.groupsHasErrorList.append(groupname)
 			elif self.isMarginsGroup(groupname):
 				if self.isLeftSideGroup(groupname):
 					for glyphname in content:
 						# self.leftMarginsDic[glyphname] = groupname
 						self.checkMapAndAddGlyph2hashMap(self.leftMarginsDic, glyphname, groupname)
+						if glyphname not in self.font:
+							self.groupsHasErrorList.append(groupname)
 
 				else:
 					for glyphname in content:
 						# self.rightMarginsDic[glyphname] = groupname
 						self.checkMapAndAddGlyph2hashMap(self.rightMarginsDic, glyphname, groupname)
+						if glyphname not in self.font:
+							self.groupsHasErrorList.append(groupname)
 
 
 	def insertTempGlyphInGroup (self, glyphnames):  # , side):
@@ -933,6 +950,18 @@ class TDHashGroupsDic(object):
 			return self.langSet.checkPairBaseScriptCompatibility(self.font, (_l, _r))
 		# if self.langSet:
 		# 	return self.langSet.checkPairLanguageCompatibility(self.font, pair)
+
+	def checkGroupHasError(self, group):
+		if group in self.font.groups:
+			if len(self.font.groups[group]) == 0:
+				return GROUP_IS_EMPTY
+			else:
+				for glyph in self.font.groups[group]:
+					if glyph not in self.font:
+						return GROUP_MISSING_GLYPH
+			return 0
+		else:
+			return GROUP_NOT_FOUNDED
 
 
 

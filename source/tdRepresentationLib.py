@@ -385,7 +385,8 @@ def drawFontGlyph (containder, font, glyphname, pointSize  =10):
 def drawKernPairListed( container, font, columns, hashKernDic, pairInfo, mode = None, pointSize = 11):
 	pair = pairInfo[0]
 	info = pairInfo[1]
-	sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs = info
+	sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs, hasError = info
+	# print (info)
 	l, r = pair
 	_pair = pair
 	if pair not in font.kerning: return
@@ -506,10 +507,37 @@ def drawKernPairListed( container, font, columns, hashKernDic, pairInfo, mode = 
 				offset = (0, yoffset),
 				# backgroundColor = (1, 1, 1, .8)
 			)
+			# if langs == 1:
+			# 	drawCrossMark(baselayer, position = (layersXpos[4] + layersWidth[4]/2, 9), size = 10, color = (.6, .1, .1, 1) ) #  - 10
+			# if langs == 2:
+			# 	drawCrossMark(baselayer, position = (layersXpos[4] + layersWidth[4]/2, 9), size = 10, color = (.3, .5, .3, 1) )
 			if langs == 1:
-				drawCrossMark(baselayer, position = (layersXpos[4] + layersWidth[4]/2, 9), size = 10, color = (.6, .1, .1, 1) ) #  - 10
-			if langs == 2:
-				drawCrossMark(baselayer, position = (layersXpos[4] + layersWidth[4]/2, 9), size = 10, color = (.3, .5, .3, 1) )
+				langscolor = (.6, .1, .1, 1)
+			elif langs == 2:
+				langscolor = (.3, .5, .3, 1)
+			if langs:
+				baselayer.appendTextLineSublayer(
+					name = 'kernValue.cross',
+					position = (layersXpos[4] + layersWidth[4] / 2, 5),  # +
+					fillColor = langscolor,
+					pointSize = pointSize,
+					text = '􀆪',
+					horizontalAlignment = "center",
+					offset = (2, yoffset),
+					# backgroundColor = (1, 1, 1, .8)
+				)
+
+			if hasError:
+				baselayer.appendTextLineSublayer(
+					name = 'errormark',
+					position = (layersXpos[5] + layersWidth[5] / 2, 5),  # + 15
+					fillColor = (.6, .1, .1, 1),
+					pointSize = pointSize,
+					text = '􀇿',
+					horizontalAlignment = "left",
+					offset = (-1, yoffset),
+					# backgroundColor = (1, 1, 1, .8)
+				)
 
 			baselayer.appendLineSublayer(
 				name = 'baseline',
@@ -579,8 +607,14 @@ def drawKernPairListed( container, font, columns, hashKernDic, pairInfo, mode = 
 			lnt = base.getSublayer('kernValue.cross')
 			if lnt:
 				x, y = lnt.getPosition()
-				if x != layersXpos[4] + layersWidth[4]/2:
-					lnt.setPosition((layersXpos[4] + layersWidth[4]/2, 9))
+				if x != layersXpos[4] + layersWidth[4] / 2 : #+ layersWidth[4]/3
+					lnt.setPosition((layersXpos[4] + layersWidth[4] / 2, 5)) # 9
+
+			err = base.getSublayer('errormark')
+			if err:
+				x, y = err.getPosition()
+				if x != layersXpos[5] + layersWidth[5] / 2:
+					err.setPosition((layersXpos[5] + layersWidth[5] / 2, 5))
 
 
 def drawKernListSortButton (container, nameButton, selectedButton, direction, schemaButtons):
