@@ -64,7 +64,134 @@ FILRER_SIDE_1_PL = 0
 FILTER_SIDE_BOTH_PL = 1
 FILRER_SIDE_2_PL = 2
 
+PREFKEY_PL_Patterns = '%s.KernToolUI.PairsList.Patterns' % PREFKEY_base
+PREFKEY_PL_Patterns_Side1 = '%s.KernToolUI.PairsList.Patterns.Side1' % PREFKEY_base
+PREFKEY_PL_Patterns_Side2 = '%s.KernToolUI.PairsList.Patterns.Side2' % PREFKEY_base
+PREFKEY_PL_PairsPerLine = '%s.KernToolUI.PairsList.PPL' % PREFKEY_base
+PREFKEY_PL_SendingMethod = '%s.KernToolUI.SendingMethod' % PREFKEY_base
 
+
+
+class TDPairsListSettingsDialogWindow(object):
+	def __init__ (self, parentWindow, callback=None ):
+		wW = 400
+		hW = 600
+		self.w = vanilla.Sheet((wW, hW), parentWindow) #minSize = (wW,hW), ,  maxSize = (500,1000)
+		# self.callback = callback
+
+		self.w.sp = vanilla.Group('auto')
+		metrics1 = {
+			"border": 10,
+			"space": 5
+		}
+
+		self.w.sp.swchPatternsBox = vanilla.Box('auto', 'Patterns')
+		self.w.sp.swchPatternsBox.radioGroup = vanilla.VerticalRadioGroup(
+			"auto",
+			["Automatically - depending on the language and purpose of the glyphs", "Custom"],
+			callback = self.swchPatternsBoxCallback
+		)
+		pboxSet = getExtensionDefault(PREFKEY_PL_Patterns, fallback = 0)
+		self.w.sp.swchPatternsBox.radioGroup.set(pboxSet)
+		self.w.sp.swchPatternsBox.editSide1 = vanilla.EditText('auto', placeholder = 'Side1')
+		self.w.sp.swchPatternsBox.editSide2 = vanilla.EditText('auto', placeholder = 'Side2')
+		self.w.sp.swchPatternsBox.editSide1.enable(False)
+		self.w.sp.swchPatternsBox.editSide2.enable(False)
+		if pboxSet:
+			self.w.sp.swchPatternsBox.editSide1.enable(True)
+			self.w.sp.swchPatternsBox.editSide2.enable(True)
+			self.w.sp.swchPatternsBox.editSide1.set(getExtensionDefault(PREFKEY_PL_Patterns_Side1, fallback = ''))
+			self.w.sp.swchPatternsBox.editSide2.set(getExtensionDefault(PREFKEY_PL_Patterns_Side2, fallback = ''))
+
+		rules = [
+			"H:|-[radioGroup]-|",
+			"H:|-[editSide1]-border-[editSide2(==editSide1)]-|",
+			"V:|-[radioGroup(==%d)]-border-[editSide1]-|" % self.w.sp.swchPatternsBox.radioGroup.getFittingHeight(),
+			"V:|-[radioGroup(==%d)]-border-[editSide2]-|" % self.w.sp.swchPatternsBox.radioGroup.getFittingHeight()
+
+		]
+		self.w.sp.swchPatternsBox.addAutoPosSizeRules(rules, metrics1)
+
+		self.w.sp.swchPPLBox = vanilla.Box('auto', 'Pairs per Line')
+		segmentsGrp = [{'width': 50, 'title': '∞'},
+		               {'width': 50, 'title': '1'},
+		               {'width': 50, 'title': '2'},
+		               {'width': 50, 'title': '3'},
+		               {'width': 50, 'title': '4'},
+		               {'width': 50, 'title': '5'},
+		               {'width': 50, 'title': '6'},
+		               {'width': 50, 'title': '7'},
+		               {'width': 50, 'title': '8'},
+		               ]
+		self.w.sp.swchPPLBox.segmentedButton = vanilla.SegmentedButton('auto',
+		                                            segmentDescriptions = segmentsGrp,
+		                                            selectionStyle = 'one')
+		rules = [
+			"H:|-[segmentedButton]-|",
+			"V:|-[segmentedButton]-|", # % self.w.sp.swchPPLBox.segmentedButton.getFittingHeight()
+		]
+		self.w.sp.swchPPLBox.addAutoPosSizeRules(rules)
+		self.w.sp.swchPPLBox.segmentedButton.set(getExtensionDefault(PREFKEY_PL_PairsPerLine,fallback = 4))
+
+
+		self.w.sp.swchGroppedBox = vanilla.Box('auto', 'Sending method')
+		self.w.sp.swchGroppedBox.radioGroup = vanilla.VerticalRadioGroup(
+			"auto",
+			["Groupped - pairs will be represented by the first characters in the group", "Expanded - pairs will be represented by a list of all possible combinations"],
+			# callback = self.radioGroupCallback
+		)
+		self.w.sp.swchGroppedBox.radioGroup.set(getExtensionDefault(PREFKEY_PL_SendingMethod,fallback = 0))
+		rules = [
+			"H:|-[radioGroup]-|",
+			"V:|-[radioGroup(==%d)]-|" % self.w.sp.swchGroppedBox.radioGroup.getFittingHeight()
+		]
+		self.w.sp.swchGroppedBox.addAutoPosSizeRules(rules)
+
+		self.w.wc = vanilla.Group('auto')
+		#
+		self.w.wc.btnCancel = vanilla.Button('auto', "Cancel",callback = self.btnCloseCallback)
+		self.w.wc.flex1 = vanilla.Group('auto')
+		self.w.wc.btnApply = vanilla.Button('auto', "Apply",callback = self.btnCloseCallback)
+		rulesSP = [
+			"H:|-border-[swchPatternsBox]-border-|",
+			"H:|-border-[swchPPLBox]-border-|",
+			"H:|-border-[swchGroppedBox]-border-|",
+			"V:|-border-[swchPatternsBox]-border-[swchPPLBox]-border-[swchGroppedBox]-border-|",
+		]
+		rulesWC = [
+			"H:|-border-[btnCancel]-[flex1]-[btnApply]-border-|",
+			"V:|-border-[btnCancel]-border-|",
+			"V:|-border-[flex1]-border-|",
+			"V:|-border-[btnApply]-border-|",
+		]
+		rules1 = [
+			"H:|-border-[sp]-border-|",
+			"H:|-border-[wc]-border-|",
+			"V:|-border-[sp]-border-[wc]-border-|",  #-[sp]-space
+		]
+		self.w.sp.addAutoPosSizeRules(rulesSP, metrics1)
+		self.w.wc.addAutoPosSizeRules(rulesWC, metrics1)
+		self.w.addAutoPosSizeRules(rules1, metrics1)
+		self.w.open()
+
+	def btnCloseCallback(self, sender):
+		if sender == self.w.wc.btnApply:
+			useCustomPatterns = self.w.sp.swchPatternsBox.radioGroup.get()
+			setExtensionDefault(PREFKEY_PL_Patterns, useCustomPatterns)
+			if useCustomPatterns:
+				setExtensionDefault(PREFKEY_PL_Patterns_Side1, self.w.sp.swchPatternsBox.editSide1.get())
+				setExtensionDefault(PREFKEY_PL_Patterns_Side2, self.w.sp.swchPatternsBox.editSide2.get())
+			setExtensionDefault(PREFKEY_PL_PairsPerLine, self.w.sp.swchPPLBox.segmentedButton.get())
+			setExtensionDefault(PREFKEY_PL_SendingMethod, self.w.sp.swchGroppedBox.radioGroup.get())
+		self.w.close()
+
+	def swchPatternsBoxCallback(self, sender):
+		if sender.get():
+			self.w.sp.swchPatternsBox.editSide1.enable(True)
+			self.w.sp.swchPatternsBox.editSide2.enable(True)
+		else:
+			self.w.sp.swchPatternsBox.editSide1.enable(False)
+			self.w.sp.swchPatternsBox.editSide2.enable(False)
 
 
 class TDPairsListControl4(Subscriber): #, WindowController
@@ -121,9 +248,11 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		self.w.toolbar.flex3 = vanilla.Group('auto')
 
 		self.w.toolbar2 = vanilla.Group('auto')
-		self.w.toolbar2.btnDelete = vanilla.Button('auto', '􀈑', callback = self.deleteSelectedPairs)
+		self.w.toolbar2.btnDelete = vanilla.Button('auto', '􀈑', callback = self.deleteSelectedPairsCallback)
 		self.w.toolbar2.flex1 = vanilla.Group('auto')
-		self.w.toolbar2.btnSend2KernTool = vanilla.Button('auto', '􀻵', callback = self.sendSelectedPairs2KernTool)
+		self.w.toolbar2.btnSettings = vanilla.Button('auto', '􀌆', callback = self.openSettingsDialogCallback)
+
+		self.w.toolbar2.btnSend2KernTool = vanilla.Button('auto', '􀻵', callback = self.sendSelectedPairs2KernToolCallback)
 
 
 		rulesTB = [
@@ -139,9 +268,10 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		]
 
 		rulesTB2 = [
-			"H:|-border-[btnDelete]-[flex1]-[btnSend2KernTool]-border-|",
+			"H:|-border-[btnDelete]-[flex1]-[btnSettings]-border-[btnSend2KernTool(==80)]-border-|",
 			"V:|-border-[btnDelete]-border-|",
 			"V:|-border-[flex1]-border-|",
+			"V:|-border-[btnSettings]-border-|",
 			"V:|-border-[btnSend2KernTool]-border-|",
 		]
 
@@ -202,7 +332,6 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		self.w.kernListView.addControlElement(name = 'buttonLangs', callback = self.sortingButtonCallback, drawingMethod = self.drawSortingButton)
 		self.w.kernListView.addControlElement(name = 'buttonError', callback = self.sortingButtonCallback, drawingMethod = self.drawSortingButton)
 
-
 		# self.keyCommander = TDKeyCommander()
 		# self.keyCommander.registerKeyCommand(KEY_BACKSPACE, callback = self.deleteSelectedPairs)
 		# self.keyCommander.registerKeyCommand(KEY_ENTER, callback = self.sendSelectedPairs2KernTool)
@@ -222,33 +351,106 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		if self.selectionMode == SELECTION_MODE_SELECTEDGLYPHS_PL:
 			self.showKernList(glyphNames = list(self.font.selection))
 
-	def sendSelectedPairs2KernTool(self, sender): # , value
-		pairs = []
-		for idx in self.w.kernListView.getSelectedSceneItems():
-			pair = self.w.kernListView.getSceneItems()[idx]
-			l, r = pair[0]
-			sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs, hasError = pair[1]
-			p1, lw, rw, p2 = list(self.langSet.wrapPairToPattern(self.font, (keyGlyphL, keyGlyphR)))
-			pairs.append('/%s/%s/%s/%s' % (p1, lw, rw, p2))
-		line = ''.join(pairs)
+	def sendSelectedPairs2KernTool(self):
+		useCustomPatterns = getExtensionDefault(PREFKEY_PL_Patterns, fallback = 0)
+		LPattern = ''
+		RPattern = ''
+		if useCustomPatterns:
+			side1 = getExtensionDefault(PREFKEY_PL_Patterns_Side1, fallback = ' ')
+			side2 = getExtensionDefault(PREFKEY_PL_Patterns_Side2, fallback = ' ')
+			patternLeft = tdGlyphparser.translateText(font = self.font, text = side1)
+			patternRight = tdGlyphparser.translateText(font = self.font, text = side2)
+			if patternLeft:
+				for l in patternLeft:
+					if l != '':
+						LPattern += '/%s' % l
+			if patternRight:
+				for r in patternRight:
+					if r != '':
+						RPattern += '/%s' % r
+		ppl = getExtensionDefault(PREFKEY_PL_PairsPerLine, fallback = 4)
+		sendingMethodExpanded = getExtensionDefault(PREFKEY_PL_SendingMethod, fallback = 0)
+
+		line = ''
+		pairscount = 0
+		cl = None
+		cr = None
+		if sendingMethodExpanded:
+			for idx in self.w.kernListView.getSelectedSceneItems():
+				pair = self.w.kernListView.getSceneItems()[idx]
+				l, r = pair[0]
+				lgroup = [l]
+				rgroup = [r]
+				if l.startswith(ID_KERNING_GROUP):
+					lgroup = self.font.groups[l]
+
+				if r.startswith(ID_KERNING_GROUP):
+					rgroup = self.font.groups[r]
+
+				for side1glyph in lgroup:
+					for side2glyph in rgroup:
+						p1, lw, rw, p2 = list(self.langSet.wrapPairToPattern(self.font, (side1glyph, side2glyph)))
+						if idx == 0:
+							cl = side1glyph
+							cr = side2glyph
+						if useCustomPatterns:
+							p1 = LPattern
+							p2 = RPattern
+						else:
+							p1 = '/%s' % p1
+							p2 = '/%s' % p2
+						line += '%s/%s/%s%s' % (p1, lw, rw, p2)
+						pairscount += 1
+						if ppl and pairscount == ppl:
+							line += '\\n'
+							pairscount = 0
+		else:
+			for idx in self.w.kernListView.getSelectedSceneItems():
+				pair = self.w.kernListView.getSceneItems()[idx]
+				l, r = pair[0]
+				sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs, hasError = pair[1]
+				p1, lw, rw, p2 = list(self.langSet.wrapPairToPattern(self.font, (keyGlyphL, keyGlyphR)))
+				if idx == 0:
+					cl = keyGlyphL
+					cr = keyGlyphR
+				if useCustomPatterns:
+					p1 = LPattern
+					p2 = RPattern
+				else:
+					p1 = '/%s' % p1
+					p2 = '/%s' % p2
+				line += '%s/%s/%s%s' % (p1, lw, rw, p2)
+				pairscount += 1
+				if ppl and pairscount == ppl:
+					line += '\\n'
+					pairscount = 0
 		postEvent('typedev.KernTool.observerSetText',
 		          glyphsLine = line,
 		          glyphsready = True,
-		          targetpair = None,
+		          targetpair = (cl, cr),
 		          fontID = getFontID(self.font),
 		          # observerID = self.observerID)
 		          )
 
-	def deleteSelectedPairs(self, sender): # , value
+	def sendSelectedPairs2KernToolCallback(self, sender): # , value
+		self.sendSelectedPairs2KernTool()
+
+	def deleteSelectedPairs(self):
 		pairs = []
 		for idx in self.w.kernListView.getSelectedSceneItems():
 			pair = self.w.kernListView.getSceneItems()[idx]
 			l, r = pair[0]
-			pairs.append((l,r))
+			pairs.append((l, r))
 		for pair in pairs:
 			if pair in self.font.kerning:
 				self.font.kerning.remove(pair)
 		self.showKernList(glyphNames = self.kernListLastSelection)
+
+	def deleteSelectedPairsCallback(self, sender): # , value
+		self.deleteSelectedPairs()
+
+	def openSettingsDialogCallback(self, sender):
+		TDPairsListSettingsDialogWindow(parentWindow = self.w)
 
 
 	def switchSelectionCallback(self, sender):
