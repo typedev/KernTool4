@@ -71,12 +71,67 @@ PREFKEY_PL_PairsPerLine = '%s.KernToolUI.PairsList.PPL' % PREFKEY_base
 PREFKEY_PL_SendingMethod = '%s.KernToolUI.SendingMethod' % PREFKEY_base
 
 
+def saveKerning (font, selectedkern, filename):
+	print('=' * 60)
+	print(font.info.familyName, font.info.styleName)
+	print('Saving kerning to file:')
+	fn = filename
+	print(fn)
+	groupsfile = open(fn, mode = 'w')
+	txt = ''
+	for (l, r) in selectedkern:
+		txt += '%s %s %s\n' % (l, r, str(font.kerning[(l, r)]))
+	groupsfile.write(txt)
+	groupsfile.close()
+	print(len(selectedkern), 'pairs saved..')
+	print('Done.')
+
+
+def loadKernFile (font, filename, mode='replace'):  # replace / add
+	fn = filename
+	if os.path.exists(fn):
+		print('=' * 60)
+		print(font.info.familyName, font.info.styleName)
+		print('Loading kerning from file:')
+		print(fn)
+		f = open(fn, mode = 'r')
+		pairsbefore = len(font.kerning)
+		pairsimported = 0
+		for line in f:
+			line = line.strip()
+			if not line.startswith('#') and line != '':
+				left = line.split(' ')[0]
+				right = line.split(' ')[1]
+				value = int(round((float(line.split(' ')[2])), 0))
+				fl = False
+				fr = False
+				if left in font.groups:
+					fl = True
+				if left in font:
+					fl = True
+				if right in font.groups:
+					fr = True
+				if right in font:
+					fr = True
+				if fl and fr:
+					font.kerning[(left, right)] = value
+					pairsimported += 1
+				else:
+					print('Group or Glyph not found:', left, right, value)
+
+		f.close()
+		print('Kerning loaded..')
+		print('pairs before:\t', pairsbefore)
+		print('pairs imported:\t', pairsimported)
+		print('total pairs:\t', len(font.kerning))
+	else:
+		print('ERROR! kerning file not found')
 
 class TDPairsListSettingsDialogWindow(object):
 	def __init__ (self, parentWindow, callback=None ):
 		wW = 400
 		hW = 600
-		self.w = vanilla.Sheet((wW, hW), parentWindow) #minSize = (wW,hW), ,  maxSize = (500,1000)
+		self.w = vanilla.Sheet((wW, hW), parentWindow) #minSize = (wW,hW), ,  maxSize = (500,1000) , title = 'KernTool interaction settings'
 		# self.callback = callback
 
 		self.w.sp = vanilla.Group('auto')
@@ -84,8 +139,8 @@ class TDPairsListSettingsDialogWindow(object):
 			"border": 10,
 			"space": 5
 		}
-
-		self.w.sp.swchPatternsBox = vanilla.Box('auto', 'Patterns')
+		self.w.sp.titlebox = vanilla.TextBox('auto', 'KernTool interaction settings')
+		self.w.sp.swchPatternsBox = vanilla.Box('auto', 'Pattern separator')
 		self.w.sp.swchPatternsBox.radioGroup = vanilla.VerticalRadioGroup(
 			"auto",
 			["Automatically - depending on the language and purpose of the glyphs", "Custom"],
@@ -153,10 +208,11 @@ class TDPairsListSettingsDialogWindow(object):
 		self.w.wc.flex1 = vanilla.Group('auto')
 		self.w.wc.btnApply = vanilla.Button('auto', "Apply",callback = self.btnCloseCallback)
 		rulesSP = [
+			"H:|-border-[titlebox]-border-|",
 			"H:|-border-[swchPatternsBox]-border-|",
 			"H:|-border-[swchPPLBox]-border-|",
 			"H:|-border-[swchGroppedBox]-border-|",
-			"V:|-border-[swchPatternsBox]-border-[swchPPLBox]-border-[swchGroppedBox]-border-|",
+			"V:|-border-[titlebox]-border-[swchPatternsBox]-border-[swchPPLBox]-border-[swchGroppedBox]-border-|",
 		]
 		rulesWC = [
 			"H:|-border-[btnCancel]-[flex1]-[btnApply]-border-|",
@@ -220,8 +276,8 @@ class TDPairsListControl4(Subscriber): #, WindowController
 
 		self.w.toolbar = vanilla.Group('auto')
 		self.w.toolbar.btnSelectFont = vanilla.Button('auto','􁉽', callback = self.selectFontCallback)
-		self.w.toolbar.btnAppendPairs = vanilla.Button('auto', '􀐇', callback = self.selectFontCallback) # 􀑎
-		self.w.toolbar.btnSavePairs = vanilla.Button('auto', '􀈧', callback = self.selectFontCallback) # 􀈧 􀯵
+		self.w.toolbar.btnAppendPairs = vanilla.Button('auto', '􀐇', callback = self.appendPairsFromFileCallback) # 􀑎
+		self.w.toolbar.btnSavePairs = vanilla.Button('auto', '􀈧', callback = self.saveSelectedPairsToFileCallback) # 􀈧 􀯵
 		self.w.toolbar.flex1 = vanilla.Group('auto')
 		segments1 = [{'width': 0, 'title': '􀌃'}, {'width': 0, 'title': '􀝰'}] # 􀚇 􀇵 􀂔 􀇷 􀉆 􀕹 􀊫
 		self.w.toolbar.btnSwitchSelection = vanilla.SegmentedButton('auto',
@@ -350,6 +406,28 @@ class TDPairsListControl4(Subscriber): #, WindowController
 	def glyphChanged(self, info):
 		if self.selectionMode == SELECTION_MODE_SELECTEDGLYPHS_PL:
 			self.showKernList(glyphNames = list(self.font.selection))
+
+	def saveSelectedPairsToFileCallback(self, sender):
+		pairsfile = putFile(messageText = 'Save selected pairs to text file', title = 'Pairs List')
+		if pairsfile:
+			pairs = []
+			if self.w.kernListView.getSelectedSceneItems():
+				selection = self.w.kernListView.getSelectedSceneItems()
+			else:
+				selection = [idx for idx in range(0, len(self.w.kernListView.getSceneItems()))]
+			for idx in selection:
+				pair = self.w.kernListView.getSceneItems()[idx]
+				l, r = pair[0]
+				pairs.append((l, r))
+			saveKerning(self.font, pairs, pairsfile)
+
+	def appendPairsFromFileCallback(self, sender):
+		pairsfile = getFile(messageText = 'Append pairs from file', title = 'Pairs List')
+		if pairsfile:
+			loadKernFile(self.font, pairsfile[0])
+			self.showKernList()
+
+
 
 	def sendSelectedPairs2KernTool(self):
 		useCustomPatterns = getExtensionDefault(PREFKEY_PL_Patterns, fallback = 0)
