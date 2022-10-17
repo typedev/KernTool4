@@ -72,30 +72,24 @@ PREFKEY_PL_SendingMethod = '%s.KernToolUI.SendingMethod' % PREFKEY_base
 
 
 def saveKerning (font, selectedkern, filename):
-	print('=' * 60)
-	print(font.info.familyName, font.info.styleName)
-	print('Saving kerning to file:')
 	fn = filename
-	print(fn)
 	groupsfile = open(fn, mode = 'w')
 	txt = ''
 	for (l, r) in selectedkern:
 		txt += '%s %s %s\n' % (l, r, str(font.kerning[(l, r)]))
 	groupsfile.write(txt)
 	groupsfile.close()
-	print(len(selectedkern), 'pairs saved..')
-	print('Done.')
 
 
 def loadKernFile (font, filename, mode='replace'):  # replace / add
 	fn = filename
 	if os.path.exists(fn):
-		print('=' * 60)
-		print(font.info.familyName, font.info.styleName)
-		print('Loading kerning from file:')
-		print(fn)
+		# print('=' * 60)
+		# print(font.info.familyName, font.info.styleName)
+		# print('Loading kerning from file:')
+		# print(fn)
 		f = open(fn, mode = 'r')
-		pairsbefore = len(font.kerning)
+		# pairsbefore = len(font.kerning)
 		pairsimported = 0
 		for line in f:
 			line = line.strip()
@@ -116,23 +110,21 @@ def loadKernFile (font, filename, mode='replace'):  # replace / add
 				if fl and fr:
 					font.kerning[(left, right)] = value
 					pairsimported += 1
-				else:
-					print('Group or Glyph not found:', left, right, value)
-
+				# else:
+				# 	print('Group or Glyph not found:', left, right, value)
 		f.close()
-		print('Kerning loaded..')
-		print('pairs before:\t', pairsbefore)
-		print('pairs imported:\t', pairsimported)
-		print('total pairs:\t', len(font.kerning))
-	else:
-		print('ERROR! kerning file not found')
+	# 	print('Kerning loaded..')
+	# 	print('pairs before:\t', pairsbefore)
+	# 	print('pairs added:\t', pairsimported)
+	# 	print('total pairs:\t', len(font.kerning))
+	# else:
+	# 	print('ERROR! kerning file not found')
 
 class TDPairsListSettingsDialogWindow(object):
 	def __init__ (self, parentWindow, callback=None ):
 		wW = 400
-		hW = 600
-		self.w = vanilla.Sheet((wW, hW), parentWindow) #minSize = (wW,hW), ,  maxSize = (500,1000) , title = 'KernTool interaction settings'
-		# self.callback = callback
+		hW = 300
+		self.w = vanilla.Sheet((wW, hW), parentWindow)
 
 		self.w.sp = vanilla.Group('auto')
 		metrics1 = {
@@ -765,7 +757,8 @@ class TDPairsListControl4(Subscriber): #, WindowController
 
 
 	def fontGroupsDidChange(self, info):
-		pass
+		self.hashKernDic.setFont(self.font, self.langSet)
+		self.showKernList(glyphNames = self.kernListLastSelection)
 
 	# def fontKerningDidChangePair(self, info):
 	# 	print('fontKerningDidChangePair', info)
