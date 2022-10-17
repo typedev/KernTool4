@@ -84,12 +84,7 @@ def saveKerning (font, selectedkern, filename):
 def loadKernFile (font, filename, mode='replace'):  # replace / add
 	fn = filename
 	if os.path.exists(fn):
-		# print('=' * 60)
-		# print(font.info.familyName, font.info.styleName)
-		# print('Loading kerning from file:')
-		# print(fn)
 		f = open(fn, mode = 'r')
-		# pairsbefore = len(font.kerning)
 		pairsimported = 0
 		for line in f:
 			line = line.strip()
@@ -112,18 +107,13 @@ def loadKernFile (font, filename, mode='replace'):  # replace / add
 					pairsimported += 1
 				# else:
 				# 	print('Group or Glyph not found:', left, right, value)
+
 		f.close()
-	# 	print('Kerning loaded..')
-	# 	print('pairs before:\t', pairsbefore)
-	# 	print('pairs added:\t', pairsimported)
-	# 	print('total pairs:\t', len(font.kerning))
-	# else:
-	# 	print('ERROR! kerning file not found')
 
 class TDPairsListSettingsDialogWindow(object):
 	def __init__ (self, parentWindow, callback=None ):
 		wW = 400
-		hW = 300
+		hW = 600
 		self.w = vanilla.Sheet((wW, hW), parentWindow)
 
 		self.w.sp = vanilla.Group('auto')
