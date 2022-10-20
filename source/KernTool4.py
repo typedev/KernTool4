@@ -67,7 +67,7 @@ class FontSelectorDialogWindow(object):
 		if not fontListSelected:
 
 			for idx, font in enumerate(AllFonts()):
-				listitems.append( {'UFO': font.path.split('/')[-1],
+				listitems.append( {'UFO': self.getFontUFOname(font),
 				                   'Family': '%s' % font.info.familyName,
 				                   'Style': '%s' % font.info.styleName,
 				                   'Select': True,
@@ -80,7 +80,7 @@ class FontSelectorDialogWindow(object):
 				scale = 1.0
 				if scales and font in scales:
 					scale = scales[font]
-				listitems.append({'UFO': font.path.split('/')[-1],
+				listitems.append({'UFO': self.getFontUFOname(font),
 				                  'Family': '%s' % font.info.familyName,
 				                  'Style': '%s' % font.info.styleName,
 				                  'Select': True,
@@ -91,7 +91,7 @@ class FontSelectorDialogWindow(object):
 				idx += 1
 			for font in AllFonts():
 				if font not in fontListSelected:
-					listitems.append({'UFO': font.path.split('/')[-1],
+					listitems.append({'UFO': self.getFontUFOname(font),
 					                  'Family': '%s' % font.info.familyName,
 					                  'Style': '%s' % font.info.styleName,
 					                  'Select': False,
@@ -144,6 +144,14 @@ class FontSelectorDialogWindow(object):
 			if self.callback:
 				self.callback({'selectedFonts': fontlist, 'scales': scales})
 		self.w.close()
+
+	def getFontUFOname(self, font):
+		path = font.path
+		if path:
+			return os.path.basename(font.path)
+		else:
+			return ''
+
 
 # =================================
 # KERN MULTI TOOL =================
