@@ -1082,7 +1082,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 def getMouseHitLocation(merzView, event):
 	X_mouse_pos = int(round(event.locationInWindow().x, 0))
 	Y_mouse_pos = int(round(event.locationInWindow().y, 0))
-	modifier = decodeModifiers(event.modifierFlags())
+	modifier = tdKeyCommander.decodeModifiers(event.modifierFlags())
 	point = merzView.convertWindowCoordinateToViewCoordinate((X_mouse_pos, Y_mouse_pos))
 	return (dict( point = point, modifier = modifier))
 
