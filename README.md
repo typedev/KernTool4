@@ -5,6 +5,7 @@ KernTool4 is a set of extensions for working with kerning, glyph margins and gro
 ---
 
 #### Version history:
+- `4.1.6` - `GroupsControl:` fixed to support Robofont 4.3
 - `4.1.5` - `GroupsControl:` added buttons `Delete/Send to KernTool` to PairsList and added option `Rename Group`. Improved sorting of the PairsList
 - `4.1.4` - `GroupsControl:` fixed a bug with the closing of the SсriptsBoard when the `GC` was closed. LangSet now will make patterns library for AllFonts. Updated `Scripts` for `GC`.
 - `4.1.3` - `GroupsControl` fixed bug with missing key glyph in group 

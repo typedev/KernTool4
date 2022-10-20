@@ -449,41 +449,43 @@ class TDPairsListControl4(Subscriber): #, WindowController
 
 				for side1glyph in lgroup:
 					for side2glyph in rgroup:
-						p1, lw, rw, p2 = list(self.langSet.wrapPairToPattern(self.font, (side1glyph, side2glyph)))
-						if idx == 0:
-							cl = side1glyph
-							cr = side2glyph
-						if useCustomPatterns:
-							p1 = LPattern
-							p2 = RPattern
-						else:
-							p1 = '/%s' % p1
-							p2 = '/%s' % p2
-						line += '%s/%s/%s%s' % (p1, lw, rw, p2)
-						pairscount += 1
-						if ppl and pairscount == ppl:
-							line += '\\n'
-							pairscount = 0
+						if side1glyph in self.font and side2glyph in self.font:
+							p1, lw, rw, p2 = list(self.langSet.wrapPairToPattern(self.font, (side1glyph, side2glyph)))
+							if idx == 0:
+								cl = side1glyph
+								cr = side2glyph
+							if useCustomPatterns:
+								p1 = LPattern
+								p2 = RPattern
+							else:
+								p1 = '/%s' % p1
+								p2 = '/%s' % p2
+							line += '%s/%s/%s%s' % (p1, lw, rw, p2)
+							pairscount += 1
+							if ppl and pairscount == ppl:
+								line += '\\n'
+								pairscount = 0
 		else:
 			for idx in self.w.kernListView.getSelectedSceneItems():
 				pair = self.w.kernListView.getSceneItems()[idx]
 				l, r = pair[0]
 				sortL, sortR, grouppedL, grouppedR, value, note, keyGlyphL, keyGlyphR, langs, hasError = pair[1]
-				p1, lw, rw, p2 = list(self.langSet.wrapPairToPattern(self.font, (keyGlyphL, keyGlyphR)))
-				if idx == 0:
-					cl = keyGlyphL
-					cr = keyGlyphR
-				if useCustomPatterns:
-					p1 = LPattern
-					p2 = RPattern
-				else:
-					p1 = '/%s' % p1
-					p2 = '/%s' % p2
-				line += '%s/%s/%s%s' % (p1, lw, rw, p2)
-				pairscount += 1
-				if ppl and pairscount == ppl:
-					line += '\\n'
-					pairscount = 0
+				if keyGlyphL in self.font and keyGlyphR in self.font:
+					p1, lw, rw, p2 = list(self.langSet.wrapPairToPattern(self.font, (keyGlyphL, keyGlyphR)))
+					if idx == 0:
+						cl = keyGlyphL
+						cr = keyGlyphR
+					if useCustomPatterns:
+						p1 = LPattern
+						p2 = RPattern
+					else:
+						p1 = '/%s' % p1
+						p2 = '/%s' % p2
+					line += '%s/%s/%s%s' % (p1, lw, rw, p2)
+					pairscount += 1
+					if ppl and pairscount == ppl:
+						line += '\\n'
+						pairscount = 0
 		postEvent('typedev.KernTool.observerSetText',
 		          glyphsLine = line,
 		          glyphsready = True,
