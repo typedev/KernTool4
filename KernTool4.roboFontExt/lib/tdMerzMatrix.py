@@ -59,6 +59,11 @@ DROP_STYLE_INSERT = 1
 DROP_STYLE_DROPIN = 2
 DROP_STYLE_SCENE  = 3
 
+DRAWING_BASE_MODE_NONE = 0
+DRAWING_BASE_MODE_SCROLL = 1
+DRAWING_BASE_MODE_RESIZE = 2
+
+
 
 class TDMerzMatrixDesigner (object): #MerzView
 
@@ -196,7 +201,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 		self.container.setBackgroundColor(color)
 		if self.documentLayer:
 			self.documentLayer.setBackgroundColor(color)
-		self.drawBase(refresh = True)
+		self.drawBase()
 
 
 	def fillHash(self, deep = 3):
@@ -267,11 +272,12 @@ class TDMerzMatrixDesigner (object): #MerzView
 			with self.documentLayer.propertyGroup():  # duration = .5
 				self.documentLayer.setPosition((0, h - dh))  # - (dy + dh)
 				self.dropsLayer.setPosition((0, h - dh))  # - (dy + dh)
+				self.drawBase()
 
 
 
 
-	def drawBase(self, refresh = False): #, testrun = False
+	def drawBase(self, mode = None): #, testrun = False
 		if not self.documentLayer:
 			self.documentLayer = self.container.appendBaseSublayer(
 				name = 'base',
@@ -301,7 +307,8 @@ class TDMerzMatrixDesigner (object): #MerzView
 		w, h = self.container.getSize()
 		x, y = self.documentLayer.getPosition()
 
-		self.visibleLayers = sum([ self.indexYpos[s] for s in list(filter(lambda p: p > (-y-200) and p < (-y + h + 100), self.indexYpos.keys())) ], [])
+		# self.visibleLayers = sum([ self.indexYpos[s] for s in list(filter(lambda p: p > (-y-200) and p < (-y + h + 100), self.indexYpos.keys())) ], [])
+		self.visibleLayers = sum([ self.indexYpos[s] for s in list(filter(lambda p: p > (-y - self.elementHeight) and p < (-y + h + self.elementHeight), self.indexYpos.keys())) ], [])
 
 		with self.documentLayer.sublayerGroup():
 			for layer in self.visibleLayers:
@@ -311,7 +318,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 				index = self.getIndexOfLayer(layer)
 				if not index and index != 0 : break # or index>=len(self.items)
 				# if not layer.getSublayers():
-				self.layerWillDrawCallback(self, dict( layer = layer, index = index, item = self.items[index] )) # self.documentLayer.getSublayers().index(layer)
+				self.layerWillDrawCallback(self, dict( layer = layer, index = index, item = self.items[index], drawmode = mode )) # self.documentLayer.getSublayers().index(layer)
 
 			# clear the layers of contentLayers that are not included in the visibility zone
 			if self.clearHash:
@@ -472,6 +479,14 @@ class TDMerzMatrixDesigner (object): #MerzView
 
 	def drawSelectedLayer(self, index, selected = False):
 		layer = self.documentLayer.getSublayers()[index]
+
+		backgroundColor = (0, 0, 0, 0)
+		borderColor = self.borderColor
+		filters = layer.getFilters()
+		for filter in filters:
+			if filter['name'] == 'saturation':
+				layer.removeFilter('saturation')
+
 		if selected:
 			backgroundColor = self.selectionColor
 			borderColor = self.selectedBorderColor
@@ -483,13 +498,13 @@ class TDMerzMatrixDesigner (object): #MerzView
 					brightness = 0,
 				)
 			)
-		else:
-			backgroundColor = (0,0,0,0)
-			borderColor = self.borderColor
-			filters = layer.getFilters()
-			for filter in filters:
-				if filter['name'] == 'saturation':
-					layer.removeFilter('saturation')
+		# else:
+		# 	backgroundColor = (0,0,0,0)
+		# 	borderColor = self.borderColor
+		# 	filters = layer.getFilters()
+		# 	for filter in filters:
+		# 		if filter['name'] == 'saturation':
+		# 			layer.removeFilter('saturation')
 			# layer.clearAnimation()
 			# layer.setOpacity(1)
 		layer.setBackgroundColor((backgroundColor))
@@ -660,7 +675,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 			layer.setPosition((_x , _y))
 			drops.setPosition((_x , _y))
 		# self.drawScrollBars()
-		self.drawBase()
+		self.drawBase(mode = DRAWING_BASE_MODE_SCROLL)
 
 
 	def eventScrollWheel(self, event, delta, momentumPhase):
@@ -745,7 +760,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 			with self.documentLayer.propertyGroup(): #duration = .5
 				self.documentLayer.setPosition((0, h - dh )) # - (dy + dh)
 				self.dropsLayer.setPosition((0, h - dh )) #- (dy + dh)
-		self.drawBase()
+		self.drawBase(mode = DRAWING_BASE_MODE_RESIZE)
 
 	def setViewSize(self, size = None, positiontozero = True):
 		hM = self.windowHeight
@@ -900,7 +915,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 				# self.listOfwidths.append(_w)
 				if _w != welem:
 					# TODO need more light version of redraw, instead of clearing sublayers
-					layer.clearSublayers()
+					# layer.clearSublayers()
 					# layer.setInfoValue('update', 'size')
 					layer.setSize((welem,_h))
 				layer.setPosition((xpos, ypos))
@@ -1067,7 +1082,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 def getMouseHitLocation(merzView, event):
 	X_mouse_pos = int(round(event.locationInWindow().x, 0))
 	Y_mouse_pos = int(round(event.locationInWindow().y, 0))
-	modifier = decodeModifiers(event.modifierFlags())
+	modifier = tdKeyCommander.decodeModifiers(event.modifierFlags())
 	point = merzView.convertWindowCoordinateToViewCoordinate((X_mouse_pos, Y_mouse_pos))
 	return (dict( point = point, modifier = modifier))
 
