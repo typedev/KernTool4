@@ -45,7 +45,7 @@ from tdLangSet import *
 import ScriptsBoard
 importlib.reload(ScriptsBoard)
 # from ScriptsBoard import main
-
+import tdGlyphparser
 
 # DEVELOP = True
 #
@@ -174,7 +174,8 @@ class TDPairsListSettingsDialogWindow(object):
 		self.w.sp.swchGroppedBox = vanilla.Box('auto', 'Sending method')
 		self.w.sp.swchGroppedBox.radioGroup = vanilla.VerticalRadioGroup(
 			"auto",
-			["Groupped - pairs will be represented by the first characters in the group", "Expanded - pairs will be represented by a list of all possible combinations"],
+			["Groupped - pairs will be represented by the first characters in the group",
+			 "Expanded - pairs will be represented by a list of all possible combinations"],
 			# callback = self.radioGroupCallback
 		)
 		self.w.sp.swchGroppedBox.radioGroup.set(getExtensionDefault(PREFKEY_PL_SendingMethod,fallback = 0))

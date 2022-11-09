@@ -20,6 +20,14 @@
 			<key>shortKey</key>
 			<string></string>
 		</dict>
+		<dict>
+			<key>path</key>
+			<string>PairsList.py</string>
+			<key>preferredName</key>
+			<string>PairsList</string>
+			<key>shortKey</key>
+			<string></string>
+		</dict>
 	</array>
 	<key>developer</key>
 	<string>Alexander Lubovenko</string>
@@ -38,8 +46,8 @@
 	<key>requiresVersionMinor</key>
 	<string>2</string>
 	<key>timeStamp</key>
-	<real>1666267139.29266</real>
+	<real>1668009351.99719</real>
 	<key>version</key>
-	<string>4.1.6</string>
+	<string>4.2.1</string>
 </dict>
 </plist>
