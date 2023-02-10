@@ -614,8 +614,9 @@ class TDHashGroupsDic(object):
 			if kerning is different, such an exception will be saved
 		"""
 		report = []
+		glyphlist2add = list(dict.fromkeys(glyphlist)) # filter possible repetitions of glyphs
 		if self.trackHistory:
-			self.history.append(('add', group, glyphlist, checkKerning, checkLanguageCompatibility))
+			self.history.append(('add', group, glyphlist2add, checkKerning, checkLanguageCompatibility))
 		# def msgCanceled(self, glyphname, side, mode, showAlert):
 		# 	txt = 'Glyph %s is already in the group %s, the addition is canceled' % (glyphname, self.getGroupNameByGlyph(glyphname, side, mode))
 		# 	if showAlert:
@@ -657,7 +658,7 @@ class TDHashGroupsDic(object):
 		else:
 			side = SIDE_2
 
-		for glyphname in glyphlist:
+		for glyphname in glyphlist2add:
 			if self.isKerningGroup(group):
 				glyphingroup = checkingPresenceInGroups(self, group, glyphname, side, EDITMODE_KERNING, showAlert, report)
 				if not glyphingroup:

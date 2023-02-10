@@ -69,7 +69,8 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 		if osVersionCurrent >= osVersion10_14:
 			dark = AppKit.NSAppearance.appearanceNamed_(AppKit.NSAppearanceNameDarkAqua)
-			if AppKit.NSApp().appearance() == dark:
+			# print('dark mode', mojo.UI.inDarkMode())
+			if AppKit.NSApp().appearance() == dark or mojo.UI.inDarkMode():
 				KERNTOOL_UI_DARKMODE = True
 
 		if KERNTOOL_UI_DARKMODE:
