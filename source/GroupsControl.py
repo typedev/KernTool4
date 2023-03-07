@@ -294,7 +294,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			"H:|[fontView]-space-[contentView(>=fontView)]-space-[kernListView(>=340)]|",
 			"H:|[linesPreview]|",
 			"V:|[fontView]-space-[linesPreview(==175)]|",
-			"V:|[groupView]-space-[contentView(==195)]-space-[linesPreview(==175)]|",
+			"V:|[groupView]-space-[contentView(==245)]-space-[linesPreview(==175)]|",
 			"V:|[kernListView]-space-[linesPreview(==175)]|"
 			# "V:||",
 		]

@@ -10,7 +10,7 @@ def placeCompositesIntoGroup(parent, groupname):
 		if glyphname in font and glyphname in mapComponents:
 			components = mapComponents[glyphname]
 			for component in components:
-				if component not in font.groups[groupname] and component not in glyphs2add:
+				if component not in font.groups[groupname] and component not in glyphs2add and '_' not in component:
 					glyphs2add.append(component)
 	# print(glyphs2add)
 	if glyphs2add:

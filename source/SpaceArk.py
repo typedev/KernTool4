@@ -189,6 +189,9 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 			dark = AppKit.NSAppearance.appearanceNamed_(AppKit.NSAppearanceNameDarkAqua)
 			if AppKit.NSApp().appearance() == dark:
 				KERNTOOL_UI_DARKMODE = True
+			if hasattr(mojo.UI, 'inDarkMode'):
+				if mojo.UI.inDarkMode():
+					KERNTOOL_UI_DARKMODE = True
 
 		if KERNTOOL_UI_DARKMODE:
 			darkm = '-dark'
