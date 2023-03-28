@@ -9,8 +9,8 @@
 name = "KernTool4"
 description = 'KernTool4 is an extension for working with Kerning and glyph Margins in Robofont4.'
 tags = 'kerning, spacing, margins'
-version = "4.2.1"
-mainScriptsList = ['KernTool4', 'GroupsControl', 'PairsList']
+version = "4.2.2"
+mainScriptsList = ['KernTool4', 'GroupsControl', 'PairsList', 'SpaceArk']
 
 developer = "Alexander Lubovenko"
 developerURL = "https://github.com/typedev"

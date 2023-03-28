@@ -71,6 +71,9 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			dark = AppKit.NSAppearance.appearanceNamed_(AppKit.NSAppearanceNameDarkAqua)
 			if AppKit.NSApp().appearance() == dark:
 				KERNTOOL_UI_DARKMODE = True
+			if hasattr(mojo.UI, 'inDarkMode'):
+				if mojo.UI.inDarkMode():
+					KERNTOOL_UI_DARKMODE = True
 
 		if KERNTOOL_UI_DARKMODE:
 			darkm = '-dark'
@@ -291,7 +294,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			"H:|[fontView]-space-[contentView(>=fontView)]-space-[kernListView(>=340)]|",
 			"H:|[linesPreview]|",
 			"V:|[fontView]-space-[linesPreview(==175)]|",
-			"V:|[groupView]-space-[contentView(==195)]-space-[linesPreview(==175)]|",
+			"V:|[groupView]-space-[contentView(==245)]-space-[linesPreview(==175)]|",
 			"V:|[kernListView]-space-[linesPreview(==175)]|"
 			# "V:||",
 		]
@@ -755,12 +758,13 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 		self.w.g1.kernListView.setSceneItems(items = [])
 		if groupname:
-			groupnames = [groupname]
-			if len(self.w.g1.groupView.getSelectedSceneItems()) > 1:
-				groupnames =[]
-				for idx in self.w.g1.groupView.getSelectedSceneItems():
-					gn = self.w.g1.groupView.getSceneItems()[idx]
-					groupnames.append(gn)
+			# groupnames = [groupname]
+			# if len(self.w.g1.groupView.getSelectedSceneItems()) > 1:
+			# 	groupnames =[]
+			# 	for idx in self.w.g1.groupView.getSelectedSceneItems():
+			# 		gn = self.w.g1.groupView.getSceneItems()[idx]
+			# 		groupnames.append(gn)
+			groupnames = self.getSelectedGroupNames()
 			pairs = []
 			for groupname in groupnames:
 				_pairs = self.hashKernDic.getPairsBy(groupname, self.groupsSide)
@@ -851,6 +855,17 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		              data = {'mask': lmask},
 		              info = '%s  \n+composites\n+parents\n\n*Check the %s side,\nuse a Beam [B] for more accuracy' % (displayTitle, txtside))
 		self.w.g1.linesPreview.startDrawGlyphsMatrix([matrix], animatedStart = False)
+
+	def getSelectedGroupNames(self):
+		groupnames = []
+		if self.selectedGroup:
+			groupnames = [self.selectedGroup]
+			if len(self.w.g1.groupView.getSelectedSceneItems()) > 1:
+				groupnames = []
+				for idx in self.w.g1.groupView.getSelectedSceneItems():
+					gn = self.w.g1.groupView.getSceneItems()[idx]
+					groupnames.append(gn)
+		return groupnames
 
 
 	def selectGroupLayerCallback (self, sender, info):
@@ -1238,7 +1253,9 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		self.w.g1.contentView.clearScene()
 		self.w.g1.kernListView.clearScene()
 		if self.ScriptsBoardWindow:
-			self.ScriptsBoardWindow.close()
+			try:
+				self.ScriptsBoardWindow.close()
+			except: pass
 		unregisterCurrentFontSubscriber(self)
 
 	def keyDown (self, sender, event):

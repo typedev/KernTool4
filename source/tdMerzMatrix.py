@@ -691,7 +691,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 			# 		    dict(
 			# 		        name="motionBlur",
 			# 		        filterType="motionBlur",
-			# 		        radius=1.0,
+			# 		        radius=5.0,
 			# 		        angle=90
 			# 		        )
 			# 			)

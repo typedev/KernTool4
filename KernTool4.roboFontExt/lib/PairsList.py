@@ -14,6 +14,8 @@ import mojo
 import importlib
 from mojo.smartSet import getSmartSets
 from vanilla.dialogs import getFile, putFile
+from vanilla.vanillaBase import osVersionCurrent, osVersion10_14
+
 from mojo.subscriber import Subscriber, registerCurrentFontSubscriber, unregisterCurrentFontSubscriber
 from mojo.UI import SelectFont, SimpleStatus, StatusBar, LightStatusBar
 from mojo.events import addObserver, removeObserver, postEvent
@@ -241,9 +243,18 @@ class TDPairsListControl4(Subscriber): #, WindowController
 	def build (self):
 		darkm = ''
 		KERNTOOL_UI_DARKMODE = False
-		dark = AppKit.NSAppearance.appearanceNamed_(AppKit.NSAppearanceNameDarkAqua)
-		if AppKit.NSApp().appearance() == dark:
-			KERNTOOL_UI_DARKMODE = True
+
+		if osVersionCurrent >= osVersion10_14:
+			dark = AppKit.NSAppearance.appearanceNamed_(AppKit.NSAppearanceNameDarkAqua)
+			if AppKit.NSApp().appearance() == dark:
+				KERNTOOL_UI_DARKMODE = True
+			if hasattr(mojo.UI, 'inDarkMode'):
+				if mojo.UI.inDarkMode():
+					KERNTOOL_UI_DARKMODE = True
+
+		# dark = AppKit.NSAppearance.appearanceNamed_(AppKit.NSAppearanceNameDarkAqua)
+		# if AppKit.NSApp().appearance() == dark:
+		# 	KERNTOOL_UI_DARKMODE = True
 		if KERNTOOL_UI_DARKMODE:
 			darkm = '-dark'
 		self.idName = 'PairsList'

@@ -5,7 +5,7 @@
       <excludeFolder url="file:///Applications/RoboFont.app/Contents/Resources/lib/python3.7" />
     </content>
     <content url="file://$MODULE_DIR$" />
-    <orderEntry type="jdk" jdkName="Python 3.8 (fontParts-venv)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.11 (M1)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">

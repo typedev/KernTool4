@@ -28,6 +28,14 @@
 			<key>shortKey</key>
 			<string></string>
 		</dict>
+		<dict>
+			<key>path</key>
+			<string>SpaceArk.py</string>
+			<key>preferredName</key>
+			<string>SpaceArk</string>
+			<key>shortKey</key>
+			<string></string>
+		</dict>
 	</array>
 	<key>developer</key>
 	<string>Alexander Lubovenko</string>
@@ -46,8 +54,8 @@
 	<key>requiresVersionMinor</key>
 	<string>2</string>
 	<key>timeStamp</key>
-	<real>1668009351.99719</real>
+	<real>1678813705.4390101</real>
 	<key>version</key>
-	<string>4.2.1</string>
+	<string>4.2.2</string>
 </dict>
 </plist>
