@@ -789,6 +789,10 @@ class TDMerzMatrixDesigner (object): #MerzView
 			with self.documentLayer.propertyGroup():  # duration = .5
 				self.documentLayer.setPosition((0, h - dh))  # - (dy + dh)
 				self.dropsLayer.setPosition((0, h - dh))  # - (dy + dh)
+		# else:
+		# 	with self.documentLayer.propertyGroup():
+		# 		self.documentLayer.setPosition((dx, dy))  # - (dy + dh)
+		# 		self.dropsLayer.setPosition((dx, dy))  # - (dy + dh)
 
 		# self.drawBase(refresh = True)
 	def checkWidthElement(self):
@@ -873,26 +877,31 @@ class TDMerzMatrixDesigner (object): #MerzView
 			self.elementWidth = elementWidth
 		if elementHeight:
 			self.elementHeight = elementHeight
+
+		animatedStart = False
+		if animated == 'bottom' or animated == 'left' or animated == 'right' or animated == 'shake':
+			animatedStart = True
+
 		if len(items) > len(self.items):
 			self.updateSceneItems()
 			items2insert = items[len(self.items):]
 			self.insertSceneItems(items = items2insert, elementWidth = elementWidth, elementHeight = elementHeight)
 			self.items = items
 			self.reloadSceneItems(items)
+			self.resizeScene(positiontozero = True)
+			self.moveSceneToStartPosition(animated = animatedStart, direction = animated)
 		elif len(items) < len(self.items):
 			self.updateSceneItems()
 			s = [ self.items.index(x) for x in self.items[len(items):] ]
 			self._removeSceneItems(itemsIndexes = s)
 			self.items = items
 			self.reloadSceneItems(items)
+			self.resizeScene(positiontozero = False)
+			# self.moveSceneToStartPosition(animated = animatedStart, direction = animated)
 		elif len(items) == len(self.items):
 			self.reloadSceneItems(items)
 		# self.reCalculateSizeScene(positiontozero = True)
-		self.resizeScene(positiontozero = True)
-		animatedStart = False
-		if animated == 'bottom' or animated == 'left' or animated == 'right' or animated == 'shake':
-			animatedStart = True
-		self.moveSceneToStartPosition(animated = animatedStart, direction = animated)
+		self.drawBase()
 		self.drawControlsElements()
 
 
@@ -1037,8 +1046,8 @@ class TDMerzMatrixDesigner (object): #MerzView
 				layersToRemove.append(layer)
 			for layer in layersToRemove:
 				self.documentLayer.removeSublayer(layer)
-		self.reCalculateSizeScene()
-		self.resizeScene()
+		# self.reCalculateSizeScene()
+		self.resizeScene(positiontozero = False)
 
 
 	def removeSceneItems(self, itemsIndexes):

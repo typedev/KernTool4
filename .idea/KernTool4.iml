@@ -4,8 +4,11 @@
     <content url="file:///Applications/RoboFont.app/Contents/Resources/lib/python3.7">
       <excludeFolder url="file:///Applications/RoboFont.app/Contents/Resources/lib/python3.7" />
     </content>
+    <content url="file:///Applications/RoboFont.app/Contents/Resources/lib/python3.9">
+      <excludeFolder url="file:///Applications/RoboFont.app/Contents/Resources/lib/python3.9" />
+    </content>
     <content url="file://$MODULE_DIR$" />
-    <orderEntry type="jdk" jdkName="Python 3.9 (PythonVenv)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.9 (fontParts)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">
