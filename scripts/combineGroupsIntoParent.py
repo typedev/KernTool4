@@ -58,7 +58,7 @@ def combineGroupsByLanguage (parent):
 		# print('union is possible', basegroup, groups2combine)
 		for group in groups2combine:
 			content = list(self.font.groups[group])
-			self.delGlyphsFromGroup(group, content)
+			self.removeGlyphsFromGroup(group, content)
 			self.addGlyphsToGroup(basegroup, content)
 			if self.isLeftSideGroup(basegroup):
 				contentSide1.extend(content)

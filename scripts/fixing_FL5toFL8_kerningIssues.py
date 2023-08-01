@@ -9,6 +9,7 @@ def main (parent = None):
 	print ('Start...')
 	font = parent.font
 	hashKernDic = parent.hashKernDic
+	groups2kill = []
 	for groupname, content in font.groups.items():
 		if groupname.startswith('_'):
 			if content and content[0] == groupname.replace('_',''):
@@ -24,9 +25,11 @@ def main (parent = None):
 				print('Making group', groupname2, content)
 				report = hashKernDic.addGlyphsToGroup(groupname2, content)
 				# print(report)
-
+				groups2kill.append(groupname)
 			else:
 				print('Group not defined:', groupname, '=', content)
+	for groupname in groups2kill:
+		del font.groups[groupname]
 	parent.refreshGroupsView()
 
 
