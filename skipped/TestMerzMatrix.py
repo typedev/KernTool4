@@ -45,7 +45,7 @@ class TDTestView(object):  # , WindowController
 			elementSize = (0, 0),
 			elementMargins = (0, 0),
 			backgroundColor = (1, 1, 1, 1),
-			selectionColor = (0, 0, 0, 0),
+			selectionColor = (0, 0, 1, 0.3),
 			selectedBorderColor = (0,0,1,.1),
 			controlsColor = (.2, .3, .4, 1),
 			cornerRadius = 0,
@@ -153,7 +153,7 @@ class TDTestView(object):  # , WindowController
 					name = 'base',
 					position = (0, 0),
 					size = (layerGlyphWidth, layerGlyphHeight),
-					backgroundColor = (1,1,1,1),
+					backgroundColor = (1,1,1,0),
 					# cornerRadius = 5
 				)
 				markColor = None
@@ -170,7 +170,7 @@ class TDTestView(object):  # , WindowController
 				# print(baselayer, xpos, layerGlyphHeight)
 		else:
 			baselayer = container.getSublayer('base')
-			print('just need redraw', baselayer) # , baselayer.getSublayers()
+			# print('just need redraw', baselayer) # , baselayer.getSublayers()
 			for glyph in glyphs:
 				if glyph != self.font[glyph.name]:
 					print('changes detect', glyph.name)
@@ -180,27 +180,44 @@ class TDTestView(object):  # , WindowController
 		print ('drawGlyphsLineObserver',info)
 
 	def showGlyphsLine(self):
-		txt = 'Приведенный состав алфавита отражает\nего состояние\nдо реформы\n1917–18 г.г.\nи включает 35 знаков,\nчетыре из которых\nне сохранились\nв современном русском\nалфавите (выделены красным).\nБуквы Ё, Й использовались в языке, хотя и не считались отдельными буквами алфавита.\nЗеленым выделены знаки, представленные\nв лексикографических источниках.'.split('\n')
-		idx = 0
-		glyphslines = []
+		# txt = 'Приведенный состав алфавита отражает\nего состояние\nдо реформы\n1917–18 г.г.\nи включает 35 знаков,\nчетыре из которых\nне сохранились\nв современном русском\nалфавите (выделены красным).\nБуквы Ё, Й использовались в языке, хотя и не считались отдельными буквами алфавита.\nЗеленым выделены знаки, представленные\nв лексикографических источниках.'.split('\n')
+		# idx = 0
+		# glyphslines = []
 		scale = pt2Scale(self.glyphsPointSize * 2 )
 		h = scale2pt( scale )
-		print (h)
+		# print (h)
+		# listw = []
+		# for line in txt:
+		# 	glyphslinenames = tdGlyphparser.translateText(CurrentFont(), line)
+		# 	glyphsline = []
+		# 	wline = 0
+		# 	for name in glyphslinenames:
+		# 		glyph = self.font[name]
+		# 		glyphsline.append(glyph)
+		# 		wline += (glyph.width * scale / 2)
+		# 	print(wline, glyphslinenames)
+		# 	listw.append(wline)
+		# 	glyphslines.append(glyphsline)
+		# ew = max(listw)
+		# print()
+		# print(glyphslines)
+		aaa = 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split(' ')
+		glyphslines = []
 		listw = []
-		for line in txt:
-			glyphslinenames = tdGlyphparser.translateText(CurrentFont(), line)
-			glyphsline = []
+		for s1 in aaa:
+			g1 = self.font[s1]
 			wline = 0
-			for name in glyphslinenames:
-				glyph = self.font[name]
-				glyphsline.append(glyph)
-				wline += (glyph.width * scale / 2)
-			print(wline, glyphslinenames)
+			glyphsline = []
+			for s2 in aaa:
+				g2 = self.font[s2]
+				glyphsline.append(g1)
+				glyphsline.append(g2)
+				wline += (g1.width * scale / 2) + (g2.width * scale / 2)
 			listw.append(wline)
 			glyphslines.append(glyphsline)
 		ew = max(listw)
-		# print()
-		# print(glyphslines)
+
+
 		self.w.itemsView.setSceneItems(items = glyphslines, animated = 'bottom', elementWidth = ew, elementHeight = h) #, animated = 'bottom'
 		# self.w.itemsView.updateSceneItems()
 

@@ -138,18 +138,18 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			# 	'callback': self.exportHistory,
 			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_export_history%s.pdf' % darkm),
 			# },
-			{
-				'itemIdentifier': "toolbarHistoryController",
-				'label': 'History',
-				'callback': self.callHistoryController,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_history%s.pdf' % darkm),
-			},
 			# {
-			# 	'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
+			# 	'itemIdentifier': "toolbarHistoryController",
+			# 	'label': 'History',
+			# 	'callback': self.callHistoryController,
+			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_history%s.pdf' % darkm),
 			# },
-			{
-				'itemIdentifier': AppKit.NSToolbarSpaceItemIdentifier,
-			},
+			# # {
+			# # 	'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
+			# # },
+			# {
+			# 	'itemIdentifier': AppKit.NSToolbarSpaceItemIdentifier,
+			# },
 			{
 				'itemIdentifier': "toolbarAddGroup",
 				'label': 'Add Group',
@@ -270,7 +270,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		self.w.g2.flex1 = vanilla.Group('auto')
 		self.w.g2.flex2 = vanilla.Group('auto')
 
-		segments = [{'width': 120,'title': 'Side 1'}, {'width': 120,'title': 'Side 2'}]
+		segments = [{'width': 100,'title': 'Side 1'}, {'width': 100,'title': 'Side 2'}]
 		self.w.g2.switchSide = vanilla.SegmentedButton('auto',
 		                                               segmentDescriptions = segments,
 		                                               selectionStyle = 'one',
@@ -278,6 +278,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		                                               sizeStyle = 'regular')
 		self.w.g2.switchSide.set(0)
 		self.w.g2.selectGroup = vanilla.PopUpButton('auto', sorted(self.font.groups.keys()), callback = self.selectorGroupsCallback)
+		self.w.g2.btnHistory = vanilla.Button('auto', 'History On', callback = self.callHistoryController)
 
 		self.w.g1 = vanilla.Group('auto')
 		self.w.g1.fontView = TDMerzMatrixView('auto', delegate = self )
@@ -321,7 +322,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			"space": 0
 		}
 		rules2 = [
-			"H:|-sborder-[selectGlyphSet]-sborder-[checkHideGrouped]-[flex1]-[checkKeepKerning]-sborder-[switchSide]-sborder-[selectGroup(==switchSide)]-[flex2(==flex1)]-sborder-|", #
+			"H:|-sborder-[selectGlyphSet]-sborder-[checkHideGrouped]-[flex1]-[checkKeepKerning]-sborder-[switchSide]-sborder-[selectGroup(==switchSide)]-[flex2(==flex1)]-[btnHistory]-sborder-|", #
 			"V:|-border-[selectGlyphSet]-space-|",
 			"V:|-border-[checkHideGrouped]-space-|",
 			"V:|-border-[checkKeepKerning]-space-|",
@@ -329,6 +330,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			"V:|-border-[switchSide]-space-|",
 			"V:|-border-[selectGroup]-space-|",
 			"V:|-border-[flex2]-space-|",
+			"V:|-border-[btnHistory]-space-|",
 		]
 		rules3 = [
 			"H:|[g2]|",

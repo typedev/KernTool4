@@ -45,8 +45,8 @@ class TDHistoryControllerWindow(Subscriber):
 
 		self.w = vanilla.FloatingWindow((500, 600), minSize = (300, 300), title = 'History v%s' % _version)
 
-		self.w.btnStart = vanilla.Button('auto', title = 'Start', callback = self.btnStartStopCallback)
-		self.w.btnStop = vanilla.Button('auto', title = 'Stop', callback = self.btnStartStopCallback)
+		self.w.btnStart = vanilla.Button('auto', title = 'On', callback = self.btnStartStopCallback)
+		self.w.btnStop = vanilla.Button('auto', title = 'Off', callback = self.btnStartStopCallback)
 		self.w.flex1 = vanilla.Group('auto')
 		self.w.btnRollBack = vanilla.Button('auto', title = 'Step back', callback = self.btnStartStopCallback)
 		self.w.flex2 = vanilla.Group('auto')
@@ -91,8 +91,10 @@ class TDHistoryControllerWindow(Subscriber):
 		if self.host:
 			if sender == self.w.btnStart:
 				self.host.hashKernDic.setHistoryResume()
+				self.host.w.g2.btnHistory.setTitle('History On')
 			elif sender == self.w.btnStop:
 				self.host.hashKernDic.setHistoryPause()
+				self.host.w.g2.btnHistory.setTitle('History Off')
 			elif sender == self.w.btnReset:
 				self.host.hashKernDic.clearHistory()
 				self.showHistory()
