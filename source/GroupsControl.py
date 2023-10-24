@@ -1238,6 +1238,11 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 
 def main():
-	registerCurrentFontSubscriber(TDGroupsControl4)
+	if CurrentFont():
+		registerCurrentFontSubscriber(TDGroupsControl4)
+	else:
+		from mojo.UI import Message
+		Message("No open font found..")
+
 if __name__ == "__main__":
 	main()

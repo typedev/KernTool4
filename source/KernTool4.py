@@ -1031,7 +1031,11 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		unregisterCurrentFontSubscriber(self)
 
 def main():
-	registerCurrentFontSubscriber(TDKernMultiTool)
+	if CurrentFont():
+		registerCurrentFontSubscriber(TDKernMultiTool)
+	else:
+		from mojo.UI import Message
+		Message("No open font found..")
 
 if __name__ == "__main__":
 	main()

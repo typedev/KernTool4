@@ -988,7 +988,11 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 		unregisterCurrentGlyphSubscriber(self)
 
 def main():
-	registerCurrentGlyphSubscriber(TDSpaceArkTool)
+	if CurrentFont():
+		registerCurrentGlyphSubscriber(TDSpaceArkTool)
+	else:
+		from mojo.UI import Message
+		Message("No open font found..")
 
 if __name__ == "__main__":
 	main()

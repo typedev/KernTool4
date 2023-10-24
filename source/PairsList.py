@@ -793,6 +793,11 @@ class TDPairsListControl4(Subscriber): #, WindowController
 
 
 def main():
-	registerCurrentFontSubscriber(TDPairsListControl4)
+	if CurrentFont():
+		registerCurrentFontSubscriber(TDPairsListControl4)
+	else:
+		from mojo.UI import Message
+		Message("No open font found..")
+
 if __name__ == "__main__":
 	main()
