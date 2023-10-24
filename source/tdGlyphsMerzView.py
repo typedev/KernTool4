@@ -242,10 +242,24 @@ SHOWTITLES_GLYPH_WIDTH = 1
 SHOWTITLES_GLYPH_INDEX = 100
 
 def pt2Scale(pt):
-	return pt / CurrentFont().info.unitsPerEm
+	if CurrentFont().info.unitsPerEm == 2048:
+		return pt / (CurrentFont().info.unitsPerEm / 2)
+	if CurrentFont().info.unitsPerEm == 1000:
+		return pt / CurrentFont().info.unitsPerEm
 
 def scale2pt(scale):
+	if CurrentFont().info.unitsPerEm == 2048:
+		scale = scale /2
+
 	return round( CurrentFont().info.unitsPerEm * scale, 1 )
+
+def calculateLineHeight(font):
+	if font:
+		if font.info.unitsPerEm == 1000:
+			return 2000
+		if font.info.unitsPerEm == 2048:
+			return 3400
+	return 2000
 
 LEFT_SYMBOL_MARGIN = chr(int('25C2', 16)) # 25C0
 RIGHT_SYMBOL_MARGIN = chr(int('25B8', 16)) # 25B6
@@ -1825,6 +1839,7 @@ class TDGlyphsMerzView (MerzView):
 		# print (self, len(self.placedGlyphLinesDic), len(self.placedGlyphLinesList))
 		container = self.getMerzContainer()
 		container.clearSublayers()
+		self.lineHeight = calculateLineHeight(CurrentFont())
 		xpos = 0
 		heightMatrix = len(glyphslines) * (self.lineHeight + self.lineGap) + self.bottomGap
 		hM = self.height()

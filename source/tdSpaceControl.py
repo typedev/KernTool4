@@ -614,8 +614,9 @@ class TDHashGroupsDic(object):
 			if kerning is different, such an exception will be saved
 		"""
 		report = []
+		glyphlist2add = list(dict.fromkeys(glyphlist)) # filter possible repetitions of glyphs
 		if self.trackHistory:
-			self.history.append(('add', group, glyphlist, checkKerning, checkLanguageCompatibility))
+			self.history.append(('add', group, glyphlist2add, checkKerning, checkLanguageCompatibility))
 		# def msgCanceled(self, glyphname, side, mode, showAlert):
 		# 	txt = 'Glyph %s is already in the group %s, the addition is canceled' % (glyphname, self.getGroupNameByGlyph(glyphname, side, mode))
 		# 	if showAlert:
@@ -657,7 +658,7 @@ class TDHashGroupsDic(object):
 		else:
 			side = SIDE_2
 
-		for glyphname in glyphlist:
+		for glyphname in glyphlist2add:
 			if self.isKerningGroup(group):
 				glyphingroup = checkingPresenceInGroups(self, group, glyphname, side, EDITMODE_KERNING, showAlert, report)
 				if not glyphingroup:
@@ -767,7 +768,7 @@ class TDHashGroupsDic(object):
 				return False
 
 
-	def delGlyphsFromGroup (self, group, glyphlist, checkKerning=True, rebuildMap = True, checkLanguageCompatibility = False):
+	def removeGlyphsFromGroup (self, group, glyphlist, checkKerning=True, rebuildMap = True, checkLanguageCompatibility = False):
 		"""
 		function to remove glyphs from a group
 		if kerning check mode is enabled, existing kerning with this group will be checked:
@@ -777,6 +778,7 @@ class TDHashGroupsDic(object):
 		report = []
 		newPairs = []
 		deletedPairs = []
+		if not glyphlist: return (newPairs, deletedPairs)
 		if self.trackHistory:
 			self.history.append(('remove', group, glyphlist, checkKerning, checkLanguageCompatibility))
 		if group in self.font.groups:
@@ -846,12 +848,11 @@ class TDHashGroupsDic(object):
 		report = []
 		newPairs = []
 		deletedPairs = []
-		if self.trackHistory:
-			self.history.append(('delete', group, checkKerning, checkLanguageCompatibility))
+
 		if group in self.font.groups:
 			glyphslist = self.font.groups[group]
-			newPairs = self.delGlyphsFromGroup(group, glyphslist, checkKerning = checkKerning,
-			                        rebuildMap = False, checkLanguageCompatibility = checkLanguageCompatibility )
+			newPairs = self.removeGlyphsFromGroup(group, glyphslist, checkKerning = checkKerning,
+			                                      rebuildMap = False, checkLanguageCompatibility = checkLanguageCompatibility)
 			report.append (('group removed', group))
 			if self.isKerningGroup(group):
 				report.append ( ('clearing kerning' , ''))
@@ -873,6 +874,8 @@ class TDHashGroupsDic(object):
 						deletedPairs.append((l,r))
 
 			del self.font.groups[group]
+			if self.trackHistory:
+				self.history.append(('delete', group, [], checkKerning, checkLanguageCompatibility))
 			self.makeReverseGroupsMapping()
 		# if report:
 		# 	for i in report:

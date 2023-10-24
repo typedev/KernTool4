@@ -37,7 +37,7 @@ def splitGroupByLanguage (parent, groupname, removeCrossLanguagePairs=False):  #
 			newGroupName = '%s_%s' % (groupname, baseScript)  # glyphslist[0] groupprefix, keyglyph,
 			# print('this glyphs will be groupped to %s group' % newGroupName)
 			# print(glyphslist)
-			(_newPairs, _dp) = self.delGlyphsFromGroup(groupname, glyphslist)
+			(_newPairs, _dp) = self.removeGlyphsFromGroup(groupname, glyphslist)
 			for pair in _newPairs:
 				if pair not in newPairs:
 					newPairs.append(pair)

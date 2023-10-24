@@ -228,9 +228,10 @@ class TDMerzMatrixDesigner (object): #MerzView
 		# dw, dh = self.documentLayer.getSize()
 		# dx, dy = self.documentLayer.getPosition()
 		# if dy + dh > 0:
-		with self.documentLayer.propertyGroup():  # duration = .5
-			self.documentLayer.setPosition((0, h - dh))  # - (dy + dh)
-			self.dropsLayer.setPosition((0, h - dh))  # - (dy + dh)
+
+		# with self.documentLayer.propertyGroup():  # duration = .5
+		# 	self.documentLayer.setPosition((0, h - dh))  # - (dy + dh)
+		# 	self.dropsLayer.setPosition((0, h - dh))  # - (dy + dh)
 
 		if direction == 'bottom' and animated:
 			self.documentLayer.setPosition((0, - dh))
@@ -263,16 +264,17 @@ class TDMerzMatrixDesigner (object): #MerzView
 						_x,_y = layer.getPosition()
 						layer.setPosition((_x, _y + 10))
 						d += .02
-
-		elif not animated:
+		else:
+		# elif not animated:
 			w, h = self.container.getSize()
 			dw, dh = self.documentLayer.getSize()
-			# dx, dy = self.documentLayer.getPosition()
+			dx, dy = self.documentLayer.getPosition()
 			# if dy + dh > 0:
-			with self.documentLayer.propertyGroup():  # duration = .5
-				self.documentLayer.setPosition((0, h - dh))  # - (dy + dh)
-				self.dropsLayer.setPosition((0, h - dh))  # - (dy + dh)
-				self.drawBase()
+			if dh < h or dy + dh - h <=0:
+				with self.documentLayer.propertyGroup():  # duration = .5
+					self.documentLayer.setPosition((0, h - dh))  # - (dy + dh)
+					self.dropsLayer.setPosition((0, h - dh))  # - (dy + dh)
+					self.drawBase()
 
 
 
@@ -691,7 +693,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 			# 		    dict(
 			# 		        name="motionBlur",
 			# 		        filterType="motionBlur",
-			# 		        radius=1.0,
+			# 		        radius=5.0,
 			# 		        angle=90
 			# 		        )
 			# 			)
@@ -789,6 +791,10 @@ class TDMerzMatrixDesigner (object): #MerzView
 			with self.documentLayer.propertyGroup():  # duration = .5
 				self.documentLayer.setPosition((0, h - dh))  # - (dy + dh)
 				self.dropsLayer.setPosition((0, h - dh))  # - (dy + dh)
+		# else:
+		# 	with self.documentLayer.propertyGroup():
+		# 		self.documentLayer.setPosition((dx, dy))  # - (dy + dh)
+		# 		self.dropsLayer.setPosition((dx, dy))  # - (dy + dh)
 
 		# self.drawBase(refresh = True)
 	def checkWidthElement(self):
@@ -873,26 +879,31 @@ class TDMerzMatrixDesigner (object): #MerzView
 			self.elementWidth = elementWidth
 		if elementHeight:
 			self.elementHeight = elementHeight
+
+		animatedStart = False
+		if animated == 'bottom' or animated == 'left' or animated == 'right' or animated == 'shake':
+			animatedStart = True
+
 		if len(items) > len(self.items):
 			self.updateSceneItems()
 			items2insert = items[len(self.items):]
 			self.insertSceneItems(items = items2insert, elementWidth = elementWidth, elementHeight = elementHeight)
 			self.items = items
 			self.reloadSceneItems(items)
+			self.resizeScene(positiontozero = True)
+			self.moveSceneToStartPosition(animated = animatedStart, direction = animated)
 		elif len(items) < len(self.items):
 			self.updateSceneItems()
 			s = [ self.items.index(x) for x in self.items[len(items):] ]
 			self._removeSceneItems(itemsIndexes = s)
 			self.items = items
 			self.reloadSceneItems(items)
+			self.resizeScene(positiontozero = False)
+			self.moveSceneToStartPosition(animated = animatedStart, direction = animated)
 		elif len(items) == len(self.items):
 			self.reloadSceneItems(items)
 		# self.reCalculateSizeScene(positiontozero = True)
-		self.resizeScene(positiontozero = True)
-		animatedStart = False
-		if animated == 'bottom' or animated == 'left' or animated == 'right' or animated == 'shake':
-			animatedStart = True
-		self.moveSceneToStartPosition(animated = animatedStart, direction = animated)
+		self.drawBase()
 		self.drawControlsElements()
 
 
@@ -1037,8 +1048,8 @@ class TDMerzMatrixDesigner (object): #MerzView
 				layersToRemove.append(layer)
 			for layer in layersToRemove:
 				self.documentLayer.removeSublayer(layer)
-		self.reCalculateSizeScene()
-		self.resizeScene()
+		# self.reCalculateSizeScene()
+		self.resizeScene(positiontozero = False)
 
 
 	def removeSceneItems(self, itemsIndexes):
@@ -1436,8 +1447,7 @@ class TDMerzMatrixView(vanilla.Group):
 			layerName = layer.getName()
 			if layerName and layerName == 'contentLayer':
 				scene = layer.getSuperlayer().getSuperlayer()  # TODO there might be a problem
-				self.view.eventDrop(scene, dropInfo = dict(
-															sourceScene = source.getSceneById(items[0]['idScene']),
+				self.view.eventDrop(scene, dropInfo = dict(sourceScene = source.getSceneById(items[0]['idScene']),
 				                                           # sourceView = (sender, source),
 				                                           layerOver = self.view.getIndexOfLayer( scene, layer ),
 				                                           indexes = list(items[0]['indexes'])))
@@ -1447,7 +1457,8 @@ class TDMerzMatrixView(vanilla.Group):
 			if layerName and layerName == 'scene':
 				self.view.eventDrop(layer, dropInfo = dict(sourceScene = source.getSceneById(items[0]['idScene']),
 				                                           # sourceView = (sender, source),
-				                                           layerOver = 'scene', indexes = list(items[0]['indexes'])))
+				                                           layerOver = 'scene',
+				                                           indexes = list(items[0]['indexes'])))
 
 		self.view.removeDraggedCursor()
 

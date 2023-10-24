@@ -17,6 +17,7 @@ from vanilla.dialogs import getFile, putFile
 from mojo.subscriber import Subscriber, registerCurrentFontSubscriber, unregisterCurrentFontSubscriber
 from mojo.UI import SelectFont, AskString
 from mojo.events import postEvent
+from vanilla.vanillaBase import osVersionCurrent, osVersion10_14
 
 import tdSpaceControl
 importlib.reload(tdSpaceControl)
@@ -44,6 +45,10 @@ from tdLangSet import *
 
 import ScriptsBoard
 importlib.reload(ScriptsBoard)
+
+import tdHistoryController
+importlib.reload(tdHistoryController)
+
 # from ScriptsBoard import main
 
 
@@ -65,9 +70,15 @@ class TDGroupsControl4(Subscriber): #, WindowController
 	def build (self):
 		darkm = ''
 		KERNTOOL_UI_DARKMODE = False
-		dark = AppKit.NSAppearance.appearanceNamed_(AppKit.NSAppearanceNameDarkAqua)
-		if AppKit.NSApp().appearance() == dark:
-			KERNTOOL_UI_DARKMODE = True
+
+		if osVersionCurrent >= osVersion10_14:
+			dark = AppKit.NSAppearance.appearanceNamed_(AppKit.NSAppearanceNameDarkAqua)
+			if AppKit.NSApp().appearance() == dark:
+				KERNTOOL_UI_DARKMODE = True
+			if hasattr(mojo.UI, 'inDarkMode'):
+				if mojo.UI.inDarkMode():
+					KERNTOOL_UI_DARKMODE = True
+
 		if KERNTOOL_UI_DARKMODE:
 			darkm = '-dark'
 		self.idName = 'GroupsControl4'
@@ -102,34 +113,43 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			# },
 			{
 				'itemIdentifier': "toolbarImportGroup",
-				'label': 'Load Groups',
+				'label': 'Import Groups',
 				'callback': self.importGroupsCallback,
 				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_import_groups%s.pdf' % darkm),
 			},
 			{
 				'itemIdentifier': "toolbarExportGroup",
-				'label': 'Save Groups',
+				'label': 'Export Groups',
 				'callback': self.exportGroupsCallback,
 				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_export_groups%s.pdf' % darkm),
 			},
 			{
 				'itemIdentifier': AppKit.NSToolbarSpaceItemIdentifier,
 			},
-			{
-				'itemIdentifier': "toolbarImportHistory",
-				'label': 'Load History',
-				'callback': self.importHistory,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_import_history%s.pdf' % darkm),
-			},
-			{
-				'itemIdentifier': "toolbarExportHistory",
-				'label': 'Save History',
-				'callback': self.exportHistory,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_export_history%s.pdf' % darkm),
-			},
-			{
-				'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
-			},
+			# {
+			# 	'itemIdentifier': "toolbarImportHistory",
+			# 	'label': 'Load History',
+			# 	'callback': self.importHistory,
+			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_import_history%s.pdf' % darkm),
+			# },
+			# {
+			# 	'itemIdentifier': "toolbarExportHistory",
+			# 	'label': 'Save History',
+			# 	'callback': self.exportHistory,
+			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_export_history%s.pdf' % darkm),
+			# },
+			# {
+			# 	'itemIdentifier': "toolbarHistoryController",
+			# 	'label': 'History',
+			# 	'callback': self.callHistoryController,
+			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_history%s.pdf' % darkm),
+			# },
+			# # {
+			# # 	'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
+			# # },
+			# {
+			# 	'itemIdentifier': AppKit.NSToolbarSpaceItemIdentifier,
+			# },
 			{
 				'itemIdentifier': "toolbarAddGroup",
 				'label': 'Add Group',
@@ -250,7 +270,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		self.w.g2.flex1 = vanilla.Group('auto')
 		self.w.g2.flex2 = vanilla.Group('auto')
 
-		segments = [{'width': 120,'title': 'Side 1'}, {'width': 120,'title': 'Side 2'}]
+		segments = [{'width': 100,'title': 'Side 1'}, {'width': 100,'title': 'Side 2'}]
 		self.w.g2.switchSide = vanilla.SegmentedButton('auto',
 		                                               segmentDescriptions = segments,
 		                                               selectionStyle = 'one',
@@ -258,6 +278,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		                                               sizeStyle = 'regular')
 		self.w.g2.switchSide.set(0)
 		self.w.g2.selectGroup = vanilla.PopUpButton('auto', sorted(self.font.groups.keys()), callback = self.selectorGroupsCallback)
+		self.w.g2.btnHistory = vanilla.Button('auto', 'History On', callback = self.callHistoryController)
 
 		self.w.g1 = vanilla.Group('auto')
 		self.w.g1.fontView = TDMerzMatrixView('auto', delegate = self )
@@ -287,7 +308,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			"H:|[fontView]-space-[contentView(>=fontView)]-space-[kernListView(>=340)]|",
 			"H:|[linesPreview]|",
 			"V:|[fontView]-space-[linesPreview(==175)]|",
-			"V:|[groupView]-space-[contentView(==195)]-space-[linesPreview(==175)]|",
+			"V:|[groupView]-space-[contentView(==245)]-space-[linesPreview(==175)]|",
 			"V:|[kernListView]-space-[linesPreview(==175)]|"
 			# "V:||",
 		]
@@ -301,7 +322,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			"space": 0
 		}
 		rules2 = [
-			"H:|-sborder-[selectGlyphSet]-sborder-[checkHideGrouped]-[flex1]-[checkKeepKerning]-sborder-[switchSide]-sborder-[selectGroup(==switchSide)]-[flex2(==flex1)]-sborder-|", #
+			"H:|-sborder-[selectGlyphSet]-sborder-[checkHideGrouped]-[flex1]-[checkKeepKerning]-sborder-[switchSide]-sborder-[selectGroup(==switchSide)]-[flex2(==flex1)]-[btnHistory]-sborder-|", #
 			"V:|-border-[selectGlyphSet]-space-|",
 			"V:|-border-[checkHideGrouped]-space-|",
 			"V:|-border-[checkKeepKerning]-space-|",
@@ -309,6 +330,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			"V:|-border-[switchSide]-space-|",
 			"V:|-border-[selectGroup]-space-|",
 			"V:|-border-[flex2]-space-|",
+			"V:|-border-[btnHistory]-space-|",
 		]
 		rules3 = [
 			"H:|[g2]|",
@@ -751,12 +773,13 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 		self.w.g1.kernListView.setSceneItems(items = [])
 		if groupname:
-			groupnames = [groupname]
-			if len(self.w.g1.groupView.getSelectedSceneItems()) > 1:
-				groupnames =[]
-				for idx in self.w.g1.groupView.getSelectedSceneItems():
-					gn = self.w.g1.groupView.getSceneItems()[idx]
-					groupnames.append(gn)
+			# groupnames = [groupname]
+			# if len(self.w.g1.groupView.getSelectedSceneItems()) > 1:
+			# 	groupnames =[]
+			# 	for idx in self.w.g1.groupView.getSelectedSceneItems():
+			# 		gn = self.w.g1.groupView.getSceneItems()[idx]
+			# 		groupnames.append(gn)
+			groupnames = self.getSelectedGroupNames()
 			pairs = []
 			for groupname in groupnames:
 				_pairs = self.hashKernDic.getPairsBy(groupname, self.groupsSide)
@@ -848,6 +871,17 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		              info = '%s  \n+composites\n+parents\n\n*Check the %s side,\nuse a Beam [B] for more accuracy' % (displayTitle, txtside))
 		self.w.g1.linesPreview.startDrawGlyphsMatrix([matrix], animatedStart = False)
 
+	def getSelectedGroupNames(self):
+		groupnames = []
+		if self.selectedGroup:
+			groupnames = [self.selectedGroup]
+			if len(self.w.g1.groupView.getSelectedSceneItems()) > 1:
+				groupnames = []
+				for idx in self.w.g1.groupView.getSelectedSceneItems():
+					gn = self.w.g1.groupView.getSceneItems()[idx]
+					groupnames.append(gn)
+		return groupnames
+
 
 	def selectGroupLayerCallback (self, sender, info):
 		layer = info['layer']
@@ -927,7 +961,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		if destinationScene == self.sceneFont and sourceScene == self.sceneGroupContent:
 			# print ('remove glyph from group')
 			listofglyphs = self.w.g1.contentView.getSceneItems() # self.sceneGroupContent
-			self.hashKernDic.delGlyphsFromGroup(self.selectedGroup,[listofglyphs[idx] for idx in itemsIndexes], checkKerning = self.updateKerning)
+			self.hashKernDic.removeGlyphsFromGroup(self.selectedGroup, [listofglyphs[idx] for idx in itemsIndexes], checkKerning = self.updateKerning)
 			self.w.g1.contentView.setSceneItems(items = list(self.font.groups[self.selectedGroup]), animated = 'shake') # scene = sourceScene,
 
 			self.w.g1.fontView.setSceneItems(items = self.getFilteredFontListOfGlyphs())
@@ -1085,95 +1119,6 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			self.refreshGroupsView()
 
 
-	def exportHistory (self, sender):
-		fn = putFile(messageText = 'Export History to file', title = 'title')
-		if fn:
-			commands = []
-			for item in self.hashKernDic.history:
-				# print(item)
-				o = False
-				l = False
-				if item[0] == 'delete':
-					c = 'delete'
-					g = item[1]
-					n = ''
-					o = item[2]
-					l = item[3]
-				elif item[0] == 'add':
-					c = 'add'
-					g = item[1]
-					n = ' '.join(item[2])
-					o = item[3]
-					l = item[4]
-				elif item[0] == 'remove':
-					c = 'remove'
-					g = item[1]
-					n = ' '.join(item[2])
-					o = item[3]
-					l = item[4]
-				if o:
-					o = '+'  # check kerning
-				else:
-					o = '-'  # skip kerning
-				if l:
-					l = '+'  # check language
-				else:
-					l = '-'  # skip language
-
-				commands.append('%s %s %s %s %s' % (c, o, l, g, n))
-			print('\n'.join(commands))
-			f = open(fn, mode = 'w')
-			f.write('\n'.join(commands))
-			f.close()
-
-	def importHistory (self, sender):
-		fn = getFile(messageText = 'Import History from file', title = 'title')
-		if fn and fn[0]:
-			f = open(fn[0], mode = 'r')
-			for line in f:
-				line = line.strip()
-				if line and not line.startswith('#'):
-					command = []
-					command = line.split(' ')
-					# print (command)
-					if command[0] == 'add':
-						checkKerning = False
-						checkLanguage = False
-						if command[1] == '+':
-							checkKerning = True
-						if command[2] == '+':
-							checkLanguage = True
-						groupname = command[3]
-						glyphslist = command[4:]
-						self.hashKernDic.addGlyphsToGroup(groupname, glyphslist, checkKerning = checkKerning,
-						                                  checkLanguageCompatibility = checkLanguage)
-					elif command[0] == 'remove':
-						checkKerning = False
-						checkLanguage = False
-						if command[1] == '+':
-							checkKerning = True
-						if command[2] == '+':
-							checkLanguage = True
-						groupname = command[3]
-						glyphslist = command[4:]
-						self.hashKernDic.delGlyphsFromGroup(groupname, glyphslist, checkKerning = checkKerning,
-						                                    checkLanguageCompatibility = checkLanguage)
-					elif command[0] == 'delete':
-						checkKerning = False
-						checkLanguage = False
-						if command[1] == '+':
-							checkKerning = True
-						if command[2] == '+':
-							checkLanguage = True
-						groupname = command[3]
-						self.hashKernDic.deleteGroup(groupname, checkKerning = checkKerning, checkLanguageCompatibility = checkLanguage)
-			f.close()
-			self.hashKernDic.clearHistory()
-			self.setFontView(animated = 'left')
-			self.setGroupsView(animated = 'left')
-			self.w.g1.contentView.setSceneItems(  items = list(self.font.groups[self.selectedGroup]),  animated = 'left')
-
-
 	def importGroupsCallback (self, sender):
 		fn = getFile(messageText = 'Import Groups from file', title = 'title')
 
@@ -1186,21 +1131,24 @@ class TDGroupsControl4(Subscriber): #, WindowController
 				del self.font.groups[groupname]
 
 			f = open(fn[0], mode = 'r')
-			self.font.groups.clear()
+			# self.font.groups.clear()
+			self.hashKernDic.setFont(self.font, self.langSet)
 			for line in f:
 				line = line.strip()
 				groupname = line.split('=')[0]
 				print('Making group', groupname)
-				self.font.groups[groupname] = ()
+				# self.font.groups[groupname] = ()
 				if len(line.split('='))==2:
 					glist = []
 					content = line.split('=')[1].split(',')
 					for gname in content:
 						if gname in self.font:
 							glist.append(gname)
-					self.font.groups[groupname] = tuple(glist)
+					# self.font.groups[groupname] = tuple(glist)
+					report = self.hashKernDic.addGlyphsToGroup(groupname,glist)
+					# print (report)
 			f.close()
-			print('Groups loaded..')
+			print('Groups imported..')
 			self.hashKernDic.setFont(self.font, self.langSet)
 			self.setFontView(animated = 'left')
 			self.setGroupsView(animated = 'left')
@@ -1234,7 +1182,9 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		self.w.g1.contentView.clearScene()
 		self.w.g1.kernListView.clearScene()
 		if self.ScriptsBoardWindow:
-			self.ScriptsBoardWindow.close()
+			try:
+				self.ScriptsBoardWindow.close()
+			except: pass
 		unregisterCurrentFontSubscriber(self)
 
 	def keyDown (self, sender, event):
@@ -1266,6 +1216,10 @@ class TDGroupsControl4(Subscriber): #, WindowController
 	def runScriptsBoardCallback(self, sender):
 		self.ScriptsBoardWindow = ScriptsBoard.main(parent = self)
 
+	def callHistoryController(self, sender):
+		tdHistoryController.main(host = self)
+
+
 	# this section is required for Merz
 	def acceptsFirstResponder (self, info):
 		return True
@@ -1284,6 +1238,11 @@ class TDGroupsControl4(Subscriber): #, WindowController
 
 
 def main():
-	registerCurrentFontSubscriber(TDGroupsControl4)
+	if CurrentFont():
+		registerCurrentFontSubscriber(TDGroupsControl4)
+	else:
+		from mojo.UI import Message
+		Message("No open font found..")
+
 if __name__ == "__main__":
 	main()

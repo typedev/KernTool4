@@ -391,7 +391,7 @@ def drawKernPairListed( container, font, columns, hashKernDic, pairInfo, mode = 
 	_pair = pair
 	if pair not in font.kerning: return
 	layerWidth, layerHeight = container.getSize()
-	pointSize1, pointSize2 = pointSize, pointSize
+	pointSize1, pointSize2 = pointSize+3, pointSize
 	l = sortL
 	r = sortR
 
@@ -420,19 +420,20 @@ def drawKernPairListed( container, font, columns, hashKernDic, pairInfo, mode = 
 			if grouppedL:
 				baselayer.appendTextLineSublayer(
 					name = 'side1g',
+					# font = 'Apple Symbols',
 					position = (layersXpos[0], 5), # - 15
 					fillColor = (.3, .3, .7, .6),
 					pointSize = pointSize1,
-					text = '􀚈',  # % ('@'), 􀚓
+					text = '@',  # % ('@'), 􀚓 􀚈 ◧
 					horizontalAlignment = "left",
-					offset = (0, yoffset)  # -(self.pointSize/2)+2
+					offset = (0, yoffset+3)  # -(self.pointSize/2)+2
 				)
 
 			baselayer.appendTextLineSublayer(
 				name = 'side1',
 				position = (layersXpos[0] + 15 , 5),
 				fillColor = (0, 0, 0, 1),
-				pointSize = pointSize1,
+				pointSize = pointSize2,
 				text = l,
 				horizontalAlignment = "left",
 				offset = (0, yoffset)  # -(self.pointSize/2)+2
@@ -441,12 +442,13 @@ def drawKernPairListed( container, font, columns, hashKernDic, pairInfo, mode = 
 			if grouppedR:
 				baselayer.appendTextLineSublayer(
 					name = 'side2g',
+					# font = 'Apple Symbols',
 					position = (layersXpos[1], 5), #  - 15
 					fillColor = (.3, .3, .7, .6),
-					pointSize = pointSize2,
-					text = '􀚈',  # % (r), 􀚔
+					pointSize = pointSize1,
+					text = '@',  # % (r), 􀚔 􀚈 ◨
 					horizontalAlignment = "left",
-					offset = (0, yoffset),
+					offset = (0, yoffset+3),
 					# backgroundColor = (1,1,1,.8)
 				)
 
@@ -518,24 +520,26 @@ def drawKernPairListed( container, font, columns, hashKernDic, pairInfo, mode = 
 			if langs:
 				baselayer.appendTextLineSublayer(
 					name = 'kernValue.cross',
+					# font = 'Apple Symbols',
 					position = (layersXpos[4] + layersWidth[4] / 2, 5),  # +
 					fillColor = langscolor,
-					pointSize = pointSize,
-					text = '􀆪',
+					pointSize = pointSize1,
+					text = '􀆪', # 􀆪 ⁕
 					horizontalAlignment = "center",
-					offset = (2, yoffset),
+					offset = (2, yoffset+3),
 					# backgroundColor = (1, 1, 1, .8)
 				)
 
 			if hasError:
 				baselayer.appendTextLineSublayer(
 					name = 'errormark',
+					# font = 'Apple Symbols',
 					position = (layersXpos[5] + layersWidth[5] / 2, 5),  # + 15
 					fillColor = (.6, .1, .1, 1),
-					pointSize = pointSize,
-					text = '􀇿',
+					pointSize = pointSize1,
+					text = 'X', # 􀇿 ⊗ X
 					horizontalAlignment = "left",
-					offset = (-1, yoffset),
+					offset = (-1, yoffset+2),
 					# backgroundColor = (1, 1, 1, .8)
 				)
 

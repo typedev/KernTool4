@@ -20,6 +20,22 @@
 			<key>shortKey</key>
 			<string></string>
 		</dict>
+		<dict>
+			<key>path</key>
+			<string>PairsList.py</string>
+			<key>preferredName</key>
+			<string>PairsList</string>
+			<key>shortKey</key>
+			<string></string>
+		</dict>
+		<dict>
+			<key>path</key>
+			<string>SpaceArk.py</string>
+			<key>preferredName</key>
+			<string>SpaceArk</string>
+			<key>shortKey</key>
+			<string></string>
+		</dict>
 	</array>
 	<key>developer</key>
 	<string>Alexander Lubovenko</string>
@@ -36,10 +52,10 @@
 	<key>requiresVersionMajor</key>
 	<string>4</string>
 	<key>requiresVersionMinor</key>
-	<string>2</string>
+	<string>4</string>
 	<key>timeStamp</key>
-	<real>1666267139.29266</real>
+	<real>1698189397.4810891</real>
 	<key>version</key>
-	<string>4.1.6</string>
+	<string>4.3.0</string>
 </dict>
 </plist>
