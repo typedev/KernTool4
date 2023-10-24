@@ -5,7 +5,7 @@ KernTool4 is a set of extensions for working with kerning, glyph margins and gro
 ---
 
 #### Version history:
-- `4.3.0` - Added two parts of the extension - `PairsList` and `SpaceArk` _(Documentation will come later)_. Fixed to support `Robofont 4.4`
+- `4.3.0` - Added two parts of the extension - `PairsList` and `SpaceArk (beta)` _(Documentation will come later)_. Fixed to support `Robofont 4.4`
 
 - `4.1.6` - `GroupsControl:` fixed to support Robofont 4.3
 - `4.1.5` - `GroupsControl:` added buttons `Delete/Send to KernTool` to PairsList and added option `Rename Group`. Improved sorting of the PairsList
