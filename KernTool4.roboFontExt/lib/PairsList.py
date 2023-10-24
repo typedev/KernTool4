@@ -62,9 +62,9 @@ kernToolBundle = mojo.extensions.ExtensionBundle(path=pathForBundle, resourcesNa
 SELECTION_MODE_ALLPAIRS_PL = 0
 SELECTION_MODE_SELECTEDGLYPHS_PL = 1
 
-FILRER_SIDE_1_PL = 0
+FILTER_SIDE_1_PL = 0
 FILTER_SIDE_BOTH_PL = 1
-FILRER_SIDE_2_PL = 2
+FILTER_SIDE_2_PL = 2
 
 PREFKEY_PL_Patterns = '%s.KernToolUI.PairsList.Patterns' % PREFKEY_base
 PREFKEY_PL_Patterns_Side1 = '%s.KernToolUI.PairsList.Patterns.Side1' % PREFKEY_base
@@ -125,7 +125,7 @@ class TDPairsListSettingsDialogWindow(object):
 		}
 		self.w.sp.titlebox = vanilla.TextBox('auto', 'KernTool interaction settings')
 		self.w.sp.swchPatternsBox = vanilla.Box('auto', 'Pattern separator')
-		self.w.sp.swchPatternsBox.radioGroup = vanilla.VerticalRadioGroup(
+		self.w.sp.swchPatternsBox.radioGroup = vanilla.RadioGroup(
 			"auto",
 			["Automatically - depending on the language and purpose of the glyphs", "Custom"],
 			callback = self.swchPatternsBoxCallback
@@ -145,8 +145,8 @@ class TDPairsListSettingsDialogWindow(object):
 		rules = [
 			"H:|-[radioGroup]-|",
 			"H:|-[editSide1]-border-[editSide2(==editSide1)]-|",
-			"V:|-[radioGroup(==%d)]-border-[editSide1]-|" % self.w.sp.swchPatternsBox.radioGroup.getFittingHeight(),
-			"V:|-[radioGroup(==%d)]-border-[editSide2]-|" % self.w.sp.swchPatternsBox.radioGroup.getFittingHeight()
+			"V:|-[radioGroup]-border-[editSide1]-|", # (==%d) % self.w.sp.swchPatternsBox.radioGroup.getFittingHeight(),
+			"V:|-[radioGroup]-border-[editSide2]-|" #% (==%d) self.w.sp.swchPatternsBox.radioGroup.getFittingHeight()
 
 		]
 		self.w.sp.swchPatternsBox.addAutoPosSizeRules(rules, metrics1)
@@ -174,7 +174,7 @@ class TDPairsListSettingsDialogWindow(object):
 
 
 		self.w.sp.swchGroppedBox = vanilla.Box('auto', 'Sending method')
-		self.w.sp.swchGroppedBox.radioGroup = vanilla.VerticalRadioGroup(
+		self.w.sp.swchGroppedBox.radioGroup = vanilla.RadioGroup(
 			"auto",
 			["Groupped - pairs will be represented by the first characters in the group",
 			 "Expanded - pairs will be represented by a list of all possible combinations"],
@@ -183,7 +183,7 @@ class TDPairsListSettingsDialogWindow(object):
 		self.w.sp.swchGroppedBox.radioGroup.set(getExtensionDefault(PREFKEY_PL_SendingMethod,fallback = 0))
 		rules = [
 			"H:|-[radioGroup]-|",
-			"V:|-[radioGroup(==%d)]-|" % self.w.sp.swchGroppedBox.radioGroup.getFittingHeight()
+			"V:|-[radioGroup]-|" # (==%d) % self.w.sp.swchGroppedBox.radioGroup.getFittingHeight()
 		]
 		self.w.sp.swchGroppedBox.addAutoPosSizeRules(rules)
 
@@ -267,6 +267,9 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		self.updateKerning = True
 		self.groupPrefix = ID_KERNING_GROUP
 		self.groupsSide = SIDE_1
+
+		self.lastKernState = {}
+		self.currentKernState = {}
 
 		self.w.toolbar = vanilla.Group('auto')
 		self.w.toolbar.btnSelectFont = vanilla.Button('auto','􁉽', callback = self.selectFontCallback)
@@ -539,11 +542,11 @@ class TDPairsListControl4(Subscriber): #, WindowController
 
 	def switchFilterSideCallback(self, sender):
 		if sender.get() == 0:
-			self.filterMode = FILRER_SIDE_1_PL
+			self.filterMode = FILTER_SIDE_1_PL
 		elif sender.get() == 1:
 			self.filterMode = FILTER_SIDE_BOTH_PL
 		elif sender.get() == 2:
-			self.filterMode = FILRER_SIDE_2_PL
+			self.filterMode = FILTER_SIDE_2_PL
 		self.showKernList(glyphNames = self.kernListLastSelection)
 
 	def selectPairLayerCallback(self, sender, info):
@@ -631,6 +634,8 @@ class TDPairsListControl4(Subscriber): #, WindowController
 				sortR = r.replace(_mask2id, '')
 				if r in self.hashKernDic.groupsHasErrorList:
 					hasError = 20
+				elif r not in self.font.groups:
+					hasError = 21
 			else:
 				if r not in self.font:
 					hasError = 25
@@ -639,6 +644,8 @@ class TDPairsListControl4(Subscriber): #, WindowController
 				sortL = l.replace(_mask1id, '')
 				if l in self.hashKernDic.groupsHasErrorList:
 					hasError = 10
+				elif l not in self.font.groups:
+					hasError = 11
 				_pairslist[(l, r)] = (sortL, sortR, True, grouppedR, v, note, keyGlyphL, keyGlyphR, langs, hasError)
 			else:
 				if l not in self.font:
@@ -674,20 +681,20 @@ class TDPairsListControl4(Subscriber): #, WindowController
 		pairs = []
 		for idx in self.w.kernListView.getSelectedSceneItems():
 			pairsselected.append(self.w.kernListView.getSceneItems()[idx][0])
-		self.w.kernListView.setSceneItems(items = [])
+		# self.w.kernListView.setSceneItems(items = [])
 
 		if glyphNames:
 			pairs = []
 			_pairs = None
 			for name in glyphNames:
-				if self.filterMode == FILRER_SIDE_1_PL:
+				if self.filterMode == FILTER_SIDE_1_PL:
 					_pairs = self.hashKernDic.getPairsBy(name, SIDE_1)
 					gname = self.hashKernDic.getGroupNameByGlyph(name, side = SIDE_1)
 					if gname != name:
 						_pairsG = self.hashKernDic.getPairsBy(gname, SIDE_1)
 						_pairs += _pairsG
 
-				elif self.filterMode == FILRER_SIDE_2_PL:
+				elif self.filterMode == FILTER_SIDE_2_PL:
 					_pairs = self.hashKernDic.getPairsBy(name, SIDE_2)
 					gname = self.hashKernDic.getGroupNameByGlyph(name, side = SIDE_2)
 					if gname != name:
@@ -759,13 +766,13 @@ class TDPairsListControl4(Subscriber): #, WindowController
 	def fontKerningDidChange(self, info):
 		self.showKernList(glyphNames = self.kernListLastSelection)
 
+	def fontKerningDidChangePair(self, info):
+		pass
 
 	def fontGroupsDidChange(self, info):
 		self.hashKernDic.setFont(self.font, self.langSet)
 		self.showKernList(glyphNames = self.kernListLastSelection)
 
-	# def fontKerningDidChangePair(self, info):
-	# 	print('fontKerningDidChangePair', info)
 
 
 	# this section is required for Merz
@@ -786,6 +793,11 @@ class TDPairsListControl4(Subscriber): #, WindowController
 
 
 def main():
-	registerCurrentFontSubscriber(TDPairsListControl4)
+	if CurrentFont():
+		registerCurrentFontSubscriber(TDPairsListControl4)
+	else:
+		from mojo.UI import Message
+		Message("No open font found..")
+
 if __name__ == "__main__":
 	main()

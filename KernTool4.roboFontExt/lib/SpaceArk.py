@@ -62,12 +62,20 @@ a b c d e f g h i j k l m n o p q r s t u v w x y z
 """.split('\n')[1:-1]
 
 
+
 class FontSelectorDialogWindow(object):
 	# nsViewClass = NSView
 
 	def __init__ (self, parentWindow,
 	              callback=None, fontListSelected=None, scales = None
 	              ):
+
+		def getUFOfileName(font):
+			if font.path:
+				return os.path.basename(font.path)
+			else:
+				return ('-- this is not a UFO file --')
+
 		wW = 800
 		hW = 300
 		self.w = vanilla.Sheet((wW, hW), parentWindow) #minSize = (wW,hW), ,  maxSize = (500,1000)
@@ -78,7 +86,7 @@ class FontSelectorDialogWindow(object):
 		if not fontListSelected:
 
 			for idx, font in enumerate(AllFonts()):
-				listitems.append( {'UFO': font.path.split('/')[-1],
+				listitems.append( {'UFO': getUFOfileName(font), #)font.path.split('/')[-1],
 				                   'Family': '%s' % font.info.familyName,
 				                   'Style': '%s' % font.info.styleName,
 				                   'Select': True,
@@ -91,7 +99,7 @@ class FontSelectorDialogWindow(object):
 				scale = 1.0
 				if scales and font in scales:
 					scale = scales[font]
-				listitems.append({'UFO': font.path.split('/')[-1],
+				listitems.append({'UFO': getUFOfileName(font), # font.path.split('/')[-1],
 				                  'Family': '%s' % font.info.familyName,
 				                  'Style': '%s' % font.info.styleName,
 				                  'Select': True,
@@ -102,7 +110,7 @@ class FontSelectorDialogWindow(object):
 				idx += 1
 			for font in AllFonts():
 				if font not in fontListSelected:
-					listitems.append({'UFO': font.path.split('/')[-1],
+					listitems.append({'UFO': getUFOfileName(font), #font.path.split('/')[-1],
 					                  'Family': '%s' % font.info.familyName,
 					                  'Style': '%s' % font.info.styleName,
 					                  'Select': False,
@@ -980,7 +988,11 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 		unregisterCurrentGlyphSubscriber(self)
 
 def main():
-	registerCurrentGlyphSubscriber(TDSpaceArkTool)
+	if CurrentFont():
+		registerCurrentGlyphSubscriber(TDSpaceArkTool)
+	else:
+		from mojo.UI import Message
+		Message("No open font found..")
 
 if __name__ == "__main__":
 	main()

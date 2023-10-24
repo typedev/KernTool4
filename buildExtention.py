@@ -9,12 +9,12 @@
 name = "KernTool4"
 description = 'KernTool4 is an extension for working with Kerning and glyph Margins in Robofont4.'
 tags = 'kerning, spacing, margins'
-version = "4.2.2"
+version = "4.3.0"
 mainScriptsList = ['KernTool4', 'GroupsControl', 'PairsList', 'SpaceArk']
 
 developer = "Alexander Lubovenko"
 developerURL = "https://github.com/typedev"
-roboFontVersion = "4.2"
+roboFontVersion = "4.4"
 iconFile = 'icon.png'
 
 # ------------------------------------------------------------------------

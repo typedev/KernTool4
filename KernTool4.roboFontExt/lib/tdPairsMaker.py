@@ -275,6 +275,11 @@ class PairsBuilderDialogWindow(object):
 		                                      value = False, sizeStyle = 'small',
 		                                      callback = self.edittextcallback)
 
+		# self.w.gc.autoFixTouches = CheckBox((gcleftHalfX+120, blockY3, gcwx1, elemH),
+		#                                       title = 'auto fix',
+		#                                       value = False, sizeStyle = 'small',
+		#                                       callback = self.edittextcallback)
+
 		self.w.gbl = Group((10,-40,355,-0))
 		self.w.gbl.btnCancel = Button((leftX, 10, gcwx1, elemH), "Cancel",
 		                          callback = self.btnCloseCallback, sizeStyle = 'small')

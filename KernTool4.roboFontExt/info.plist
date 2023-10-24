@@ -52,10 +52,10 @@
 	<key>requiresVersionMajor</key>
 	<string>4</string>
 	<key>requiresVersionMinor</key>
-	<string>2</string>
+	<string>4</string>
 	<key>timeStamp</key>
-	<real>1678813705.4390101</real>
+	<real>1698189397.4810891</real>
 	<key>version</key>
-	<string>4.2.2</string>
+	<string>4.3.0</string>
 </dict>
 </plist>
