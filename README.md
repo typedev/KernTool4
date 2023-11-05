@@ -5,7 +5,7 @@ KernTool4 is a set of extensions for working with kerning, glyph margins and gro
 ---
 
 #### Version history:
-- `4.3.1` - `KernTool` and `SpaceArk` can now work with fonts from open designSpaces if `Designspace Editor 2` is installed. `KernTool:` bug fixed, when saving text the file will be saved only for the current font in KernTool.
+- `4.3.1` - `KernTool` and `SpaceArk (beta)` can now work with fonts from open designSpaces if `Designspace Editor 2` is installed. `KernTool:` bug fixed, when saving text the file will be saved only for the current font in KernTool.
 - `4.3.0` - Added two parts of the extension - `PairsList` and `SpaceArk (beta)` _(Documentation will come later)_. Fixed to support `Robofont 4.4`
 
 - `4.1.6` - `GroupsControl:` fixed to support Robofont 4.3
@@ -238,11 +238,7 @@ Too many pairs or too long text can reduce the performance of KernTool4. So far 
 
 ---
 
-KernTool4 is compatible with KernFinger from the KernTool3 suite, while I am working on updating KernFinger, they can be used in Robofont4 in conjunction with KernTool4.
-
-![](doc/pic23.jpg)
-
-> The presentation KT4 uses the Bodoni PT font created by Paratype, in the process of work, so some margins and kerning values may differ from the release.
+> The presentation KT4 uses the Bodoni PT font created by Paratype Inc., in the process of work, so some margins and kerning values may differ from the release.
 
 ---
 ---
@@ -392,4 +388,4 @@ _As long as there are no History controls, recording starts from the moment the 
 
 ![](doc/gc-pic5.jpg)
 
-> The presentation GroupsControl uses the Nagel font created by me and Paratype, in the process of work, so some margins, kerning values and groups composition may differ from the release.
+> The presentation GroupsControl uses the Nagel font created by me and Paratype Inc., in the process of work, so some margins, kerning values and groups composition may differ from the release.
