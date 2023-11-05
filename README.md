@@ -2,6 +2,8 @@
 
 KernTool4 is a set of extensions for working with kerning, glyph margins and groups in Robofont4.
 
+>[KernTool](https://github.com/typedev/KernTool4#--kerntool4) // [GroupsControl](https://github.com/typedev/KernTool4#-groupscontrol) // PairsList // SpaceArk
+
 ---
 
 #### Version history:
