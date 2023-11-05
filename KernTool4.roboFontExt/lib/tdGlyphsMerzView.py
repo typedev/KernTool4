@@ -1707,7 +1707,7 @@ class TDGlyphsMerzView (MerzView):
 		self.setGlyphNamesListToCurrentLine(glyphsNamesList)
 		return glyphsNamesList
 
-	def getGlyphsMatrixState(self):
+	def getGlyphsMatrixState(self, onlyCurrentFont = False):
 		container = self.getMerzContainer()
 		baselayer = container.getSublayer('base')
 		matrix = []
@@ -1718,7 +1718,7 @@ class TDGlyphsMerzView (MerzView):
 				if layer.getName() and 'glyphsline' in layer.getName():
 					# layer.getInfoValue('glyphs', glyphs)
 					names = layer.getInfoValue('uniqnames')
-					# font = layer.getInfoValue('font')
+					font = layer.getInfoValue('font')
 					# visible = layer.getInfoValue('visible')
 					# lineinfo = layer.getInfoValue('lineinfo')
 					# link = layer.getInfoValue('link')
@@ -1726,8 +1726,11 @@ class TDGlyphsMerzView (MerzView):
 					inverse = layer.getInfoValue('inverse')
 					scale = layer.getInfoValue('scale')
 					data = layer.getInfoValue('data')
-
-					matrix.append(getGlyphsNames_fromGlyphsLineLayer(layer))
+					if not onlyCurrentFont:
+						matrix.append(getGlyphsNames_fromGlyphsLineLayer(layer))
+					else:
+						if font == self.getCurrentFont():
+							matrix.append(getGlyphsNames_fromGlyphsLineLayer(layer))
 		return (position, matrix)
 
 

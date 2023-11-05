@@ -5,7 +5,8 @@ KernTool4 is a set of extensions for working with kerning, glyph margins and gro
 ---
 
 #### Version history:
-- `4.3.0` - Added two parts of the extension - `PairsList` and `SpaceArk` _(Documentation will come later)_. Fixed to support `Robofont 4.4`
+- `4.3.1` - `KernTool` and `SpaceArk` can now work with fonts from open designSpaces if `Designspace Editor 2` is installed. `KernTool:` bug fixed, when saving text the file will be saved only for the current font in KernTool.
+- `4.3.0` - Added two parts of the extension - `PairsList` and `SpaceArk (beta)` _(Documentation will come later)_. Fixed to support `Robofont 4.4`
 
 - `4.1.6` - `GroupsControl:` fixed to support Robofont 4.3
 - `4.1.5` - `GroupsControl:` added buttons `Delete/Send to KernTool` to PairsList and added option `Rename Group`. Improved sorting of the PairsList

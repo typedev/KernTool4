@@ -134,9 +134,14 @@ EVENT_REFRESH_ALL_OBSERVERS = 'typedev.KernTool.refreshObservers'
 	# return 'uuid' + str(uuid.uuid4()).replace('-', '')[:cut]
 
 def cutUniqName (glyphname):
+	# if 'uuid' in glyphname:
+	# 	a = glyphname.split('.')[:-1]
+	# 	return '.'.join(a)
+	# return glyphname
 	if 'uuid' in glyphname:
-		a = glyphname.split('.')[:-1]
-		return '.'.join(a)
+		last_dot_index = glyphname.rfind('.')
+		if last_dot_index != -1:
+			return glyphname[:last_dot_index]
 	return glyphname
 
 def ran_gen(size, chars=string.ascii_uppercase + string.digits):
