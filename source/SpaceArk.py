@@ -6,6 +6,7 @@ from merz import *
 from fontParts import *
 import AppKit
 import mojo
+import ezui
 from mojo.subscriber import Subscriber, registerCurrentGlyphSubscriber, unregisterCurrentGlyphSubscriber
 from mojo.events import addObserver, removeObserver
 from vanilla.vanillaBase import osVersionCurrent, osVersion10_14
@@ -81,6 +82,99 @@ else:
 	kernToolBundle = mojo.extensions.ExtensionBundle("SpaceArk")
 
 # print (pathForBundle, resourcePathForBundle, kernToolBundle.resourcesPath())
+
+class TDGlyphSequencesEditWindow(ezui.WindowController):
+	def build (self, callback = None):
+		content = """
+		= HorizontalStack
+		|----------| 
+		| sequence | @sequencesTable
+		|----------|
+		> (+-) @addRemoveButton
+		> Glyphs must be unique in all sequences
+		=---=
+	    (Cancel) @cancelButton
+	    (Apply)  @applyButton
+		"""
+		sequencesTableData = [
+        ]
+		descriptionData = dict(
+            sequencesTable=dict(
+                # width=100,
+                items=sequencesTableData,
+	            columnDescriptions = [
+		            dict(
+			            identifier = "sequence",
+			            # title = "Sequence",
+			            # width = 50,
+			            editable = True,
+		            ),
+	            ],
+
+            ),
+			cancelButton = dict(
+				keyEquivalent = chr(27)
+			),  # call button on esc keydown
+		)
+		self.w = ezui.EZWindow(
+			title = "Glyph Sequence Editor",
+			size = (700, 400),
+			minSize = (700, 400),
+			content = content,
+			descriptionData = descriptionData,
+			controller = self
+		)
+
+	def started (self):
+		table = self.w.getItem('sequencesTable')
+		lines = getExtensionDefault(PREFKEY_GlyphSequencesSArk, fallback = CONTEXTGLYPHSLINESLIST)
+		for line in lines:
+			item = table.makeItem(
+				sequence = line
+			)
+			table.appendItems([item])
+		self.w.open()
+
+	def addRemoveButtonAddCallback (self, sender):
+		table = self.w.getItem("sequencesTable")
+		item = table.makeItem(
+			sequence = ''
+		)
+		table.appendItems([item])
+		table.setSelectedIndexes([len(table.get())-1])
+
+	def addRemoveButtonRemoveCallback (self, sender):
+		table = self.w.getItem("sequencesTable")
+		table.removeSelectedItems()
+
+	def cancelButtonCallback (self, sender):
+		self.w.close()
+
+	def applyButtonCallback(self, sender):
+		lines = []
+		table = self.w.getItem('sequencesTable')
+		glyphs = []
+		for item in table.get():
+			line = item['sequence']
+			for glyph in line.split(' '):
+				if glyph:
+					if glyph in glyphs:
+						from mojo.UI import Message
+						Message("Found duplicate glyphs in sequences..", informativeText = glyph)
+						return
+					else:
+						glyphs.append(glyph)
+			lines.append(item['sequence'])
+		setExtensionDefault(PREFKEY_GlyphSequencesSArk, value = lines)
+
+		self.w.close()
+
+
+
+
+
+
+
 
 class TDSpaceArkTool(Subscriber): #, WindowController
 
@@ -336,7 +430,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 		self.w.eb.editRight = vanilla.EditText('auto', callback = self.editCallback) #-120
 		self.w.eb.btnRR = vanilla.Button('auto','􀆊',callback = self.btnSwithGlyphCallback)
 
-		self.w.eb.btnEBsettings = vanilla.Button('auto','􀥏',callback = self.btnSwithGlyphCallback)
+		self.w.eb.btnEBsettings = vanilla.Button('auto','􀥏',callback = self.btnSequencesEditorCallback)
 
 
 
@@ -412,7 +506,9 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 	# 			# self.w.groupsView.refreshView()
 	# 			return
 	def makeLinesOfSwitchers(self):
-		for line in CONTEXTGLYPHSLINESLIST:
+		self.switchers = []
+		lines = getExtensionDefault(PREFKEY_GlyphSequencesSArk, fallback = CONTEXTGLYPHSLINESLIST)
+		for line in lines:
 			lineofglyphs = tdGlyphparser.translateText(CurrentFont(), line.replace(' ',''))
 			self.switchers.append(lineofglyphs)
 
@@ -587,6 +683,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 		# print (self.glyphsInMatrix)
 
 	def btnSwithGlyphCallback(self, sender):
+		self.makeLinesOfSwitchers()
 		def findLineOfSwitchers(switchers, glyphname):
 			if not glyphname: return
 			for line in switchers:
@@ -645,7 +742,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 				idx = len(lineOfSwitchers)-1
 			else:
 				idx = idx + stepIdx
-		print(cidx, idx, lineOfSwitchers[cidx], lineOfSwitchers[idx])
+		# print(cidx, idx, lineOfSwitchers[cidx], lineOfSwitchers[idx])
 		if sideSwitch == SIDE_1:
 			currentLine[-1] = lineOfSwitchers[idx]
 			self.w.eb.editLeft.set('/' + '/'.join(currentLine))
@@ -868,6 +965,9 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 		# 	self.w.glyphsView.switchLinkedMode(linked = self.linkedMode)
 		#
 		# self.w.glyphsView.startDrawGlyphsMatrix(matrix, animatedStart = False)
+	def btnSequencesEditorCallback(self, sender):
+		se = TDGlyphSequencesEditWindow()
+
 
 	def glyphsViewDoubleClickCallback(self, sender):
 		font = sender.selectedFont
