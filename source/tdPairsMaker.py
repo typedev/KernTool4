@@ -2,7 +2,6 @@
 
 from vanilla import *
 
-from fontParts.world import CurrentFont
 
 from vanilla.dialogs import getFile, putFile, ask
 from defconAppKit.controls.glyphCollectionView import GlyphCollectionView
@@ -294,7 +293,7 @@ class PairsBuilderDialogWindow(object):
 		# self.w.progressBar = ProgressBar(((wW / 3) + 12 + (wW/6), blockY7, wx1-8, elemH),sizeStyle = 'small')
 		self.setViewGlyphsCell(self.leftList,direction = 'L')
 		self.setViewGlyphsCell(self.rightList,direction = 'R')
-		self.setFontViewCell(CurrentFont())
+		self.setFontViewCell(self.font)
 		self.w.open()
 
 	# def exceptionSelectorCallback (self, sender):
