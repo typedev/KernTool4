@@ -43,6 +43,10 @@ import tdKeyCommander
 importlib.reload(tdKeyCommander)
 from tdKeyCommander import *
 
+import tdFontSelectorUI
+importlib.reload(tdFontSelectorUI)
+from tdFontSelectorUI import *
+
 # import tdOverSubcriber
 # import tdTXTPatterns
 # importlib.reload(tdTXTPatterns)
@@ -61,108 +65,6 @@ a b c d e f g h i j k l m n o p q r s t u v w x y z
 ! , . : ; ? ‐ ‑ ‘ ’ ‚ “ ” „ ‹ › « »
 """.split('\n')[1:-1]
 
-
-
-class FontSelectorDialogWindow(object):
-	# nsViewClass = NSView
-
-	def __init__ (self, parentWindow,
-	              callback=None, fontListSelected=None, scales = None
-	              ):
-
-		def getUFOfileName(font):
-			if font.path:
-				return os.path.basename(font.path)
-			else:
-				return ('-- this is not a UFO file --')
-
-		wW = 800
-		hW = 300
-		self.w = vanilla.Sheet((wW, hW), parentWindow) #minSize = (wW,hW), ,  maxSize = (500,1000)
-		self.callback = callback
-
-		self.fontList = {}
-		listitems = []
-		if not fontListSelected:
-
-			for idx, font in enumerate(AllFonts()):
-				listitems.append( {'UFO': getUFOfileName(font), #)font.path.split('/')[-1],
-				                   'Family': '%s' % font.info.familyName,
-				                   'Style': '%s' % font.info.styleName,
-				                   'Select': True,
-				                   'Scale kerning': 1.0,
-				                   'ID': idx} )
-				self.fontList[idx] = font
-		else:
-			idx = 0
-			for font in fontListSelected:
-				scale = 1.0
-				if scales and font in scales:
-					scale = scales[font]
-				listitems.append({'UFO': getUFOfileName(font), # font.path.split('/')[-1],
-				                  'Family': '%s' % font.info.familyName,
-				                  'Style': '%s' % font.info.styleName,
-				                  'Select': True,
-				                  'Scale kerning': scale,
-				                  'ID': idx})
-
-				self.fontList[idx] = font
-				idx += 1
-			for font in AllFonts():
-				if font not in fontListSelected:
-					listitems.append({'UFO': getUFOfileName(font), #font.path.split('/')[-1],
-					                  'Family': '%s' % font.info.familyName,
-					                  'Style': '%s' % font.info.styleName,
-					                  'Select': False,
-					                  'Scale kerning': 1.0,
-					                  'ID': idx})
-
-					self.fontList[idx] = font
-					idx += 1
-
-		self.w.fontsList = vanilla.List((10, 35, -10, -50), listitems,
-		                                allowsMultipleSelection = False,
-		                                columnDescriptions=[{"title": "UFO", },
-		                                                    {"title": "Family", 'width': 150},
-		                                                    {'title': 'Style', 'width': 150},
-		                                                    {"title": "Select", 'cell': vanilla.CheckBoxListCell(),'width': 50},
-		                                                    {"title": 'Scale kerning', 'width': 80, 'editable': True},
-		                                                    {'title': 'ID', 'width': 0}],
-		                                )
-
-		self.w.btnCancel = vanilla.Button((10, -35, 100, 21), "Cancel",
-		                          callback = self.btnCloseCallback, sizeStyle = 'small')
-		self.w.btnApply = vanilla.Button((-110, -35, 100, 21), "Apply",
-		                         callback = self.btnCloseCallback, sizeStyle = 'small')
-
-		self.w.btnDown = vanilla.Button(((wW / 2) - 105 , -35, 100, 21), "Down",
-		                          callback = self.btnSortCallback, sizeStyle = 'small')
-		self.w.btnUp = vanilla.Button(((wW / 2) + 5, -35, 100, 21), "Up",
-		                         callback = self.btnSortCallback, sizeStyle = 'small')
-
-		self.w.open()
-
-	def btnSortCallback(self, sender):
-		listitems = self.w.fontsList.get()
-		selected = self.w.fontsList.getSelection()[0]
-		if sender == self.w.btnDown and selected < len(listitems):
-			listitems.insert(selected + 1, listitems.pop(selected))
-		if sender == self.w.btnUp and selected > 0:
-			listitems.insert(selected - 1, listitems.pop(selected))
-		self.w.fontsList.set(listitems)
-
-	def btnCloseCallback(self, sender):
-		if sender == self.w.btnApply:
-			fontlist = []
-			scales = {}
-			for item in self.w.fontsList.get():
-				if item['Select']:
-					fontlist.append( self.fontList[ item['ID'] ] )
-					scale = str(item['Scale kerning']).replace(',','.')
-					scales[self.fontList[ item['ID'] ]] = float( scale )
-			if self.callback:
-				self.callback({'selectedFonts': fontlist, 'scales': scales})
-		self.w.close()
 
 
 # =================================
@@ -366,6 +268,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 		self.glyphsInMatrix = []
 		self.fontList = AllFonts()
 		self.fontListScales = {}
+		self.currentDS = None
 		# self.txtPatterns = TD_txtPatterns()
 		# self.txtPatterns.makeLibPatterns(self.fontList)
 
@@ -624,7 +527,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 		for idxLine, line in enumerate(lines):
 
 			if need_covertion:
-				for glyphName in tdGlyphparser.translateText(CurrentFont(), line):
+				for glyphName in tdGlyphparser.translateText(self.w.glyphsView.getCurrentFont(), line):
 					if glyphName and '00AD' not in glyphName:
 						tline.append(glyphName)
 				if tline:
@@ -637,7 +540,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 					tline.append('{break}')
 
 		if tline:
-			tm = TDGlyphsMatrix(CurrentFont(), width = 15000)
+			tm = TDGlyphsMatrix(self.w.glyphsView.getCurrentFont(), width = 15000)
 			tm.setGlyphs(tline, insertVirtual = True)
 			tm.buildMatrix()
 
@@ -657,11 +560,11 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 		gC = []
 		gR = []
 		if txtL:
-			gL = tdGlyphparser.translateText(font = CurrentFont(), text = txtL)
+			gL = tdGlyphparser.translateText(font = self.w.glyphsView.getCurrentFont(), text = txtL)
 		if txt:
-			gC = tdGlyphparser.translateText(font = CurrentFont(), text = txt)
+			gC = tdGlyphparser.translateText(font = self.w.glyphsView.getCurrentFont(), text = txt)
 		if txtR:
-			gR = tdGlyphparser.translateText(font = CurrentFont(), text = txtR)
+			gR = tdGlyphparser.translateText(font = self.w.glyphsView.getCurrentFont(), text = txtR)
 		glyphsline = []
 		for g in gC:
 			if gL:
@@ -696,7 +599,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 		stepIdx = 0
 		sideSwitch = None
 		if sender == self.w.eb.btnLL:
-			currentLine = tdGlyphparser.translateText(font = CurrentFont(), text = self.w.eb.editLeft.get())
+			currentLine = tdGlyphparser.translateText(font = self.w.glyphsView.getCurrentFont(), text = self.w.eb.editLeft.get())
 			# if len(c)>1:return
 			if not currentLine: return
 			currentGlyph = currentLine[-1]
@@ -704,7 +607,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 			sideSwitch = SIDE_1
 
 		if sender == self.w.eb.btnLR:
-			currentLine = tdGlyphparser.translateText(font = CurrentFont(), text = self.w.eb.editLeft.get())
+			currentLine = tdGlyphparser.translateText(font = self.w.glyphsView.getCurrentFont(), text = self.w.eb.editLeft.get())
 			# if len(c)>1:return
 			if not currentLine: return
 
@@ -713,7 +616,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 			sideSwitch = SIDE_1
 
 		if sender == self.w.eb.btnRL:
-			currentLine = tdGlyphparser.translateText(font = CurrentFont(), text = self.w.eb.editRight.get())
+			currentLine = tdGlyphparser.translateText(font = self.w.glyphsView.getCurrentFont(), text = self.w.eb.editRight.get())
 			# if len(c)>1:return
 			if not currentLine: return
 
@@ -722,7 +625,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 			sideSwitch = SIDE_2
 
 		if sender == self.w.eb.btnRR:
-			currentLine = tdGlyphparser.translateText(font = CurrentFont(), text = self.w.eb.editRight.get())
+			currentLine = tdGlyphparser.translateText(font = self.w.glyphsView.getCurrentFont(), text = self.w.eb.editRight.get())
 			# if len(c)>1:return
 			if not currentLine: return
 
@@ -794,13 +697,15 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 
 
 	def fontsCallback(self, sender):
-		FontSelectorDialogWindow( parentWindow = self.w, callback = self.fontListCallback, fontListSelected = self.fontList, scales = self.fontListScales)
+		TDFontSelectorDialogWindow( parentWindow = self.w, callback = self.fontListCallback, fontListSelected = self.fontList, scales = self.fontListScales, designSpace = self.currentDS)
 
 	def fontListCallback(self, fontListSelected):
 		# print (self.glyphsInMatrix)
 		if fontListSelected:
 			self.fontList = fontListSelected['selectedFonts']
 			self.fontListScales = fontListSelected['scales']
+			if 'ds' in fontListSelected:
+				self.currentDS = fontListSelected['ds']
 			# print (self.fontListScales)
 			self.fontsHashKernLib = makeFontsHashGroupsLib(self.fontList, self.langSet)
 			self.spaceControl.setupSpaceControl(fontsHashKernLib = self.fontsHashKernLib, scalesKern = self.fontListScales)
@@ -946,7 +851,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 
 	def insertLineCallback(self, sender):
 		# self.w.glyphsView.insertGlyphsLine()
-		selected = list(CurrentFont().selection)
+		selected = list(self.w.glyphsView.getCurrentFont().selection)
 		if not selected:
 			selected = 'H H O H H O O H'.split(' ')
 			self.w.eb.edit.set('HHOHHOOH')

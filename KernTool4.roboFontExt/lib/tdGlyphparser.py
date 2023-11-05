@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-__author__ = 'alexander'
-# from robofab.world import RFont
-# import tdAnchorParser
-# reload(tdAnchorParser)
-# from tdAnchorParser import buildGlyphs
-# import unicodedata
 
 def parserTXT(text = ''):
 	context = ''
@@ -88,24 +82,18 @@ def translateTextToGlyphs(sourcefont, tempfont, text, insertInTempFont = True):
 	result = []
 	data = parserTXT(text)
 	for s in data:
-		# print s
 		if s.startswith('code: '):
 			s = s.replace('code: ', '')
-			# print s
 			result.extend( parseCode(sourcefont, tempfont, s, insertInTempFont) )
-		# for d in ddd:
-		# print d
 		else:
 			if s != '\n':
 				n = findGlyphNameByUnicode(sourcefont, ord(s))
-				# print n
 				if insertInTempFont:
 					tempfont.insertGlyph(sourcefont[n], n)
 			else:
 				n = s
 			if n != '.notdef':
 				result.append(n)
-	# tempfont.save()
 	return result
 
 def translateText(font, text):
@@ -113,27 +101,6 @@ def translateText(font, text):
 
 
 
-
-# if __name__ == '__main__':
-# 	from robofab.world import *
-#
-# # 	text = u"""
-# # what happens?
-# # 	as жнп 01/uni0435/uni04FD sdft  /?/Adier=a+dieresis:top+uni1ABB:marktop  dfg /?+grave:top
-# #
-# # 	/Alpha=A
-# # /Aacute=A+acute:top
-# #   /Adieresis1ABB=a+dieresis:top+uni1ABB:marktop
-# # 	/Agrave=A+grave:top
-# #
-# #
-# #
-# # 	"""
-# 	text = u"ÁÂÀÄÅÃĂĀĄÆÇĆČĈĊĎĐÉÊÈËĚĖĒĘĞĜĢĠĦĤÍÎÌÏİĪĮĴĶŁĹĽĻÑŃŇŅÓÔÒÖÕŐŌØŒŔŘŖŠŚŞŜȘÞŤŢÚÛÙÜŬŰŪŲŮÝŸŽŹŻáâàäåãăāąæçćčĉċďđðéêèëěėēęğĝģġħĥıíîìïiīįĵķķłĺľļñńňņóôòöõőōøœŕřŗßšśşŝșþťţúûùüŭűūųůýÿžźż"
-# 	tempfont = OpenFont(path = '/Users/alexander/PycharmProjects/PrivateWorks/tempfont.ufo')
-# 	sourcefont = OpenFont(path = '/Users/alexander/Documents/WORKS/Paratype/!!!SBSANS/mono/SBSans-Regular&Heavy_041218kk/SBSANS-50wt-50wd copy 2.ufo')
-#
-# 	print translateText(sourcefont,text)
 
 
 
