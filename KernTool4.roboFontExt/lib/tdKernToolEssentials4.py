@@ -25,7 +25,7 @@ PREFKEY_GlyphsViewFontSize = '%s.KernToolUI.GlyphsView.FontSize' % PREFKEY_base
 PREFKEY_GroupsViewFontSize = '%s.KernToolUI.GroupsView.FontSize' % PREFKEY_base
 PREFKEY_GroupsViewPanelSize = '%s.KernToolUI.GroupsView.PanelSize' % PREFKEY_base
 PREFKEY_WindowSize = '%s.KernToolUI.Window.Size' % PREFKEY_base
-
+PREFKEY_GlyphSequencesSArk = '%s.KernToolUI.GlyphSequences' % PREFKEY_base
 
 
 
