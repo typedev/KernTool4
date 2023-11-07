@@ -663,6 +663,7 @@ class TDMerzMatrixDesigner (object): #MerzView
 		# if animate:
 		# 	d = duration
 			# self.scrollAnimation = True
+
 		with layer.propertyGroup(duration = duration): #, animationFinishedCallback = self.srollFinishedCallback):
 			if _y > 0:
 				_y = 0
@@ -679,25 +680,22 @@ class TDMerzMatrixDesigner (object): #MerzView
 		# self.drawScrollBars()
 		self.drawBase(mode = DRAWING_BASE_MODE_SCROLL)
 
-
 	def eventScrollWheel(self, event, delta, momentumPhase):
 		deltaX, deltaY = delta
 		scaleScroll = 2
+		# if not self.documentLayer.getFilter('motionBlur'):
+		# 	self.documentLayer.appendFilter(
+		# 		dict(
+		# 			name = "motionBlur",
+		# 			filterType = "motionBlur",
+		# 			radius = 15.0,
+		# 			angle = 90
+		# 		)
+		# 	)
 		if  momentumPhase == 0:
 			scaleScroll = 10
 			self.scrollMoving((deltaX, deltaY), scaleScroll = scaleScroll, duration = .08)
 		elif momentumPhase == 4:
-
-			# if not self.documentLayer.getFilter('motionBlur'):
-			# 	self.documentLayer.appendFilter(
-			# 		    dict(
-			# 		        name="motionBlur",
-			# 		        filterType="motionBlur",
-			# 		        radius=5.0,
-			# 		        angle=90
-			# 		        )
-			# 			)
-
 			self.momentY += deltaY
 			scaleScroll = 10
 			self.scrollMoving((deltaX, self.momentY), scaleScroll = scaleScroll, duration = .1)

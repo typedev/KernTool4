@@ -5,7 +5,6 @@ def parserTXT(text = ''):
 	datag = []
 	templine = 'code: '
 	for id, litera in enumerate(text):
-		# print id, len(unicode(text, 'utf-8'))
 		if litera == '/':
 			context = 'start_code'
 		if (litera == ' ') or (litera == '\n'):
@@ -18,16 +17,12 @@ def parserTXT(text = ''):
 				context = ''
 		if id == len(text)-1:
 			if context == 'start_code':
-				# context = 'end_code'
 				datag.append(templine+text[-1])
-				# templine = 'code: '
 				break
 		if litera!='':
 			if context == 'start_code':
-				# if litera!=' ':
 				templine += litera
 			else:
-				# if litera!='':
 				datag.append(litera)
 	result = []
 	for a in datag:
@@ -48,10 +43,10 @@ def findGlyphNameByUnicode (font, uni):
 		# print 'WARNING! %s not found...' % uni
 		return '.notdef'
 
-def parseCode(font, tempfont, code, insertInTempFont=True):
+def parseCode(font, code):
 	precode = []
 	result = []
-	selected = font.selection
+	selected = font.selectedGlyphNames
 	if '?' in code:
 		lp, rp = code.split('?')
 		for sg in selected:
@@ -61,44 +56,32 @@ def parseCode(font, tempfont, code, insertInTempFont=True):
 
 	for c in precode:
 		if ('+' in c) or ('=' in c):
-			# print 'calling code:', c
-			if insertInTempFont:
-				pass
-				# d = buildGlyphs(font,tempfont,c)
-				# print 'bulded::: ', d
-				# result.append(''.join(d))
-			else:
-				print ('operation not supported:', c)
+			# print 'calling build glyph:', c
+			print ('operation not supported:', c)
 		else:
-			# print 'simple glyph', c
 			if c in font:
-				# if insertInTempFont:
-				# 	tempfont.insertGlyph(font[c],c)
 				result.append(c)
 	return result
 
 
-def translateTextToGlyphs(sourcefont, tempfont, text, insertInTempFont = True):
+def translateText(font, text):
 	result = []
 	data = parserTXT(text)
 	for s in data:
 		if s.startswith('code: '):
 			s = s.replace('code: ', '')
-			result.extend( parseCode(sourcefont, tempfont, s, insertInTempFont) )
+			result.extend( parseCode(font, s) )
 		else:
 			if s != '\n':
-				n = findGlyphNameByUnicode(sourcefont, ord(s))
-				if insertInTempFont:
-					tempfont.insertGlyph(sourcefont[n], n)
+				n = findGlyphNameByUnicode(font, ord(s))
 			else:
 				n = s
 			if n != '.notdef':
 				result.append(n)
 	return result
 
-def translateText(font, text):
-	return translateTextToGlyphs(sourcefont=font, tempfont=None, text=text, insertInTempFont = False)
-
+if __name__ == "__main__":
+	print( translateText(CurrentFont(), 'Hello world!') )
 
 
 
