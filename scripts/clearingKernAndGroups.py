@@ -16,7 +16,7 @@ Finds and removes lost glyphs in groups, empty groups, lost pairs, pairs with No
 ***The script works only from GroupsControl***
 """
 
-def clearKernAndGroups(parent,
+def clearKernAndGroups(host,
                        deleteHolesInGroup = True,
                        deleteEmptyGroup = True,
                        deleteLostPairs = True,
@@ -29,7 +29,7 @@ def clearKernAndGroups(parent,
 		deleteNoneKern = True  # remove pairs if their value is undefined
 		deleteZeroKern = False  # remove pairs if their value is 0
 	"""
-	font = parent.font
+	font = host.font
 	report = []
 	report.append('=' * 40)
 	report.append('%s %s' % (font.info.familyName, font.info.styleName))
@@ -164,9 +164,9 @@ def clearKernAndGroups(parent,
 	for (l, r), v in font.kerning.items():
 		if l and r and v == 0:
 			zeroPairs.append((l,r))
-			lg = parent.getKeyGlyphByGroupname(l)
-			rg = parent.getKeyGlyphByGroupname(r)
-			pattern = parent.langSet.wrapPairToPattern(font, (lg, rg))
+			lg = host.getKeyGlyphByGroupname(l)
+			rg = host.getKeyGlyphByGroupname(r)
+			pattern = host.langSet.wrapPairToPattern(font, (lg, rg))
 			zeroPatterns.append(pattern)
 
 	if zeroPairs:
@@ -216,9 +216,9 @@ class BaseLexerKAGCL(RegexLexer):
 
 
 class TDKernAndGroupsCleaner:
-	def __init__(self, parent = None):
+	def __init__(self, host = None):
 		_version = '0.3'
-		self.parent = parent
+		self.host = host
 
 		self.w = FloatingWindow((600, 400),minSize = (300, 300), title = 'Groups and Kerning Cleaner v%s' % _version)
 
@@ -271,20 +271,20 @@ class TDKernAndGroupsCleaner:
 		deleteLostPairs = self.w.chkboxDeleteLostPairs.get()
 		deleteNoneKern = self.w.chkboxDeleteNoneKern.get()
 		deleteZeroKern = self.w.chkboxDeleteZeroKern.get()
-		report = clearKernAndGroups(parent = self.parent.hashKernDic,
-		                   deleteHolesInGroup = deleteHolesInGroup,
-		                   deleteEmptyGroup = deleteEmptyGroup,
-		                   deleteLostPairs = deleteLostPairs,
-		                   deleteNoneKern = deleteNoneKern,
-		                   deleteZeroKern = deleteZeroKern)
+		report = clearKernAndGroups(host = self.host.hashKernDic,
+		                            deleteHolesInGroup = deleteHolesInGroup,
+		                            deleteEmptyGroup = deleteEmptyGroup,
+		                            deleteLostPairs = deleteLostPairs,
+		                            deleteNoneKern = deleteNoneKern,
+		                            deleteZeroKern = deleteZeroKern)
 		self.w.textBox.set('\n'.join(report))
-		self.parent.hashKernDic.makeReverseGroupsMapping()
-		self.parent.refreshGroupsView()
+		self.host.hashKernDic.makeReverseGroupsMapping()
+		self.host.refreshGroupsView()
 
 
-def main(parent = None):
-	if not parent: return
-	TDKernAndGroupsCleaner(parent = parent)
+def main(host = None):
+	if not host: return
+	TDKernAndGroupsCleaner(host = host)
 
 
 if __name__ == "__main__":

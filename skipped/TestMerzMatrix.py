@@ -76,11 +76,27 @@ class TDTestView(object):  # , WindowController
 			# for g in glyphline:
 			# 	drawFontGlyph(layer, self.font, g.name)
 
-	def drawGlyphBox (self, container, glyph, xpos, backgroundColor = (0,0,0,0), color=(0, 0, 0, 1)):
+	def drawGlyphBox (self, container, glyph, xpos, colorsSet = None, drawMode = None, showMode = None):
+		# backgroundColor = (0,0,0,0), color=(0, 0, 0, 1)):
 		w, h = container.getSize()
 		scale = pt2Scale(h / 2)
 		yshift = h / 3 / scale
 		wbox = glyph.width * scale
+
+		color = (0, 0, 0, 1)
+		backgroundColor = (0, 0, 0, 0)
+
+		if colorsSet:
+			try:
+				color = colorsSet['color']
+				backgroundColor = colorsSet['backgroundColor']
+			except:
+				pass
+				# color = (0, 0, 0, 1)
+				# backgroundColor = (0, 0, 0, 0)
+
+
+
 
 		baselayer = container.appendBaseSublayer(
 			name = 'glyphbox.%s' % glyph.name,
@@ -89,7 +105,6 @@ class TDTestView(object):  # , WindowController
 			acceptsHit = True,
 			backgroundColor = backgroundColor,
 		)
-
 		glyphLayer = baselayer.appendPathSublayer(
 			name = 'path.%s' % glyph.name,
 			fillColor = color,
@@ -110,7 +125,7 @@ class TDTestView(object):  # , WindowController
 			position = (0, 10),  # - ygap),
 			fillColor = (0,0,0,1),
 			pointSize = 8,
-			text = LEFT_SYMBOL_MARGIN + str(leftMargin),
+			text = f'{LEFT_SYMBOL_MARGIN}{leftMargin}', # LEFT_SYMBOL_MARGIN + str(leftMargin),
 			horizontalAlignment = "left",
 			verticalAlignment = 'bottom',
 			# offset = (0, -4),
@@ -122,7 +137,7 @@ class TDTestView(object):  # , WindowController
 			position = (wbox, 10),  # - hctrl - ygap), #glyph.width
 			fillColor = (0,0,0,1),
 			pointSize = 8,
-			text = str(rightMargin) + RIGHT_SYMBOL_MARGIN,
+			text = f'{rightMargin}{RIGHT_SYMBOL_MARGIN}',
 			horizontalAlignment = "right",
 			verticalAlignment = 'top',
 			# offset = (0, 4),
@@ -134,14 +149,13 @@ class TDTestView(object):  # , WindowController
 			size = (wbox, h / 2),  # glyph.width * self.scaleFactor
 			backgroundColor = (0, 0, 0, 0),
 			# font = self.displayFontName,
-			text = glyph.name + TITLE_SYMBOL,
+			text = f'{glyph.name}{TITLE_SYMBOL}', # glyph.name + TITLE_SYMBOL,
 			pointSize = 8,  # + 2,
 			fillColor = (0,0,0,1),
 			horizontalAlignment = 'center',
 			# visible = self.showMargins,
 			padding = (1, 3)
 		)
-
 		return wbox
 
 	def drawGlyphsLine(self, container, glyphs):
@@ -202,6 +216,7 @@ class TDTestView(object):  # , WindowController
 		# print()
 		# print(glyphslines)
 		aaa = 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split(' ')
+
 		glyphslines = []
 		listw = []
 		for s1 in aaa:
@@ -236,28 +251,20 @@ class TDTestView(object):  # , WindowController
 	# this section is required for Merz
 	def acceptsFirstResponder (self, info):
 		return True
-
 	def sizeChanged (self, sender):
 		sender.eventResizeView()
-
 	def mouseUp (self, sender, event):
 		sender.eventMouseUp(event)
-
 	def mouseDragged (self, sender, event):
 		sender.eventMouseDragged(event)
-
 	def scrollWheel (self, sender, event):
 		sender.eventScrollWheel(event)
-
 	def magnifyWithEvent (self, sender, event):
 		sender.eventMagnify(event)
-
 	def mouseDown (self, sender, event):
 		sender.eventMouseDown(event)
-
 	def keyDown (self, sender, event):
 		sender.eventKeyDown(event)
-
 	def windowCloseCallback(self, sender):
 		removeObserver(self, 'currentGlyphChanged')
 		self.w.itemsView.clearScene()

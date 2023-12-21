@@ -220,8 +220,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		self.w.addToolbar("KernTool4Toolbar", toolbarItems)
 		# self.w.getNSWindow().toolbar().setSelectedItemIdentifier_('toolbarEditKerning')
 
-		self.langSet = TDLangSet()
-		self.fontsHashKernLib = makeFontsHashGroupsLib(AllFonts(),self.langSet)
+
 		self.glyphsInMatrix = []
 		self.fontList = AllFonts()
 		self.fontListScales = {}
@@ -229,7 +228,15 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		# self.txtPatterns = TD_txtPatterns()
 		# self.txtPatterns.makeLibPatterns(self.fontList)
 
-
+		# for font in AllFonts():
+		# 	self.fontList.append(
+		# 		dict(
+		# 			font = font,
+		# 			scaleKern = 1.0,
+		# 		)
+		# 	)
+		self.langSet = TDLangSet()
+		self.fontsHashKernLib = makeFontsHashGroupsLib(AllFonts(), self.langSet)
 
 		self.w.glyphsView = TDGlyphsMerzView(
 			delegate = self,
@@ -349,7 +356,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		txt = ''
 		if info == 1:
 			for line in lines:
-				g = [convertGlyphName2unicode(self.fontList[0], cutUniqName(gn)) for gn in line]
+				g = [convertGlyphName2unicode(self.w.glyphsView.getCurrentFont(), cutUniqName(gn)) for gn in line]
 				if g:
 					txt += ''.join(g) + '\n'
 		if info == 2:

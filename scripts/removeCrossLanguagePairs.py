@@ -119,59 +119,7 @@ class TDRemoveCrossPairsWindow(object):
 		patterns.append('\n')
 		self.w.textBox.set('\n'.join(patterns))
 
-	# def getFontName (self, font, fonts):
-	# 	# by Andy Clymer, June 2018
-	# 	# A helper to get the font name, starting with the preferred name and working back to the PostScript name
-	# 	# Make sure that it's not the same name as another font in the fonts list
-	# 	if font.info.openTypeNamePreferredFamilyName and font.info.openTypeNamePreferredSubfamilyName:
-	# 		name = "%s %s" % (font.info.openTypeNamePreferredFamilyName, font.info.openTypeNamePreferredSubfamilyName)
-	# 	elif font.info.familyName and font.info.styleName:
-	# 		name = "%s %s" % (font.info.familyName, font.info.styleName)
-	# 	elif font.info.fullName:
-	# 		name = font.info.fullName
-	# 	elif font.info.fullName:
-	# 		name = font.info.postscriptFontName
-	# 	else: name = "Untitled"
-	# 	# Add a number to the name if this name already exists
-	# 	if name in fonts:
-	# 		i = 2
-	# 		while name + " (%s)" % i in fonts:
-	# 			i += 1
-	# 		name = name + " (%s)" % i
-	# 	return name
-	#
-	# def collectFonts (self):
-	# 	# by Andy Clymer, June 2018
-	# 	# Hold aside the current font choices
-	# 	font0idx = self.w.fontA.get()
-	# 	# font1idx = self.w.fontB.get()
-	# 	if not font0idx == -1:
-	# 		font0name = self.fontNames[font0idx]
-	# 	else: font0name = None
-	# 	# if not font1idx == -1:
-	# 	# 	font1name = self.fontNames[font1idx]
-	# 	# else: font1name = None
-	# 	# Collect info on all open fonts
-	# 	self.fonts = AllFonts()
-	# 	self.fontNames = []
-	# 	for font in self.fonts:
-	# 		self.fontNames.append(self.getFontName(font, self.fontNames))
-	# 	# Update the popUpButtons
-	# 	self.w.fontA.setItems(self.fontNames)
-	# 	# self.w.fontB.setItems(self.fontNames)
-	# 	# If there weren't any previous names, try to set the first and second items in the list
-	# 	if font0name == None:
-	# 		if len(self.fonts):
-	# 			self.w.fontA.set(0)
-	# 	# if font1name == None:
-	# 	# 	if len(self.fonts) >= 1:
-	# 	# 		self.w.fontB.set(1)
-	# 	# Otherwise, if there had already been fonts choosen before new fonts were loaded,
-	# 	# try to set the index of the fonts that were already selected
-	# 	if font0name in self.fontNames:
-	# 		self.w.fontA.set(self.fontNames.index(font0name))
-	# 	# if font1name in self.fontNames:
-	# 	# 	self.w.fontB.set(self.fontNames.index(font1name))
+
 
 def main (parent = None):
 	if not parent: return

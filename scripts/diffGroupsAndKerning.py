@@ -106,7 +106,13 @@ def diffGroups (masterfont, targetfont):
 		for g, (c1, c2) in groupsDiff.items():
 			report.append('@ %s' % g)
 			report.append('+ master (%i): %s' % (len(c2), ' '.join(c2)))
+			missing = ' '.join(list(set(c1) - set(c2)))
+			if missing:
+				report.append('= missing: %s' % missing)
 			report.append('- target (%i): %s' % (len(c1), ' '.join(c1)))
+			missing = ' '.join(list(set(c2) - set(c1)))
+			if missing:
+				report.append('= missing: %s' % missing)
 	if groupsDiffOrder:
 		report.append('*' * 40)
 		report.append('Groups identical but differing in glyph order:')
