@@ -425,6 +425,8 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 
 		self.w.eb.edit = vanilla.EditText('auto', callback = self.editCallback) #-120
 		self.w.eb.btnInsertLine = vanilla.Button('auto', 'get selection',  callback = self.insertLineCallback)
+		self.w.eb.btnWrapLine = vanilla.Button('auto', 'wrap',  callback = self.btnWrapCallback)
+
 
 		self.w.eb.btnRL = vanilla.Button('auto','􀆉',callback = self.btnSwithGlyphCallback)
 		self.w.eb.editRight = vanilla.EditText('auto', callback = self.editCallback) #-120
@@ -436,13 +438,14 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 
 		rulesEditBar = [
 		    # Horizontal
-		    "H:|-border-[btnLL]-space-[editLeft(==120)]-space-[btnLR]-border-[edit]-space-[btnInsertLine(==120)]-border-[btnRL]-space-[editRight(==120)]-space-[btnRR]-border-[btnEBsettings]-border-|",
+		    "H:|-border-[btnLL]-space-[editLeft(==120)]-space-[btnLR]-border-[edit]-space-[btnInsertLine(==120)]-space-[btnWrapLine(==80)]-border-[btnRL]-space-[editRight(==120)]-space-[btnRR]-border-[btnEBsettings]-border-|",
 		    # Vertical
 			"V:|-space-[btnLL]-space-|",
 		    "V:|-space-[editLeft]-space-|",
 			"V:|-space-[btnLR]-space-|",
 		    "V:|-space-[edit]-space-|",
 			"V:|-space-[btnInsertLine]-space-|",
+			"V:|-space-[btnWrapLine]-space-|",
 			"V:|-space-[btnRL]-space-|",
 			"V:|-space-[editRight]-space-|",
 			"V:|-space-[btnRR]-space-|",
@@ -753,7 +756,21 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 
 
 
+	def btnWrapCallback(self, sender):
+		txt = self.w.eb.edit.get()
+		glyphslinetxt = []
+		glyphsline = []
+		if txt:
+			glyphslinetxt = tdGlyphparser.translateText(font = self.w.glyphsView.getCurrentFont(), text = txt)
+			gline, _, _ = self.langSet.wrapGlyphsLine_MarksAndMasks(font = self.w.glyphsView.getCurrentFont(),
+			                                          glyphsline = glyphslinetxt,
+			                                          marks = [True]*len(glyphslinetxt))
+			glyphsline = [glyph.name for glyph in gline]
+			print(glyphsline)
 
+		if glyphsline:
+			self.w.glyphsView.setGlyphNamesListToCurrentLine(glyphsline)
+		self.glyphsInMatrix = glyphsline
 
 
 
