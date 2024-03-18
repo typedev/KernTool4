@@ -51,10 +51,10 @@ import tdGlyphparser
 
 # DEVELOP = True
 #
-# if DEVELOP:
-pathForBundle = os.path.dirname(__file__)
-resourcePathForBundle = os.path.join(pathForBundle, "resources")
-kernToolBundle = mojo.extensions.ExtensionBundle(path=pathForBundle, resourcesName=resourcePathForBundle)
+# # if DEVELOP:
+# pathForBundle = os.path.dirname(__file__)
+# resourcePathForBundle = os.path.join(pathForBundle, "resources")
+# kernToolBundle = mojo.extensions.ExtensionBundle(path=pathForBundle, resourcesName=resourcePathForBundle)
 #
 # else:
 # 	kernToolBundle = mojo.extensions.ExtensionBundle("KernTool4")

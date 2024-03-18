@@ -58,17 +58,16 @@ from tdLangSet import *
 # =================================
 # KERN MULTI TOOL =================
 
-DEVELOP = True
+DEVELOP = False
 
 if DEVELOP:
 	pathForBundle = os.path.dirname(__file__)
-	resourcePathForBundle = os.path.join(pathForBundle, "resources")
-	kernToolBundle = mojo.extensions.ExtensionBundle(path=pathForBundle, resourcesName=resourcePathForBundle)
-
+	RESOURCES_FOLDER = os.path.join(pathForBundle, "resources")
+	print(DEVELOP, RESOURCES_FOLDER)
 else:
 	kernToolBundle = mojo.extensions.ExtensionBundle("KernTool4")
+	RESOURCES_FOLDER = str(kernToolBundle.resourcesFolder).replace('resources', 'lib/resources')
 
-# print (pathForBundle, resourcePathForBundle, kernToolBundle.resourcesPath())
 
 class TDKernMultiTool(Subscriber): #, WindowController
 
@@ -103,25 +102,25 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarSelectFonts",
 				'label': 'Select Fonts',
 				'callback': self.fontsCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_selectfonts%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_selectfonts%s.pdf' % darkm),
 			},
 			{
 				'itemIdentifier': "toolbarMakePairs",
 				'label': 'Make Pairs',
 				'callback': self.pairsBuilderCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_makepairs%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_makepairs%s.pdf' % darkm),
 			},
 			{
 				'itemIdentifier': "toolbarLoadFile",
 				'label': 'Load Text',
 				'callback': self.loadTextCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_loadfile%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_loadfile%s.pdf' % darkm),
 			},
 			{
 				'itemIdentifier': "toolbarSaveFile",
 				'label': 'Save Text',
 				'callback': self.saveTextCallbak,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_savefile%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_savefile%s.pdf' % darkm),
 			},
 			{
 				'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
@@ -131,7 +130,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarLinked",
 				'label': 'Link Fonts',
 				'callback': self.switchLinkedModeCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_linked%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_linked%s.pdf' % darkm),
 				# 'selectable': True,
 				'toolTip': 'Link or unlink fonts [L]'
 			},
@@ -139,7 +138,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarEditKerning",
 				'label': 'Edit Kerning',
 				'callback': self.switchKerningModeCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_editkerning%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_editkerning%s.pdf' % darkm),
 				# 'selectable': True,
 				'toolTip': 'Switch to Kerning edit mode [M]'
 			},
@@ -147,7 +146,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarEditMargins",
 				'label': 'Edit Margins',
 				'callback': self.switchMarginsModeCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_editmargins%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_editmargins%s.pdf' % darkm),
 				# 'selectable': True,
 				'toolTip': 'Switch to Margins edit mode [M]'
 			},
@@ -160,7 +159,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarShowName",
 				'label': 'Show Margins',
 				'callback': self.showNamesCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_showname%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_showname%s.pdf' % darkm),
 				# 'selectable': True,
 				'toolTip': 'Show glyph names and margins'
 			},
@@ -168,7 +167,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarShowWidth",
 				'label': 'Show Width',
 				'callback': self.showWidthCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_showwidth%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_showwidth%s.pdf' % darkm),
 				# 'selectable': True,
 				'toolTip': 'Show glyph widths and margins'
 			},
@@ -177,7 +176,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarLightMode",
 				'label': 'Light Mode',
 				'callback': self.ligthModeCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_lightmode%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_lightmode%s.pdf' % darkm),
 				'toolTip': 'Hide all and show only glyphs as plain text'
 			},
 
@@ -189,7 +188,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarLangSet",
 				'label': 'Check Language',
 				'callback': self.langSetCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_langset%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_langset%s.pdf' % darkm),
 				'toolTip': 'Check language compatibility'
 			},
 
@@ -206,14 +205,14 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarShowToolbar",
 				'label': 'Show Hints',
 				'callback': self.switchToolbarCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_show_toolbar%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_show_toolbar%s.pdf' % darkm),
 				# 'toolTip': 'Warm Grey background'
 			},
 			{
 				'itemIdentifier': "toolbarWarmBack",
 				'label': 'Night Work',
 				'callback': self.switchBackgroundColorCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_warmback%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_warmback%s.pdf' % darkm),
 				'toolTip': 'Warm Grey background'
 			},
 		]
@@ -299,8 +298,8 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		self.warmGreyBackground = False
 
 		self.showToolbarGroupsView = False
-		self.imageToolbar_KernMode = os.path.join(kernToolBundle.resourcesPath(), 'toolbar_kern.pdf' )
-		self.imageToolbar_MarginsMode = os.path.join(kernToolBundle.resourcesPath(), 'toolbar_margins.pdf' )
+		self.imageToolbar_KernMode = os.path.join(RESOURCES_FOLDER, 'toolbar_kern.pdf' )
+		self.imageToolbar_MarginsMode = os.path.join(RESOURCES_FOLDER, 'toolbar_margins.pdf' )
 
 		self.spaceControl = TDSpaceControl(self.fontsHashKernLib, self.w.glyphsView, self.w.groupsView, mode = EDITMODE_KERNING)
 
