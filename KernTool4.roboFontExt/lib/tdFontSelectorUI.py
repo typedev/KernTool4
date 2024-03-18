@@ -2,14 +2,17 @@ import os
 from fontParts.world import *
 import mojo
 import ezui
+from tdLibEssentials import  uniqueName
 
 class TDFontSelectorDialogWindow(ezui.WindowController):
-	def build (self, parentWindow, callback=None, fontListSelected=None, scales = None, designSpace = None):
+	def build (self, parentWindow, callback=None,
+	           fontListSelected=None, scales = None, designSpace = None, showScales = True):
 		self.fontListSelected = fontListSelected
 		self.scales = scales
 		self.callback = callback
 		self.dsList = ['']
 		self.currentDS = designSpace
+		self.showScales = showScales
 		content = """
 			= VerticalStack
 			* Box @box
@@ -72,23 +75,10 @@ class TDFontSelectorDialogWindow(ezui.WindowController):
 						maxWidth = 300,
 						editable = False
 					),
-					dict(
-						identifier = "Scale",
-						title = "Scale kerning",
-						width = 80,
-						editable = True,
-						cellDescription = dict(
-							valueType = "float"
-						),
-					),
-					dict(
-						identifier = "ID",
-						title = "ID",
-						width = 0,
-						editable = False
-					),
+
 				],
 			),
+
 			cancelButton = dict(
 				keyEquivalent = chr(27)
 			), # call button on esc keydown
@@ -96,6 +86,28 @@ class TDFontSelectorDialogWindow(ezui.WindowController):
                 items=[ ],
             )
 		)
+
+		if self.showScales:
+			descriptionData['complexTable']['columnDescriptions'].append(
+				dict(
+					identifier = "Scale",
+					title = "Scale kerning",
+					width = 80,
+					editable = True,
+					cellDescription = dict(
+						valueType = "float"
+					),
+				)
+			)
+		descriptionData['complexTable']['columnDescriptions'].append(
+			dict(
+				identifier = "ID",
+				title = "ID",
+				width = 0,
+				editable = False
+			),
+		)
+
 		self.w = ezui.EZSheet(
 			content = content,
 			size = (700,400),
@@ -117,24 +129,12 @@ class TDFontSelectorDialogWindow(ezui.WindowController):
 				scale = 1.0
 				if self.scales and font in self.scales:
 					scale = self.scales[font]
-				listitems.append({'UFO': self.getUFOfileName(font), # font.path.split('/')[-1],
-				                  'Family': '%s' % font.info.familyName,
-				                  'Style': '%s' % font.info.styleName,
-				                  'Select': True,
-				                  'Scale': scale,
-				                  'ID': idx})
-
+				self.appendItem2ListItems(listItems = listitems, font = font, select = True, scale = scale, idx = idx)
 				self.fontList[idx] = font
 				idx += 1
 			for font in AllFonts():
 				if font not in self.fontListSelected:
-					listitems.append({'UFO': self.getUFOfileName(font), #font.path.split('/')[-1],
-					                  'Family': '%s' % font.info.familyName,
-					                  'Style': '%s' % font.info.styleName,
-					                  'Select': False,
-					                  'Scale': 1.0,
-					                  'ID': idx})
-
+					self.appendItem2ListItems(listItems = listitems, font = font, select = False, scale = 1.0, idx = idx)
 					self.fontList[idx] = font
 					idx += 1
 		self.setFontsTable(listitems)
@@ -156,6 +156,21 @@ class TDFontSelectorDialogWindow(ezui.WindowController):
 
 		self.w.open()
 
+	def appendItem2ListItems(self, listItems, font, select = True, scale = None, idx = 0):
+		if self.showScales:
+			listItems.append({'UFO': self.getUFOfileName(font),  # font.path.split('/')[-1],
+			                  'Family': '%s' % font.info.familyName,
+			                  'Style': '%s' % font.info.styleName,
+			                  'Select': select,
+			                  'Scale': scale,
+			                  'ID': idx})
+		else:
+			listItems.append({'UFO': self.getUFOfileName(font),  # font.path.split('/')[-1],
+			                  'Family': '%s' % font.info.familyName,
+			                  'Style': '%s' % font.info.styleName,
+			                  'Select': select,
+			                  # 'Scale': scale,
+			                  'ID': idx})
 
 	def getUFOfileName (self, font):
 		if font.path:
@@ -206,12 +221,7 @@ class TDFontSelectorDialogWindow(ezui.WindowController):
 		listitems = []
 		fontlist = {}
 		for idx, font in enumerate(AllFonts()):
-			listitems.append({'UFO': self.getUFOfileName(font),  # )font.path.split('/')[-1],
-			                  'Family': '%s' % font.info.familyName,
-			                  'Style': '%s' % font.info.styleName,
-			                  'Select': True,
-			                  'Scale': 1.0,
-			                  'ID': idx})
+			self.appendItem2ListItems(listItems = listitems, font = font, select = True, scale = 1.0, idx = idx)
 			fontlist[idx] = font
 		return listitems, fontlist
 
@@ -239,12 +249,7 @@ class TDFontSelectorDialogWindow(ezui.WindowController):
 			self.fontList = {}
 			for source in self.currentDS.sources:
 				font = OpenFont(source.path)
-				listitems.append({'UFO': self.getUFOfileName(font),  # )font.path.split('/')[-1],
-				                  'Family': '%s' % font.info.familyName,
-				                  'Style': '%s' % font.info.styleName,
-				                  'Select': True,
-				                  'Scale': 1.0,
-				                  'ID': idx})
+				self.appendItem2ListItems(listItems = listitems, font = font, select = True, scale = 1.0, idx = idx)
 				self.fontList[idx] = font
 				idx +=1
 			self.setFontsTable(listitems)
@@ -258,7 +263,8 @@ class TDFontSelectorDialogWindow(ezui.WindowController):
 			if item['Select']:
 				fontlist.append( self.fontList[ item['ID'] ] )
 				# scale = item['Scale'] # str(item['Scale']).replace(',','.')
-				scales[self.fontList[ item['ID'] ]] = float( item['Scale'] )
+				if self.showScales:
+					scales[self.fontList[ item['ID'] ]] = float( item['Scale'] )
 		if self.callback:
 			self.callback({'selectedFonts': fontlist, 'scales': scales, 'ds': self.currentDS})
 		self.w.close()
