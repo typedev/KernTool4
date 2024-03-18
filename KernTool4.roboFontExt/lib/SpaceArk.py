@@ -70,16 +70,15 @@ a b c d e f g h i j k l m n o p q r s t u v w x y z
 
 # =================================
 
-DEVELOP = True
+DEVELOP = False
 
 if DEVELOP:
 	pathForBundle = os.path.dirname(__file__)
-	# print('SpaceArk dir', pathForBundle)
-	resourcePathForBundle = os.path.join(pathForBundle, "resources")
-	kernToolBundle = mojo.extensions.ExtensionBundle(path=pathForBundle, resourcesName=resourcePathForBundle)
-
+	RESOURCES_FOLDER = os.path.join(pathForBundle, "resources")
+	print(DEVELOP, RESOURCES_FOLDER)
 else:
-	kernToolBundle = mojo.extensions.ExtensionBundle("SpaceArk")
+	kernToolBundle = mojo.extensions.ExtensionBundle("KernTool4")
+	RESOURCES_FOLDER = str(kernToolBundle.resourcesFolder).replace('resources', 'lib/resources')
 
 # print (pathForBundle, resourcePathForBundle, kernToolBundle.resourcesPath())
 
@@ -207,25 +206,25 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarSelectFonts",
 				'label': 'Select Fonts',
 				'callback': self.fontsCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_selectfonts%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_selectfonts%s.pdf' % darkm),
 			},
 			# {
 			# 	'itemIdentifier': "toolbarMakePairs",
 			# 	'label': 'Make Pairs',
 			# 	'callback': self.pairsBuilderCallback,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_makepairs%s.pdf' % darkm),
+			# 	'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_makepairs%s.pdf' % darkm),
 			# },
 			# {
 			# 	'itemIdentifier': "toolbarLoadFile",
 			# 	'label': 'Load Text',
 			# 	'callback': self.loadTextCallback,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_loadfile%s.pdf' % darkm),
+			# 	'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_loadfile%s.pdf' % darkm),
 			# },
 			# {
 			# 	'itemIdentifier': "toolbarSaveFile",
 			# 	'label': 'Save Text',
 			# 	'callback': self.saveTextCallbak,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_savefile%s.pdf' % darkm),
+			# 	'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_savefile%s.pdf' % darkm),
 			# },
 			{
 				'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
@@ -235,7 +234,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarLinked",
 				'label': 'Link Fonts',
 				'callback': self.switchLinkedModeCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_linked%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_linked%s.pdf' % darkm),
 				# 'selectable': True,
 				'toolTip': 'Link or unlink fonts [L]'
 			},
@@ -243,7 +242,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarEditKerning",
 				'label': 'Edit Kerning',
 				'callback': self.switchKerningModeCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_editkerning%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_editkerning%s.pdf' % darkm),
 				# 'selectable': True,
 				'toolTip': 'Switch to Kerning edit mode [M]'
 			},
@@ -251,7 +250,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarEditMargins",
 				'label': 'Edit Margins',
 				'callback': self.switchMarginsModeCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_editmargins%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_editmargins%s.pdf' % darkm),
 				# 'selectable': True,
 				'toolTip': 'Switch to Margins edit mode [M]'
 			},
@@ -264,7 +263,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarShowName",
 				'label': 'Show Margins',
 				'callback': self.showNamesCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_showname%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_showname%s.pdf' % darkm),
 				# 'selectable': True,
 				'toolTip': 'Show glyph names and margins'
 			},
@@ -272,7 +271,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarShowWidth",
 				'label': 'Show Width',
 				'callback': self.showWidthCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_showwidth%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_showwidth%s.pdf' % darkm),
 				# 'selectable': True,
 				'toolTip': 'Show glyph widths and margins'
 			},
@@ -281,7 +280,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarShowMetrics",
 				'label': 'Show Metrics',
 				'callback': self.showMetricsCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_showmetrics%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_showmetrics%s.pdf' % darkm),
 				# 'selectable': True,
 				'toolTip': 'Show Font Dimensions'
 			},
@@ -289,7 +288,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarShowSkeleton",
 				'label': 'Show Skeleton',
 				'callback': self.showSkeletonCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_showskeleton%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_showskeleton%s.pdf' % darkm),
 				# 'selectable': True,
 				'toolTip': 'Show Glyph Skeleton'
 			},
@@ -297,7 +296,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarShowBlues",
 				'label': 'Show Blues',
 				'callback': self.showBluesZonesCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_showblues%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_showblues%s.pdf' % darkm),
 				# 'selectable': True,
 				'toolTip': 'Show Blue zones'
 			},
@@ -305,7 +304,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 			# 	'itemIdentifier': "toolbarShowFamilys",
 			# 	'label': 'Show Familys',
 			# 	'callback': self.showFamilyZonesCallback,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_showfamily%s.pdf' % darkm),
+			# 	'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_showfamily%s.pdf' % darkm),
 			# 	# 'selectable': True,
 			# 	'toolTip': 'Show Family zones'
 			# },
@@ -314,7 +313,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarLightMode",
 				'label': 'Light Mode',
 				'callback': self.ligthModeCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_lightmode%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_lightmode%s.pdf' % darkm),
 				'toolTip': 'Hide all and show only glyphs as plain text'
 			},
 
@@ -326,7 +325,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 			# 	'itemIdentifier': "toolbarLangSet",
 			# 	'label': 'Check Language',
 			# 	'callback': self.langSetCallback,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_langset%s.pdf' % darkm),
+			# 	'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_langset%s.pdf' % darkm),
 			# 	'toolTip': 'Check language compatibility'
 			# },
 
@@ -343,14 +342,14 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarShowToolbar",
 				'label': 'Show Hints',
 				'callback': self.switchToolbarCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_show_toolbar%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_show_toolbar%s.pdf' % darkm),
 				# 'toolTip': 'Warm Grey background'
 			},
 			{
 				'itemIdentifier': "toolbarWarmBack",
 				'label': 'Night Work',
 				'callback': self.switchBackgroundColorCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_warmback%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_warmback%s.pdf' % darkm),
 				'toolTip': 'Warm Grey background'
 			},
 		]
@@ -406,8 +405,8 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 		self.w.glyphsView.switchMargins(True)
 
 		self.showToolbarGroupsView = False
-		self.imageToolbar_KernMode = os.path.join(kernToolBundle.resourcesPath(), 'toolbar_kern_cut.pdf' )
-		self.imageToolbar_MarginsMode = os.path.join(kernToolBundle.resourcesPath(), 'toolbar_margins.pdf' )
+		self.imageToolbar_KernMode = os.path.join(RESOURCES_FOLDER, 'toolbar_kern_cut.pdf' )
+		self.imageToolbar_MarginsMode = os.path.join(RESOURCES_FOLDER, 'toolbar_margins.pdf' )
 
 		self.spaceControl = TDSpaceControl(self.fontsHashKernLib, self.w.glyphsView, mode = EDITMODE_MARGINS)
 		self.spaceControl.switchMarginsON()
@@ -425,6 +424,8 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 
 		self.w.eb.edit = vanilla.EditText('auto', callback = self.editCallback) #-120
 		self.w.eb.btnInsertLine = vanilla.Button('auto', 'get selection',  callback = self.insertLineCallback)
+		self.w.eb.btnWrapLine = vanilla.Button('auto', 'wrap',  callback = self.btnWrapCallback)
+
 
 		self.w.eb.btnRL = vanilla.Button('auto','􀆉',callback = self.btnSwithGlyphCallback)
 		self.w.eb.editRight = vanilla.EditText('auto', callback = self.editCallback) #-120
@@ -436,13 +437,14 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 
 		rulesEditBar = [
 		    # Horizontal
-		    "H:|-border-[btnLL]-space-[editLeft(==120)]-space-[btnLR]-border-[edit]-space-[btnInsertLine(==120)]-border-[btnRL]-space-[editRight(==120)]-space-[btnRR]-border-[btnEBsettings]-border-|",
+		    "H:|-border-[btnLL]-space-[editLeft(==120)]-space-[btnLR]-border-[edit]-space-[btnInsertLine(==120)]-space-[btnWrapLine(==80)]-border-[btnRL]-space-[editRight(==120)]-space-[btnRR]-border-[btnEBsettings]-border-|",
 		    # Vertical
 			"V:|-space-[btnLL]-space-|",
 		    "V:|-space-[editLeft]-space-|",
 			"V:|-space-[btnLR]-space-|",
 		    "V:|-space-[edit]-space-|",
 			"V:|-space-[btnInsertLine]-space-|",
+			"V:|-space-[btnWrapLine]-space-|",
 			"V:|-space-[btnRL]-space-|",
 			"V:|-space-[editRight]-space-|",
 			"V:|-space-[btnRR]-space-|",
@@ -753,7 +755,21 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 
 
 
+	def btnWrapCallback(self, sender):
+		txt = self.w.eb.edit.get()
+		glyphslinetxt = []
+		glyphsline = []
+		if txt:
+			glyphslinetxt = tdGlyphparser.translateText(font = self.w.glyphsView.getCurrentFont(), text = txt)
+			gline, _, _ = self.langSet.wrapGlyphsLine_MarksAndMasks(font = self.w.glyphsView.getCurrentFont(),
+			                                          glyphsline = glyphslinetxt,
+			                                          marks = [True]*len(glyphslinetxt))
+			glyphsline = [glyph.name for glyph in gline]
+			print(glyphsline)
 
+		if glyphsline:
+			self.w.glyphsView.setGlyphNamesListToCurrentLine(glyphsline)
+		self.glyphsInMatrix = glyphsline
 
 
 

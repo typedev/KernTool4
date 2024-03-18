@@ -52,15 +52,15 @@ importlib.reload(tdHistoryController)
 # from ScriptsBoard import main
 
 
-# DEVELOP = True
-#
-# if DEVELOP:
-pathForBundle = os.path.dirname(__file__)
-resourcePathForBundle = os.path.join(pathForBundle, "resources")
-kernToolBundle = mojo.extensions.ExtensionBundle(path=pathForBundle, resourcesName=resourcePathForBundle)
-#
-# else:
-# 	kernToolBundle = mojo.extensions.ExtensionBundle("KernTool4")
+DEVELOP = False
+
+if DEVELOP:
+	pathForBundle = os.path.dirname(__file__)
+	RESOURCES_FOLDER = os.path.join(pathForBundle, "resources")
+	print(DEVELOP, RESOURCES_FOLDER)
+else:
+	kernToolBundle = mojo.extensions.ExtensionBundle("KernTool4")
+	RESOURCES_FOLDER = str(kernToolBundle.resourcesFolder).replace('resources', 'lib/resources')
 
 class TDGroupsControl4(Subscriber): #, WindowController
 
@@ -89,7 +89,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarSelectFonts",
 				'label': 'Select Font',
 				'callback': self.selectFontCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_selectfont%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_selectfont%s.pdf' % darkm),
 			},
 			{
 				'itemIdentifier': AppKit.NSToolbarSpaceItemIdentifier,
@@ -99,14 +99,14 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			# 	'label': 'Margins Groups',
 			# 	'callback': self.allCallbacks,
 			# 	'selectable': True,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_margins_groups%s.pdf' % darkm),
+			# 	'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_margins_groups%s.pdf' % darkm),
 			# },
 			# {
 			# 	'itemIdentifier': "toolbarKerningGroup",
 			# 	'label': 'Kerning Groups',
 			# 	'callback': self.allCallbacks,
 			# 	'selectable': True,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_kerning_groups%s.pdf' % darkm),
+			# 	'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_kerning_groups%s.pdf' % darkm),
 			# },
 			# {
 			# 	'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
@@ -115,13 +115,13 @@ class TDGroupsControl4(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarImportGroup",
 				'label': 'Import Groups',
 				'callback': self.importGroupsCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_import_groups%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_import_groups%s.pdf' % darkm),
 			},
 			{
 				'itemIdentifier': "toolbarExportGroup",
 				'label': 'Export Groups',
 				'callback': self.exportGroupsCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_export_groups%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_export_groups%s.pdf' % darkm),
 			},
 			{
 				'itemIdentifier': AppKit.NSToolbarSpaceItemIdentifier,
@@ -130,19 +130,19 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			# 	'itemIdentifier': "toolbarImportHistory",
 			# 	'label': 'Load History',
 			# 	'callback': self.importHistory,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_import_history%s.pdf' % darkm),
+			# 	'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_import_history%s.pdf' % darkm),
 			# },
 			# {
 			# 	'itemIdentifier': "toolbarExportHistory",
 			# 	'label': 'Save History',
 			# 	'callback': self.exportHistory,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_export_history%s.pdf' % darkm),
+			# 	'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_export_history%s.pdf' % darkm),
 			# },
 			# {
 			# 	'itemIdentifier': "toolbarHistoryController",
 			# 	'label': 'History',
 			# 	'callback': self.callHistoryController,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_history%s.pdf' % darkm),
+			# 	'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_history%s.pdf' % darkm),
 			# },
 			# # {
 			# # 	'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
@@ -154,14 +154,14 @@ class TDGroupsControl4(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarAddGroup",
 				'label': 'Add Group',
 				'callback': self.addGroupCallbacks,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_add_group%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_add_group%s.pdf' % darkm),
 				'toolTip': 'Create a group from the selected glyphs'
 			},
 			{
 				'itemIdentifier': "toolbarAddMultiGroup",
 				'label': 'Сreate groups',
 				'callback': self.addGroupByListCallbacks,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_add_multigroups%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_add_multigroups%s.pdf' % darkm),
 				'toolTip': 'Create a group for each of the selected glyphs'
 			},
 			{
@@ -171,7 +171,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarDeleteGroup",
 				'label': 'Delete Group',
 				'callback': self.deleteSelectedGroupCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_delete_group%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_delete_group%s.pdf' % darkm),
 				'toolTip': 'Delete selected groups'
 			},
 			{
@@ -181,21 +181,21 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			# 	'itemIdentifier': "toolbarSplitGroup",
 			# 	'label': 'Split by Script',
 			# 	'callback': self.splitGroupCallback,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_split_groups%s.pdf' % darkm),
+			# 	'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_split_groups%s.pdf' % darkm),
 			# 	'toolTip': 'Split selected groups by language'
 			# },
 			# {
 			# 	'itemIdentifier': "toolbarCombineGroup",
 			# 	'label': 'Combine by Script',
 			# 	'callback': self.combineGroupsByLanguageCallback,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_combine_groups%s.pdf' % darkm),
+			# 	'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_combine_groups%s.pdf' % darkm),
 			# 	'toolTip': 'Combine all groups by language'
 			# },
 			# {
 			# 	'itemIdentifier': "toolbarRemoveCrossPairs",
 			# 	'label': 'Remove Cross-Pairs',
 			# 	'callback': self.removeCrossScriptsCallback,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_remove_crosspairs%s.pdf' % darkm),
+			# 	'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_remove_crosspairs%s.pdf' % darkm),
 			# 	'toolTip': 'Remove Cross-Language kerning pairs from font'
 			# },
 			# {
@@ -205,7 +205,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 				'itemIdentifier': "toolbarRenameGroup",
 				'label': 'Rename Group',
 				'callback': self.renameGroupCallback,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_rename_group%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_rename_group%s.pdf' % darkm),
 			},
 			# {
 			# 	'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
@@ -215,14 +215,14 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			# 	'label': 'Side 1',
 			# 	'callback': self.allCallbacks,
 			# 	'selectable': True,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_side1%s.pdf' % darkm),
+			# 	'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_side1%s.pdf' % darkm),
 			# },
 			# {
 			# 	'itemIdentifier': "toolbarSide2",
 			# 	'label': 'Side 2',
 			# 	'callback': self.allCallbacks,
 			# 	'selectable': True,
-			# 	'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_side2%s.pdf' % darkm),
+			# 	'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_side2%s.pdf' % darkm),
 			# },
 			# {
 			# 	'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
@@ -235,7 +235,7 @@ class TDGroupsControl4(Subscriber): #, WindowController
 				'label': 'Scripts',
 				'callback': self.runScriptsBoardCallback,
 				# 'selectable': True,
-				'imagePath': os.path.join(kernToolBundle.resourcesPath(), 'tb_scripts%s.pdf' % darkm),
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_scripts%s.pdf' % darkm),
 			},
 
 		]

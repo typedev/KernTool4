@@ -82,11 +82,12 @@ def convertGlyphName2unicode(font, glyphName):
 	if font[glyphName].unicode:
 		return chr(int("%04X" % (font[glyphName].unicode), 16))
 	else:
-		return '/%s ' % glyphName
+		return f'/{glyphName} ' #% glyphName
 
 def prepareGlyphsMatrix(glyphslines, fonts, lineinfo = None):
 	matrix = []
 	idx = 0
+	# fonts = fontsList['fonts']
 	for glist in glyphslines:
 		link = getUniqName()
 		for font in fonts:
@@ -97,7 +98,7 @@ def prepareGlyphsMatrix(glyphslines, fonts, lineinfo = None):
 					gline.append(font[gn])
 			if len(fonts) != 1:
 				# lineinfo = '%s %s\n\n%i:%i' % (font.info.familyName, font.info.styleName, idx, len(fonts) * len(glyphslines))
-				lineinfo = '%s %s' % (font.info.familyName, font.info.styleName)
+				lineinfo = f'{font.info.familyName} {font.info.styleName}' # % (font.info.familyName, font.info.styleName)
 
 			else:
 				lineinfo = lineinfo
@@ -263,7 +264,7 @@ def calculateLineHeight(font):
 
 LEFT_SYMBOL_MARGIN = chr(int('25C2', 16)) # 25C0
 RIGHT_SYMBOL_MARGIN = chr(int('25B8', 16)) # 25B6
-TITLE_SYMBOL = '\n' + chr(int('25BC', 16))
+TITLE_SYMBOL = f'\n%s' % chr(int('25BC', 16))
 
 # class TDView(vanilla.Group):
 # 	def __init__(self, posSize, backgroundColor=None, delegate=None,
@@ -442,7 +443,7 @@ class TDGlyphsMerzView (MerzView):
 
 		for idx, (y1, y2) in enumerate(listblues):
 			rb = container.appendRectangleSublayer(
-				name = 'blues.%i' % idx,
+				name = f'blues.{idx}', #% idx,
 				position = (0 + italicShift(font.info.italicAngle, y1), y1 + 600 ),
 				size = (width , (y2 - y1) ),
 				fillColor = color,
@@ -451,12 +452,12 @@ class TDGlyphsMerzView (MerzView):
 			if showDimentions:
 				shiftx = 0
 				container.appendTextLineSublayer(
-					name = 'blues.label.%s' % idx,
+					name = f'blues.label.{idx}', # % idx,
 					font = fontname,
 					position = (width + italicShift(font.info.italicAngle, y1 + shiftx) +50 , y2 + 580),
 					fillColor = color,
 					pointSize = pointsize,
-					text = '%i/%i:%i' % (y1, y2, (y2-y1)),
+					text = f'{y1}/{y2}:{y2-y1}', # % (y1, y2, (y2-y1)),
 					verticalAlignment = 'top',
 					horizontalAlignment = "left"
 				)
@@ -479,7 +480,7 @@ class TDGlyphsMerzView (MerzView):
 		)
 		for name, position in dimensions.items():
 			rb = container.appendLineSublayer(
-				name = 'metrics.%s' % name,
+				name = f'metrics.{name}', # % name,
 				startPoint = (0 + italicShift(font.info.italicAngle, position), position+600),
 				endPoint = (width + italicShift(font.info.italicAngle, position), position+600),
 				strokeWidth = 1,
@@ -493,12 +494,12 @@ class TDGlyphsMerzView (MerzView):
 					verticalAlignment = 'bottom'
 					shiftx = 120
 				container.appendTextLineSublayer(
-					name = 'metrics.label.%s' % name,
+					name = f'metrics.label.{name}', # % name,
 					font = fontname,
 					position = (-50 + italicShift(font.info.italicAngle, position + shiftx)  , position + 580),
 					fillColor = (.2,.5,.2,1),
 					pointSize = pointsize,
-					text = '%s:%i' % (name[0], position),
+					text = f'{name[0]}:{position}', # % (name[0], position),
 					verticalAlignment = verticalAlignment,
 					horizontalAlignment = "right"
 				)
@@ -666,7 +667,7 @@ class TDGlyphsMerzView (MerzView):
 			size = ( width , self.lineHeight - 50), #glyph.width * self.scaleFactor
 			backgroundColor = (0, 0, 0, 0),
 			font = self.displayFontName,
-			text = displayName + TITLE_SYMBOL,
+			text = f"{displayName}{TITLE_SYMBOL}", #displayName + TITLE_SYMBOL,
 			pointSize = self.pointSizeMargins, #+ 2,
 			fillColor = color,
 			horizontalAlignment = 'center',
@@ -694,7 +695,7 @@ class TDGlyphsMerzView (MerzView):
 			position = (-offsetX_text - itshift, yctrl),# - ygap),
 			fillColor = color_text,
 			pointSize = pointsize,
-			text = LEFT_SYMBOL_MARGIN + str(leftMargin),
+			text = f'{LEFT_SYMBOL_MARGIN}{leftMargin}',
 			horizontalAlignment = "left",
 			verticalAlignment = 'bottom',
 			offset = (0,-4),
@@ -706,7 +707,7 @@ class TDGlyphsMerzView (MerzView):
 			position = ( width + offsetX_text - itshift, yctrl),# - hctrl - ygap), #glyph.width
 			fillColor = color_text,
 			pointSize = pointsize,
-			text = str(rightMargin) + RIGHT_SYMBOL_MARGIN,
+			text = f'{rightMargin}{RIGHT_SYMBOL_MARGIN}',
 			horizontalAlignment = "right",
 			verticalAlignment = 'top',
 			offset = (0, 4),
@@ -890,7 +891,7 @@ class TDGlyphsMerzView (MerzView):
 
 		def drawGlyphPath(container, glyph, fillColor = (0,0,0,1), strokeColor = None, strokeWidth = 0):
 			glyphLayer = container.appendPathSublayer(
-				name = 'path.' + glyph.name,
+				name = f'path.{glyph.name}', # + glyph.name,
 				fillColor = fillColor,
 				position = (0, 600),
 				strokeColor = strokeColor,
@@ -928,7 +929,7 @@ class TDGlyphsMerzView (MerzView):
 		strokeColor = None
 		with container.sublayerGroup():
 			baselayer = container.appendRectangleSublayer(
-				name = 'glyphbox.' + uniqname, #glyph.name,
+				name = f'glyphbox.{uniqname}', # + uniqname, #glyph.name,
 				position = (xpos, ypos),
 				size = (width, self.lineHeight),
 				fillColor = color_box,
@@ -1067,7 +1068,9 @@ class TDGlyphsMerzView (MerzView):
 			kernline.clearSublayers()
 
 		for idx, glyph in enumerate(glyphs):
-			glyphbox = container.getSublayer('glyphbox.' + uniqnames[idx])
+			# print ('++++++++++++++')
+			# print ('glyphbox.' , uniqnames[idx])
+			glyphbox = container.getSublayer(f'glyphbox.{uniqnames[idx]}') #  + uniqnames[idx]
 			if glyphbox:
 
 				marklayer = glyphbox.getSublayer('mark')
@@ -1087,7 +1090,7 @@ class TDGlyphsMerzView (MerzView):
 					print ([cutUniqName(uniqname) for uniqname in uniqnames])
 					print (data)
 
-				glyphpath = glyphbox.getSublayer('path.' + glyph.name)
+				glyphpath = glyphbox.getSublayer(f'path.{glyph.name}') #  + glyph.name
 				glyphpath.setPosition((delta,600))
 
 				glyphbox.setPosition((xpos, 0))
@@ -1101,16 +1104,16 @@ class TDGlyphsMerzView (MerzView):
 
 				l = glyphbox.getSublayer('margin.left')
 				if l:
-					l.setText(LEFT_SYMBOL_MARGIN+str(lm))
+					l.setText(f'{LEFT_SYMBOL_MARGIN}{lm}')
 				r = glyphbox.getSublayer('margin.right')
 				if r: #TODO need reposition right margins layer
-					r.setText(str(rm)+RIGHT_SYMBOL_MARGIN)
+					r.setText(f'{rm}{RIGHT_SYMBOL_MARGIN}')
 
 				n = glyphbox.getSublayer('glyphTitle')
 				if n:
 					n.setSize(( glyph.width , self.lineHeight - 50 ))
 					if self.modeTitles == SHOWTITLES_GLYPH_WIDTH:
-						n.setText(str(glyph.width) + TITLE_SYMBOL)
+						n.setText(f'{glyph.width}{TITLE_SYMBOL}')
 
 
 				if self.selectionMode == SELECTION_MODE_PAIR:
@@ -1362,7 +1365,7 @@ class TDGlyphsMerzView (MerzView):
 			)
 			uniqnames = []
 			for glyph in glyphs:
-				uniqname = '%s.%s' % (glyph.name, getUniqName())
+				uniqname = f'{glyph.name}.{getUniqName()}' # % (glyph.name, getUniqName())
 				uniqnames.append(uniqname)
 				self.placedGlyphLinesDic[uniqname] = baselayer
 				self.placedGlyphUniqNames.append(uniqname)
@@ -1425,7 +1428,7 @@ class TDGlyphsMerzView (MerzView):
 		ypos = 35 / self.scaleFactor
 		# print ('draw status')
 		for mode, (status, value) in self.statuses.items():
-			layer = container.getSublayer('status.'+mode)
+			layer = container.getSublayer(f'status.{mode}') # +mode
 			# layerremoved = True
 			if not value:
 				value = ''
@@ -1439,7 +1442,7 @@ class TDGlyphsMerzView (MerzView):
 				# layerremoved = False
 			if status: # and layerremoved:
 				l = container.appendTextLineSublayer(
-					name = 'status.'+mode,
+					name = f'status.{mode}', #+mode,
 					font = self.displayFontName,
 					position = (xpos ,  ypos), # + 1500
 					# size = (100,100),
@@ -1451,7 +1454,7 @@ class TDGlyphsMerzView (MerzView):
 					# padding = (5,0),
 					horizontalAlignment = 'right',
 					# verticalAlignment = 'bottom',
-					text = '[' +mode+value+ ']',
+					text = f'[ {mode}{value} ]',
 					cornerRadius = 5, )
 				ypos += 18/self.scaleFactor
 				# print('noscale',mode, l.getSize())
@@ -1620,7 +1623,7 @@ class TDGlyphsMerzView (MerzView):
 		# 		idx +=1
 		glyphs = getGlyphsNames_fromGlyphsLineLayer(glyphsLineLayer)
 		if index <= len(glyphs)-1:
-			boxlayer = glyphsLineLayer.getSublayer('glyphbox.%s' % glyphs[index])
+			boxlayer = glyphsLineLayer.getSublayer(f'glyphbox.{glyphs[index]}') # % glyphs[index])
 			self.selectedGlyphs = []
 			self.selectGlyphLayer(boxlayer, selectionMode = selectionMode)
 		else:
@@ -1630,7 +1633,7 @@ class TDGlyphsMerzView (MerzView):
 		if uniqGlyphname in self.placedGlyphLinesDic:
 			glyphsLinelayer = self.placedGlyphLinesDic[uniqGlyphname]
 			self.selectedGlyphs = []
-			self.selectGlyphLayer(glyphsLinelayer.getSublayer('glyphbox.%s' % uniqGlyphname), selectionMode = selectionMode)
+			self.selectGlyphLayer(glyphsLinelayer.getSublayer(f'glyphbox.{uniqGlyphname}'), selectionMode = selectionMode) #  % uniqGlyphname
 
 
 	def modifyGlyphsLine (self, glyphsLineLayer, glyphs=None, marks = None):
@@ -1657,7 +1660,7 @@ class TDGlyphsMerzView (MerzView):
 		uniqnames = []
 		lmargins = []
 		for idx, glyph in enumerate(glyphs):
-			uniqname = '%s.%s' % (glyph.name, getUniqName())
+			uniqname = f'{glyph.name}.{getUniqName()}' # % (glyph.name, getUniqName())
 			uniqnames.append(uniqname)
 			self.placedGlyphLinesDic[uniqname] = glyphsLineLayer
 
