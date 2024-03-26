@@ -298,7 +298,12 @@ class TDGroupsControl4(Subscriber): #, WindowController
 		)
 		self.w.g1.linesPreview.scaleFactor = pt2Scale(72)
 		self.w.g1.linesPreview.setStatus('showing dependencies', True)
-		self.spaceControl = TDSpaceControl({self.font: self.hashKernDic}, self.w.g1.linesPreview, mode = EDITMODE_MARGINS)
+		
+		scale = 1
+		if 'com.typedev.KernTool.scaleKerningAndMargins' in self.font.lib.keys():
+			scale = float(self.font.lib['com.typedev.KernTool.scaleKerningAndMargins'])
+
+		self.spaceControl = TDSpaceControl({self.font: self.hashKernDic}, self.w.g1.linesPreview, mode = EDITMODE_MARGINS, scalesKern = {self.font: scale}, scalesMargins = {self.font: scale})
 		self.previewMode = 'margins'
 		self.spaceControl.switchMarginsON()
 
@@ -1115,6 +1120,10 @@ class TDGroupsControl4(Subscriber): #, WindowController
 			self.spaceControl.fontsHashKernLib = {self.font: self.hashKernDic}
 			self.spaceControl.kernControl.fontsHashKernLib = {self.font: self.hashKernDic}
 			self.spaceControl.marginsControl.fontsHashKernLib = {self.font: self.hashKernDic}
+			if 'com.typedev.KernTool.scaleKerningAndMargins' in self.font.lib.keys():
+				scale = float(self.font.lib['com.typedev.KernTool.scaleKerningAndMargins'])
+				self.spaceControl.scalesKern = {self.font: scale}
+				self.spaceControl.scalesMargins = {self.font: scale}
 
 			self.refreshGroupsView()
 
