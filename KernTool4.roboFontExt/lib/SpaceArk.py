@@ -361,6 +361,10 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 		self.glyphsInMatrix = []
 		self.fontList = AllFonts()
 		self.fontListScales = {}
+		for font in self.fontList:
+			if 'com.typedev.KernTool.scaleKerningAndMargins' in font.lib.keys():
+				scale = float(font.lib['com.typedev.KernTool.scaleKerningAndMargins'])
+				self.fontListScales[font] = scale
 		self.currentDS = None
 		# self.txtPatterns = TD_txtPatterns()
 		# self.txtPatterns.makeLibPatterns(self.fontList)
@@ -408,7 +412,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 		self.imageToolbar_KernMode = os.path.join(RESOURCES_FOLDER, 'toolbar_kern_cut.pdf' )
 		self.imageToolbar_MarginsMode = os.path.join(RESOURCES_FOLDER, 'toolbar_margins.pdf' )
 
-		self.spaceControl = TDSpaceControl(self.fontsHashKernLib, self.w.glyphsView, mode = EDITMODE_MARGINS)
+		self.spaceControl = TDSpaceControl(self.fontsHashKernLib, self.w.glyphsView, mode = EDITMODE_MARGINS, scalesKern = self.fontListScales, scalesMargins = self.fontListScales)
 		self.spaceControl.switchMarginsON()
 
 
@@ -777,10 +781,20 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 		if sender != self.w.glyphsView: return
 		glyphs = container.getInfoValue('glyphs')
 		font = container.getInfoValue('font')
-
+		marks = container.getInfoValue('marks')
+		if not marks:
+			marks = [False for i in glyphs]
+			
 		lineinfo = container.getInfoValue('lineinfo')
 		widthLine = 0
 		if not lineinfo: lineinfo = ''
+		if 'com.typedev.KernTool.scaleKerningAndMargins' in font.lib.keys():
+			unit = int(round( float(font.lib['com.typedev.KernTool.scaleKerningAndMargins'])*10 ,0))
+			lineinfounit = '\ngrid:%i' % unit
+		else:
+			unit = None
+			lineinfounit = ''
+			
 		if self.titlesMode == SHOWTITLES_GLYPH_WIDTH:
 
 			for idx, glyph in enumerate(glyphs):
@@ -790,12 +804,18 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 					kernvalue = pair['kernValue']
 					if not kernvalue: kernvalue = 0
 				widthLine += glyph.width + kernvalue
+				if unit:
+					if (glyph.width/unit)%1:
+						marks[idx] = True
+					else:
+						marks[idx] = False
 
 		lineinfo = re.sub(r'\w*:\d\w*', '', lineinfo).strip()
 		if self.titlesMode == SHOWTITLES_GLYPH_WIDTH:
-			lineinfo += '\n\nwidth:%i' % widthLine
+			lineinfo += '\n\nwidth:%i%s\n' % (widthLine, lineinfounit)
 
 		container.setInfoValue('lineinfo', lineinfo)
+		container.setInfoValue('marks', marks)
 
 
 
@@ -821,7 +841,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 				self.currentDS = fontListSelected['ds']
 			# print (self.fontListScales)
 			self.fontsHashKernLib = makeFontsHashGroupsLib(self.fontList, self.langSet)
-			self.spaceControl.setupSpaceControl(fontsHashKernLib = self.fontsHashKernLib, scalesKern = self.fontListScales)
+			self.spaceControl.setupSpaceControl(fontsHashKernLib = self.fontsHashKernLib, scalesKern = self.fontListScales, scalesMargins = self.fontListScales)
 
 			matrix = prepareGlyphsMatrix(self.glyphsInMatrix, self.fontList)
 			self.linkedMode = True

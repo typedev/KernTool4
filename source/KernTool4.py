@@ -223,6 +223,12 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		self.glyphsInMatrix = []
 		self.fontList = AllFonts()
 		self.fontListScales = {}
+
+		for font in self.fontList:
+			if 'com.typedev.KernTool.scaleKerningAndMargins' in font.lib.keys():
+				scale = float(font.lib['com.typedev.KernTool.scaleKerningAndMargins'])
+				self.fontListScales[font] = scale
+				
 		self.currentDS = None
 		# self.txtPatterns = TD_txtPatterns()
 		# self.txtPatterns.makeLibPatterns(self.fontList)
@@ -301,7 +307,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		self.imageToolbar_KernMode = os.path.join(RESOURCES_FOLDER, 'toolbar_kern.pdf' )
 		self.imageToolbar_MarginsMode = os.path.join(RESOURCES_FOLDER, 'toolbar_margins.pdf' )
 
-		self.spaceControl = TDSpaceControl(self.fontsHashKernLib, self.w.glyphsView, self.w.groupsView, mode = EDITMODE_KERNING)
+		self.spaceControl = TDSpaceControl(self.fontsHashKernLib, self.w.glyphsView, self.w.groupsView, mode = EDITMODE_KERNING, scalesKern = self.fontListScales, scalesMargins = self.fontListScales)
 
 		self.w.edit = vanilla.EditText((5, 5, -5, 21), callback = self.editCallback) #-120
 		# self.w.btnInsertLine = vanilla.Button((-110, 4, 100, 21), 'insert line',  callback = self.insertLineCallback)
@@ -788,7 +794,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 			if 'ds' in fontListSelected:
 				self.currentDS = fontListSelected['ds']
 			self.fontsHashKernLib = makeFontsHashGroupsLib(self.fontList, self.langSet)
-			self.spaceControl.setupSpaceControl(fontsHashKernLib = self.fontsHashKernLib, scalesKern = self.fontListScales)
+			self.spaceControl.setupSpaceControl(fontsHashKernLib = self.fontsHashKernLib, scalesKern = self.fontListScales, scalesMargins = self.fontListScales)
 			matrix = prepareGlyphsMatrix(self.glyphsInMatrix, self.fontList)
 			self.linkedMode = True
 			if len(self.fontList) == 1:

@@ -1273,6 +1273,14 @@ class TDMarginsControl(object):
 		self.glyphsView.refreshView(justmoveglyphs = True)
 		if self.groupsView:
 			self.groupsView.refreshView(justmoveglyphs = True)
+			
+	def getScaledValue(self, font, value):
+		if not self.scales or not value or value in range(-1,2):
+			return value
+		elif self.scales and font in self.scales and value:
+			return round(value * self.scales[font])
+		else:
+			return value
 
 	def setCurrentGlyphMargins(self, sender, side = SIDE_1, value = None, multiply=None, operation = 'value'):
 		self.lastSide = side
@@ -1283,11 +1291,11 @@ class TDMarginsControl(object):
 			if multiply == 0:
 				multiply = 10
 			value = (self.lastValue * multiply) - self.lastValue
-
-		delta = value
+		
 		if not sender.selectedGlyphs: return
 		glyphname = cutUniqName(sender.selectedGlyphs[0])
 		font = sender.getCurrentFont()
+		delta = self.getScaledValue(font, value)
 
 		if side == SIDE_1:
 			if font[glyphname].leftMargin != None:
