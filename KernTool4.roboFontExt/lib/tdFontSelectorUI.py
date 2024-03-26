@@ -91,7 +91,7 @@ class TDFontSelectorDialogWindow(ezui.WindowController):
 			descriptionData['complexTable']['columnDescriptions'].append(
 				dict(
 					identifier = "Scale",
-					title = "Scale kerning",
+					title = "Scale",
 					width = 80,
 					editable = True,
 					cellDescription = dict(
@@ -158,6 +158,8 @@ class TDFontSelectorDialogWindow(ezui.WindowController):
 
 	def appendItem2ListItems(self, listItems, font, select = True, scale = None, idx = 0):
 		if self.showScales:
+			if 'com.typedev.KernTool.scaleKerningAndMargins' in font.lib.keys():
+				scale = float(font.lib['com.typedev.KernTool.scaleKerningAndMargins'])
 			listItems.append({'UFO': self.getUFOfileName(font),  # font.path.split('/')[-1],
 			                  'Family': '%s' % font.info.familyName,
 			                  'Style': '%s' % font.info.styleName,
@@ -206,14 +208,24 @@ class TDFontSelectorDialogWindow(ezui.WindowController):
 		table = self.w.getItem('complexTable') # .getItem("box")
 		table.set([])
 		for ufoitem in fontslist:
-			item = table.makeItem(
-				Select = ufoitem['Select'],
-				UFO = ufoitem['UFO'],
-				Family = ufoitem['Family'],
-				Style = ufoitem['Style'],
-				Scale = float(ufoitem['Scale']),
-				ID = ufoitem['ID']
-			)
+			if self.showScales:
+				item = table.makeItem(
+					Select = ufoitem['Select'],
+					UFO = ufoitem['UFO'],
+					Family = ufoitem['Family'],
+					Style = ufoitem['Style'],
+					Scale = float(ufoitem['Scale']),
+					ID = ufoitem['ID']
+				)
+			else:
+				item = table.makeItem(
+					Select = ufoitem['Select'],
+					UFO = ufoitem['UFO'],
+					Family = ufoitem['Family'],
+					Style = ufoitem['Style'],
+					# Scale = float(ufoitem['Scale']),
+					ID = ufoitem['ID']
+				)
 			table.appendItems([item])
 
 
@@ -261,10 +273,12 @@ class TDFontSelectorDialogWindow(ezui.WindowController):
 		table = self.w.getItem('complexTable').get() # .getItem("box")
 		for item in table:
 			if item['Select']:
-				fontlist.append( self.fontList[ item['ID'] ] )
+				font = self.fontList[ item['ID'] ]
+				fontlist.append( font )
 				# scale = item['Scale'] # str(item['Scale']).replace(',','.')
 				if self.showScales:
-					scales[self.fontList[ item['ID'] ]] = float( item['Scale'] )
+					scales[ font ] = float( item['Scale'] )
+					font.lib['com.typedev.KernTool.scaleKerningAndMargins'] = str(item['Scale'])
 		if self.callback:
 			self.callback({'selectedFonts': fontlist, 'scales': scales, 'ds': self.currentDS})
 		self.w.close()
