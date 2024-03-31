@@ -886,9 +886,10 @@ class TDHashGroupsDic(object):
 		report = []
 		newPairs = []
 		deletedPairs = []
-		if self.trackHistory:
-			self.history.append(('rename', group, newname, checkKerning, checkLanguageCompatibility))
+		
 		if group in self.font.groups and newname not in self.font.groups:
+			if self.trackHistory:
+				self.history.append(('rename', group, newname, checkKerning, checkLanguageCompatibility))
 			content = list(self.font.groups[group])
 			# self.font.groups[newname] = ()
 			self.font.groups[newname] = tuple(content)

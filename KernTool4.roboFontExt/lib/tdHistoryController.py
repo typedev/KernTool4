@@ -24,6 +24,7 @@ class TDCustomLexer(RegexLexer):
             (r'\badd\b', String),
             (r'\bremove\b', Error),
             (r'\bdelete\b', Keyword),
+			(r'\brename\b', Keyword),
             (r'[KL][+-]\s*', Name.Variable),
             (r'public\S*\s', Name.Builtin),
             (r'\b\w+\b', Name),
@@ -128,6 +129,12 @@ class TDHistoryControllerWindow(Subscriber):
 					n = ' '.join(item[2])
 					o = item[3]
 					l = item[4]
+				elif item[0] == 'rename':
+					c = 'rename'
+					g = item[1] # old name
+					n = item[2] # new name
+					o = item[3]
+					l = item[4]
 				if o:
 					o = '+'  # check kerning
 				else:
@@ -160,9 +167,9 @@ class TDHistoryControllerWindow(Subscriber):
 					if command[0] == 'add':
 						checkKerning = False
 						checkLanguage = False
-						if command[1] == '+':
+						if command[1] == 'K+':
 							checkKerning = True
-						if command[2] == '+':
+						if command[2] == 'L+':
 							checkLanguage = True
 						groupname = command[3]
 						glyphslist = command[4:]
@@ -171,9 +178,9 @@ class TDHistoryControllerWindow(Subscriber):
 					elif command[0] == 'remove':
 						checkKerning = False
 						checkLanguage = False
-						if command[1] == '+':
+						if command[1] == 'K+':
 							checkKerning = True
-						if command[2] == '+':
+						if command[2] == 'L+':
 							checkLanguage = True
 						groupname = command[3]
 						glyphslist = command[4:]
@@ -182,17 +189,29 @@ class TDHistoryControllerWindow(Subscriber):
 					elif command[0] == 'delete':
 						checkKerning = False
 						checkLanguage = False
-						if command[1] == '+':
+						if command[1] == 'K+':
 							checkKerning = True
-						if command[2] == '+':
+						if command[2] == 'L+':
 							checkLanguage = True
 						groupname = command[3]
 						self.host.hashKernDic.deleteGroup(groupname, checkKerning = checkKerning, checkLanguageCompatibility = checkLanguage)
+					elif command[0] == 'rename':
+						checkKerning = False
+						checkLanguage = False
+						if command[1] == 'K+':
+							checkKerning = True
+						if command[2] == 'L+':
+							checkLanguage = True
+						groupname = command[3]
+						newgroupname = command[4]
+						self.host.hashKernDic.renameGroup(groupname, newgroupname, checkKerning = checkKerning, checkLanguageCompatibility = checkLanguage)
+						
 			f.close()
-			self.host.hashKernDic.clearHistory()
+			# self.host.hashKernDic.clearHistory()
 			self.host.setFontView(animated = 'left')
 			self.host.setGroupsView(animated = 'left')
 			self.host.refreshGroupsView()
+			self.showHistory()
 			# self.w.g1.contentView.setSceneItems(  items = list(self.font.groups[self.selectedGroup]),  animated = 'left')
 
 	def rollBack(self, doubleStep = False):
@@ -216,6 +235,9 @@ class TDHistoryControllerWindow(Subscriber):
 			elif lastCommand[0] == 'delete':
 				self.host.hashKernDic.history = self.host.hashKernDic.history[:-1]
 				self.rollBack(doubleStep = True)
+			elif lastCommand[0] == 'rename':
+				self.host.hashKernDic.renameGroup(glyphslist, groupname, checkKerning = checkKerning, checkLanguageCompatibility = checkLanguage)
+				self.host.hashKernDic.history = self.host.hashKernDic.history[:-2]
 
 
 	def showHistory(self):
