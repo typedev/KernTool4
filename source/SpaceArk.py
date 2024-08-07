@@ -70,17 +70,9 @@ a b c d e f g h i j k l m n o p q r s t u v w x y z
 
 # =================================
 
-DEVELOP = False
+pathForBundle = os.path.dirname(__file__)
+RESOURCES_FOLDER = os.path.join(pathForBundle, "resources")
 
-if DEVELOP:
-	pathForBundle = os.path.dirname(__file__)
-	RESOURCES_FOLDER = os.path.join(pathForBundle, "resources")
-	print(DEVELOP, RESOURCES_FOLDER)
-else:
-	kernToolBundle = mojo.extensions.ExtensionBundle("KernTool4")
-	RESOURCES_FOLDER = str(kernToolBundle.resourcesFolder).replace('resources', 'lib/resources')
-
-# print (pathForBundle, resourcePathForBundle, kernToolBundle.resourcesPath())
 
 class TDGlyphSequencesEditWindow(ezui.WindowController):
 	def build (self, callback = None):

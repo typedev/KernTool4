@@ -52,15 +52,9 @@ importlib.reload(tdHistoryController)
 # from ScriptsBoard import main
 
 
-DEVELOP = False
+pathForBundle = os.path.dirname(__file__)
+RESOURCES_FOLDER = os.path.join(pathForBundle, "resources")
 
-if DEVELOP:
-	pathForBundle = os.path.dirname(__file__)
-	RESOURCES_FOLDER = os.path.join(pathForBundle, "resources")
-	print(DEVELOP, RESOURCES_FOLDER)
-else:
-	kernToolBundle = mojo.extensions.ExtensionBundle("KernTool4")
-	RESOURCES_FOLDER = str(kernToolBundle.resourcesFolder).replace('resources', 'lib/resources')
 
 class TDGroupsControl4(Subscriber): #, WindowController
 

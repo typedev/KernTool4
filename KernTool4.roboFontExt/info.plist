@@ -41,6 +41,12 @@
 	<string>Alexander Lubovenko</string>
 	<key>developerURL</key>
 	<string>https://github.com/typedev</string>
+	<key>html</key>
+	<false/>
+	<key>launchAtStartUp</key>
+	<false/>
+	<key>mainScript</key>
+	<string></string>
 	<key>name</key>
 	<string>KernTool4</string>
 	<key>requiresVersionMajor</key>
@@ -48,8 +54,8 @@
 	<key>requiresVersionMinor</key>
 	<string>4</string>
 	<key>timeStamp</key>
-	<real>1711918398.001975</real>
+	<real>1723058434.748364</real>
 	<key>version</key>
-	<string>4.3.5</string>
+	<string>4.3.6</string>
 </dict>
 </plist>
