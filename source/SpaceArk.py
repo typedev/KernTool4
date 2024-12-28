@@ -190,7 +190,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 
 		if KERNTOOL_UI_DARKMODE:
 			darkm = '-dark'
-
+		self.idName = 'SpaceArk'
 		self.w = vanilla.Window((1000,800), minSize = (200, 100), title = 'SpaceArk', autosaveName = PREFKEY_WindowSize)
 
 		toolbarItems = [

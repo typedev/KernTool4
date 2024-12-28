@@ -24,6 +24,12 @@ def diffOrderOnly (g1, g2):
 		return False
 	else:
 		return True
+	
+def syncGlyphOrderInGroups(masterfont, targetfont, groupname):
+	if groupname in masterfont.groups and groupname in targetfont.groups:
+		targetfont.groups[groupname] = masterfont.groups[groupname]
+		return True
+	return False
 
 
 def saveKernPattern(patternlist, filename, pattern2line = 8):
@@ -60,7 +66,7 @@ def makePatternsFromPairsList(host, font, pairslist):
 		patterns.append(pattern)
 	return patterns
 
-def diffGroups (masterfont, targetfont):
+def diffGroups (masterfont, targetfont, syncGlyphOrder = True):
 	groupsNotInTarget = {}
 	groupsNotInMaster = {}
 	groupsDiff = {}
@@ -73,7 +79,11 @@ def diffGroups (masterfont, targetfont):
 			groupsNotInTarget[groupname] = content
 		elif not contentEqual(targetfont.groups[groupname], masterfont.groups[groupname]):
 			if diffOrderOnly(targetfont.groups[groupname], masterfont.groups[groupname]):
-				groupsDiffOrder[groupname] = (targetfont.groups[groupname], masterfont.groups[groupname])
+				if syncGlyphOrder:
+					if not syncGlyphOrderInGroups(masterfont, targetfont, groupname):
+						groupsDiffOrder[groupname] = (targetfont.groups[groupname], masterfont.groups[groupname])
+				else:
+					groupsDiffOrder[groupname] = (targetfont.groups[groupname], masterfont.groups[groupname])
 			else:
 				groupsDiff[groupname] = (targetfont.groups[groupname], masterfont.groups[groupname])
 
@@ -210,6 +220,7 @@ class TDDiffGroupsAndKerningWindow(object):
 		self.w.fontA = vanilla.PopUpButton('auto', [], sizeStyle = "regular")
 		self.w.label2 = vanilla.TextBox('auto', 'Choose Target font:')
 		self.w.fontB = vanilla.PopUpButton('auto', [], sizeStyle = "regular")  # , callback = self.optionsChanged
+		self.w.syncGlyphOrder = vanilla.CheckBox('auto', 'Sync glyph order in groups', value = True)
 		self.w.btnRun = vanilla.Button('auto', title = 'Run', callback = self.btnRunCallback)  # ,
 		self.w.textBox = CodeEditor('auto', text = '', readOnly = True, showLineNumbers = False, checksSpelling = False)
 		self.w.textBox.setLexer(BaseLexerDGAKW())
@@ -221,10 +232,11 @@ class TDDiffGroupsAndKerningWindow(object):
 			"H:|-border-[fontA]-border-|",
 			"H:|-border-[label2]-border-|",
 			"H:|-border-[fontB]-border-|",
+			"H:|-border-[syncGlyphOrder]-border-|",
 			"H:|-border-[btnRun]-border-|",
 			"H:|-0-[textBox]-0-|",
 			# Vertical
-			"V:|-border-[label1]-space-[fontA]-border-[label2]-space-[fontB]-border-[btnRun]-border-[textBox]-0-|",
+			"V:|-border-[label1]-space-[fontA]-border-[label2]-space-[fontB]-border-[syncGlyphOrder]-border-[btnRun]-border-[textBox]-0-|",
 		]
 		metrics = {
 			"border": 15,
@@ -237,7 +249,7 @@ class TDDiffGroupsAndKerningWindow(object):
 	def btnRunCallback (self, sender):
 		fontA = self.fonts[self.w.fontA.get()]
 		fontB = self.fonts[self.w.fontB.get()]
-		reportA = diffGroups(masterfont = fontA, targetfont = fontB)
+		reportA = diffGroups(masterfont = fontA, targetfont = fontB, syncGlyphOrder = self.w.syncGlyphOrder.get())
 		reportB = diffKerning(masterfont = fontA, targetfont = fontB, host = self.parent.hashKernDic)
 		self.w.textBox.set('\n'.join(reportA) + '\n'.join(reportB))
 
