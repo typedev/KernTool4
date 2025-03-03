@@ -655,7 +655,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 			raypos = self.w.groupsView.rayBeamPosition
 
 			if hashKernDic.isKerningGroup(gL):
-				Llabel = '%s // %s\n\n*Exception [E] can be made\nfor glyphs on the Left side. \nOr press [⌥E] for both sides' % ( gL, r )
+				Llabel = '%s // %s\n\n*Exception [E] can be made\nfor glyphs on the Left side. \nOr press [⌥E] for both sides. \n[Shift+E] will move touching glyphs to a safe distance' % ( gL, r )
 				(lm, rm) = getMargins(font[font.groups[gL][0]], useRayBeam = ray, rayBeamPosition = raypos)
 				margin = rm
 
@@ -674,7 +674,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				ggL.append(font[l])
 				ggL.append(font[r])
 			if hashKernDic.isKerningGroup(gR):
-				Rlabel = '%s // %s\n\n*Exception [E] can be made\nfor glyphs on the Right side. \nOr press [⌥E] for both sides' % ( l, gR )
+				Rlabel = '%s // %s\n\n*Exception [E] can be made\nfor glyphs on the Right side. \nOr press [⌥E] for both sides. \n[Shift+E] will move touching glyphs to a safe distance' % ( l, gR )
 				(lm, rm) = getMargins(font[font.groups[gR][0]], useRayBeam = ray, rayBeamPosition = raypos)
 				margin = lm
 
