@@ -1126,7 +1126,7 @@ def checkOverlapingGlyphs_2 (font, l, r, kernvalue):
 
 def autoCalcPairValue_2 (font, hashKernDic, pair): # mode = 'fixtouches'
     # print ('Calling AutoCalc..') # for', pair
-
+    zeroCorrection = 5
     l, r = pair
     rawpair = researchPair(font,hashKernDic,(l,r))
 
@@ -1142,8 +1142,13 @@ def autoCalcPairValue_2 (font, hashKernDic, pair): # mode = 'fixtouches'
             countInc += stepKern
 
     if checkOverlapingGlyphs_2(font, l, r, startKernValue - 15):
-        return startKernValue + 35
+        startKernValue += 40
+        if startKernValue == 0:
+            startKernValue += zeroCorrection
+        return startKernValue 
     else:
+        if startKernValue == 0:
+            startKernValue += zeroCorrection
         return startKernValue   
 
 def processKernTouches(font, hashKernDic = None, pairsList = None): # samplefilepath = None, sfxlist = None
@@ -1161,6 +1166,7 @@ def processKernTouches(font, hashKernDic = None, pairsList = None): # samplefile
     pairs2check = []
     monospacedFont = False
     shiftKern = 20
+    
     # if len(font.kerning) == 0:
     # 	monospacedFont = True
     # 	print ('* MONOSPACED Font * Pairs will checked but not fixed')
@@ -1394,15 +1400,20 @@ class TDKernControl(object):
                 elif sender.selectedLink == 'right':
                     self.setValue2Pair( font, currentPair, (currentPair['L_realName'], r ), kernValue, operation = 'exception')
             self.refreshViews()
+            
+    def checkKernTouches(self, font, pairs):
+        report, pairs2check = processKernTouches(font, self.fontsHashKernLib[font], pairs)
+        self.refreshViews()
+        return report, pairs2check
 
     def makeAutoExceptionCallbak(self, sender, exception = 'side'):
         if sender == self.groupsView:
             font = sender.getCurrentFont()
-            hashKernDic = self.fontsHashKernLib[font]
+            # hashKernDic = self.fontsHashKernLib[font]
             glyphLine = sender.selectedGlyphsLine
             pairs = [(cutUniqName(l),cutUniqName(r)) for l,r in zip(glyphLine[::2], glyphLine[1::2])]
-            processKernTouches(font, hashKernDic, pairs)
-            self.refreshViews()
+            self.checkKernTouches(font, pairs)
+            # self.refreshViews()
    
 
 
