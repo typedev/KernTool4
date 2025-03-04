@@ -190,7 +190,7 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 
 		if KERNTOOL_UI_DARKMODE:
 			darkm = '-dark'
-
+		self.idName = 'SpaceArk'
 		self.w = vanilla.Window((1000,800), minSize = (200, 100), title = 'SpaceArk', autosaveName = PREFKEY_WindowSize)
 
 		toolbarItems = [
@@ -358,6 +358,8 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 				scale = float(font.lib['com.typedev.KernTool.scaleKerningAndMargins'])
 				self.fontListScales[font] = scale
 		self.currentDS = None
+  
+		self.fontSuffixes = []
 		# self.txtPatterns = TD_txtPatterns()
 		# self.txtPatterns.makeLibPatterns(self.fontList)
 
@@ -475,6 +477,14 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 			self.w.eb.edit.set('HHOHHOOH')
 		else:
 			self.w.eb.edit.set('/'+'/'.join(selected))
+   
+		# self.fontSuffixes = [ '.'.join(g.name.split('.')[1:]) for g in CurrentFont() if '.' in g.name ]
+		for glyph in CurrentFont():
+			if '.' in glyph.name:
+				suffix = '.'.join(glyph.name.split('.')[1:])	
+				if suffix not in self.fontSuffixes:
+					self.fontSuffixes.append(suffix)
+		print(self.fontSuffixes)
 
 		self.glyphsInMatrix = [selected]
 
@@ -507,7 +517,15 @@ class TDSpaceArkTool(Subscriber): #, WindowController
 		self.switchers = []
 		lines = getExtensionDefault(PREFKEY_GlyphSequencesSArk, fallback = CONTEXTGLYPHSLINESLIST)
 		for line in lines:
-			lineofglyphs = tdGlyphparser.translateText(CurrentFont(), line.replace(' ',''))
+			_lineofglyphs = tdGlyphparser.translateText(self.w.glyphsView.getCurrentFont(), line.replace(' ',''))
+			lineofglyphs = []
+			for g in _lineofglyphs:
+				lineofglyphs.append(g)
+				for suffix in self.fontSuffixes:
+					fg = f"{g}.{suffix}"
+					if fg in self.w.glyphsView.getCurrentFont():
+						lineofglyphs.append(fg)
+						
 			self.switchers.append(lineofglyphs)
 
 
