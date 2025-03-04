@@ -16,6 +16,7 @@ from mojo.subscriber import Subscriber, registerCurrentGlyphSubscriber
 from mojo.events import addObserver, removeObserver
 from lib.eventTools.eventManager import postEvent, publishEvent
 from mojo.pens import DecomposePointPen
+import designspaceProblems as DP
 import importlib
 
 import tdGlyphparser
@@ -104,6 +105,12 @@ class TDInterpolationPreview(Subscriber):  # , WindowController
 		self.keyCommander.registerKeyCommand(KEY_UP, cmd = True, shift = True, callback = self.setInterpolationFactorCallbackY, callbackValue = 100)
 
 		self.keyCommander.registerKeyCommand(KEY_M, cmd = True, shift = True, callback = self.interpolateInstanceCallback)
+
+		if CurrentDesignspace():
+			print('Designspace found', CurrentDesignspace())
+			self.dsChecker = DP.DesignSpaceChecker(CurrentDesignspace())
+		else:
+			self.dsChecker = None	
 
 
 
@@ -203,6 +210,21 @@ class TDInterpolationPreview(Subscriber):  # , WindowController
 			glyphsPreview.append(g)
 			self.w.g.glyphsView.setStatus('factor:', value = str(int(round(iscaleX * 1000, 0))), status = True)
 			# self.w.g.glyphsView.setStatus('factorY:', value = str(int(round(iscaleY * 1000, 0))), status = True)
+			if self.dsChecker:
+				print('Checking glyphs...')
+				self.dsChecker.checkGlyphs()
+				report = []
+				for problem in self.dsChecker.problems:
+					cat, desc = problem.getDescription()
+					if cat == 'glyphs' and desc == 'incompatible glyph':
+						if 'glyphName' in problem.data:
+							report.append(problem.data['glyphName'])
+				if report:
+					if glyphName in report:
+						self.w.g.glyphsView.setStatus('compatibility:', value = 'incompatible', status = True)
+					else:
+						self.w.g.glyphsView.setStatus('compatibility:', value = 'Ok', status = True)
+
 
 		matrix = dict(glyphs = glyphsPreview)
 		self.w.g.glyphsView.startDrawGlyphsMatrix( [ matrix ] )

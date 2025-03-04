@@ -53,6 +53,8 @@ from tdFontSelectorUI import *
 import tdLangSet
 importlib.reload(tdLangSet)
 from tdLangSet import *
+import ScriptsBoard
+importlib.reload(ScriptsBoard)
 
 
 # =================================
@@ -186,7 +188,18 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				'toolTip': 'Check language compatibility'
 			},
 
+			
+   			{
+				'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
+			},
 			{
+				'itemIdentifier': "toolbarScripts",
+				'label': 'Scripts',
+				'callback': self.runScriptsBoardCallback,
+				# 'selectable': True,
+				'imagePath': os.path.join(RESOURCES_FOLDER, 'tb_scripts%s.pdf' % darkm),
+			},
+   			{
 				'itemIdentifier': AppKit.NSToolbarFlexibleSpaceItemIdentifier,
 			},
 			{
@@ -314,6 +327,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 		self.keyCommander.registerKeyCommand(KEY_L, callback = self.switchLinkedMode)
 
 		self._saveInProcess = False
+		self.ScriptsBoardWindow = None
 		# self.keyCommander.registerKeyCommand(KEY_S, alt = True, ctrl = True, callback = self.getStateCallbak)
 
 
@@ -335,6 +349,8 @@ class TDKernMultiTool(Subscriber): #, WindowController
 
 	# def destroy(self):
 	# 	print ('destroed')
+	def runScriptsBoardCallback(self, sender):
+		self.ScriptsBoardWindow = ScriptsBoard.main(parent = self)
 
 	def saveTextCallbak(self, sender):
 		bt = [
@@ -655,7 +671,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 			raypos = self.w.groupsView.rayBeamPosition
 
 			if hashKernDic.isKerningGroup(gL):
-				Llabel = '%s // %s\n\n*Exception [E] can be made\nfor glyphs on the Left side. \nOr press [⌥E] for both sides' % ( gL, r )
+				Llabel = '%s // %s\n\n*Exception [E] can be made\nfor glyphs on the Left side. \nOr press [⌥E] for both sides. \n[Shift+E] will move touching glyphs to a safe distance' % ( gL, r )
 				(lm, rm) = getMargins(font[font.groups[gL][0]], useRayBeam = ray, rayBeamPosition = raypos)
 				margin = rm
 
@@ -674,7 +690,7 @@ class TDKernMultiTool(Subscriber): #, WindowController
 				ggL.append(font[l])
 				ggL.append(font[r])
 			if hashKernDic.isKerningGroup(gR):
-				Rlabel = '%s // %s\n\n*Exception [E] can be made\nfor glyphs on the Right side. \nOr press [⌥E] for both sides' % ( l, gR )
+				Rlabel = '%s // %s\n\n*Exception [E] can be made\nfor glyphs on the Right side. \nOr press [⌥E] for both sides. \n[Shift+E] will move touching glyphs to a safe distance' % ( l, gR )
 				(lm, rm) = getMargins(font[font.groups[gR][0]], useRayBeam = ray, rayBeamPosition = raypos)
 				margin = lm
 
@@ -909,6 +925,10 @@ class TDKernMultiTool(Subscriber): #, WindowController
 			'groupsview.fontsize': scale2pt(self.w.groupsView.scaleFactor),
 			'groupsview.panelsize': self.w.groupsView.height()
 		})
+		if self.ScriptsBoardWindow:
+			try:
+				self.ScriptsBoardWindow.close()
+			except: pass
 		removeObserver(self, EVENT_REFRESH_ALL_OBSERVERS)
 		removeObserver(self, EVENT_OBSERVER_SETTEXT)
 		unregisterCurrentFontSubscriber(self)

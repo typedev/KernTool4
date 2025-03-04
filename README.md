@@ -7,6 +7,7 @@ KernTool4 is a set of extensions for working with kerning, glyph margins and gro
 ---
 
 #### Version history:
+- `4.3.7` - Integrate `ScriptsBoard` window in `KernTool`.
 - `4.3.4` - Scaling now works not only for kerning but also for margins. The scaling values are stored in `font.lib` with the key `com.typedev.KernTool.scaleKerningAndMargins`. An experimental option has been added to `SpaceArk (beta)` to check the parity of the glyph width to the `scaling value * 10` (grid). 
 - `4.3.2` - `SpaceArk (beta)` - added Glyph Sequence Editor. 
 - `4.3.1` - `KernTool` and `SpaceArk (beta)` can now work with fonts from open designSpaces if `Designspace Editor 2` is installed. `KernTool:` bug fixed, when saving text the file will be saved only for the current font in KernTool.
