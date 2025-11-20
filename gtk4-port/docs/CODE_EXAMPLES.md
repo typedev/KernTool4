@@ -1030,5 +1030,5 @@ if __name__ == "__main__":
    ```
 
 See also:
-- [GTK4_ANALYSIS.md](./GTK4_ANALYSIS.md) - Complete analysis
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - Detailed architecture
+- [GTK4_ANALYSIS.md](./GTK4_ANALYSIS.md) - Complete technical analysis
+- [../README.md](../README.md) - Project overview and quick start

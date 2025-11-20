@@ -951,10 +951,13 @@ If GTK4 proves too complex:
 ## Appendices
 
 See also:
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - Detailed architecture
-- [RENDERING.md](./RENDERING.md) - Cairo rendering guide
-- [EXAMPLES.md](./EXAMPLES.md) - Code examples
-- [ROADMAP.md](./ROADMAP.md) - Detailed roadmap
+- [CODE_EXAMPLES.md](./CODE_EXAMPLES.md) - Practical code examples
+- [../README.md](../README.md) - Project overview and quick start
+
+Future documentation (TODO):
+- ARCHITECTURE.md - Detailed architecture specification
+- RENDERING.md - Advanced Cairo rendering techniques
+- ROADMAP.md - Granular development roadmap
 
 ---
 
