@@ -1,5 +1,5 @@
 # Prototypes directory
 
-Будущие прототипы:
-- cairo-renderer/ - тест Cairo рендеринга
-- gtk4-skeleton/ - базовое GTK4 приложение
+Future prototypes:
+- cairo-renderer/ - Cairo rendering test
+- gtk4-skeleton/ - Basic GTK4 application

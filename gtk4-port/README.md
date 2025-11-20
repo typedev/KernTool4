@@ -1,115 +1,115 @@
 # KernTool4 GTK4 Port
 
-Портирование KernTool4 на GTK4 для создания standalone desktop приложения для Linux.
+Porting KernTool4 to GTK4 to create a standalone desktop application for Linux.
 
-## 📁 Структура этой ветки
+## 📁 Branch Structure
 
 ```
 gtk4-port/
-├── docs/                       # Документация
-│   ├── GTK4_ANALYSIS.md       # 📊 Полный анализ портирования
-│   ├── CODE_EXAMPLES.md       # 💻 Примеры кода
-│   ├── ARCHITECTURE.md        # 🏗️ Архитектура (TODO)
-│   ├── ROADMAP.md             # 🗺️ План разработки (TODO)
-│   └── WEB_ANALYSIS.md        # 🌐 Веб-версия анализ (TODO)
+├── docs/                       # Documentation
+│   ├── GTK4_ANALYSIS.md       # 📊 Complete porting analysis
+│   ├── CODE_EXAMPLES.md       # 💻 Code examples
+│   ├── ARCHITECTURE.md        # 🏗️ Architecture (TODO)
+│   ├── ROADMAP.md             # 🗺️ Development roadmap (TODO)
+│   └── WEB_ANALYSIS.md        # 🌐 Web version analysis (TODO)
 │
-├── prototypes/                 # Прототипы (TODO)
-│   ├── cairo-renderer/        # Тест Cairo рендеринга
-│   └── gtk4-skeleton/         # Базовое GTK4 приложение
+├── prototypes/                 # Prototypes (TODO)
+│   ├── cairo-renderer/        # Cairo rendering test
+│   └── gtk4-skeleton/         # Basic GTK4 application
 │
-└── README.md                   # Этот файл
+└── README.md                   # This file
 ```
 
-## 📚 Начните с документации
+## 📚 Start with Documentation
 
 ### 1. [GTK4_ANALYSIS.md](./docs/GTK4_ANALYSIS.md)
-**Самый важный документ!** Содержит:
-- Детальный анализ текущей кодовой базы
-- Технический стек для GTK4
-- Архитектурные решения
-- Оценку сложности компонентов
-- Подводные камни и решения
-- Детальный план разработки (15-20 недель)
-- Оценку ресурсов
+**Most important document!** Contains:
+- Detailed analysis of current codebase
+- Technical stack for GTK4
+- Architectural decisions
+- Component complexity assessment
+- Pitfalls and solutions
+- Detailed development plan (15-20 weeks)
+- Resource estimation
 
 ### 2. [CODE_EXAMPLES.md](./docs/CODE_EXAMPLES.md)
-Практические примеры реализации:
+Practical implementation examples:
 - Cairo Glyph Renderer
-- GTK4 Canvas виджет
-- Виртуальный scrolling
+- GTK4 Canvas widget
+- Virtual scrolling
 - Keyboard controller
-- Glyph cache для производительности
-- Структура приложения
+- Glyph cache for performance
+- Application structure
 
-## 🎯 Ключевые выводы анализа
+## 🎯 Key Analysis Findings
 
-### Оценка сложности: 7/10
+### Complexity Rating: 7/10
 
-**Время разработки:** 5-6 месяцев (с буфером)
+**Development Time:** 5-6 months (with buffer)
 
-**Распределение сложности:**
-- ✅ **Легко (30%)**: Бизнес-логика, UFO handling
-- ⚠️ **Средне (20%)**: Event handling, простые диалоги
-- 🔴 **Сложно (50%)**: Cairo rendering, виртуализация, анимации
+**Complexity Distribution:**
+- ✅ **Easy (30%)**: Business logic, UFO handling
+- ⚠️ **Medium (20%)**: Event handling, simple dialogs
+- 🔴 **Hard (50%)**: Cairo rendering, virtualization, animations
 
-### Главные вызовы
+### Main Challenges
 
-1. **Cairo Rendering** (40% времени)
-   - Замена Merz на Cairo
-   - Система слоев
+1. **Cairo Rendering** (40% of time)
+   - Replacing Merz with Cairo
+   - Layer system
    - Performance optimization
 
-2. **Виртуальный Scrolling** (10% времени)
-   - Эффективная виртуализация
-   - GTK4 ListView или custom
+2. **Virtual Scrolling** (10% of time)
+   - Efficient virtualization
+   - GTK4 ListView or custom
 
-3. **UI Components** (30% времени)
-   - Портирование всех диалогов
+3. **UI Components** (30% of time)
+   - Porting all dialogs
    - Keyboard shortcuts
    - Drag & Drop
 
-## 🚀 Следующие шаги
+## 🚀 Next Steps
 
-### Немедленные действия
+### Immediate Actions
 
-1. **Прочитать анализ**
-   - [ ] Изучить [GTK4_ANALYSIS.md](./docs/GTK4_ANALYSIS.md)
-   - [ ] Изучить [CODE_EXAMPLES.md](./docs/CODE_EXAMPLES.md)
+1. **Read the Analysis**
+   - [ ] Study [GTK4_ANALYSIS.md](./docs/GTK4_ANALYSIS.md)
+   - [ ] Study [CODE_EXAMPLES.md](./docs/CODE_EXAMPLES.md)
 
-2. **Создать Proof of Concept** (1-2 недели)
-   - [ ] Базовое GTK4 окно
+2. **Create Proof of Concept** (1-2 weeks)
+   - [ ] Basic GTK4 window
    - [ ] Simple Cairo glyph rendering
-   - [ ] Test с реальными UFO шрифтами
-   - [ ] Измерить performance
+   - [ ] Test with real UFO fonts
+   - [ ] Measure performance
 
-3. **Решение Go/No-Go**
-   - Если PoC успешен → Full development
-   - Если проблемы с performance → Рассмотреть Web версию
+3. **Go/No-Go Decision**
+   - If PoC successful → Full development
+   - If performance issues → Consider Web version
 
-### Альтернатива: Web Version
+### Alternative: Web Version
 
-Если GTK4 окажется слишком сложным:
-- **TODO**: Создать WEB_ANALYSIS.md
+If GTK4 proves too complex:
+- **TODO**: Create WEB_ANALYSIS.md
 - Python backend (FastAPI)
 - Frontend: Canvas API + React/Vue
-- Electron wrapper для desktop
+- Electron wrapper for desktop
 
-## 📋 Чек-лист для принятия решения
+## 📋 Decision Checklist
 
-**Выберите GTK4, если:**
-- ✅ Нужна максимальная производительность
-- ✅ Важна глубокая интеграция с Linux
-- ✅ Планируется только Linux support
-- ✅ Есть опыт с GTK/Cairo
-- ✅ Готовы к 5-6 месяцам разработки
+**Choose GTK4 if:**
+- ✅ Maximum performance needed
+- ✅ Deep Linux integration important
+- ✅ Only Linux support planned
+- ✅ Experience with GTK/Cairo
+- ✅ Ready for 5-6 months development
 
-**Выберите Web, если:**
-- ✅ Нужна кросс-платформенность (Linux, macOS, Windows)
-- ✅ Важна скорость разработки
-- ✅ Есть опыт с web технологиями
-- ✅ Готовы к ~200-500MB memory footprint (Electron)
+**Choose Web if:**
+- ✅ Cross-platform needed (Linux, macOS, Windows)
+- ✅ Development speed important
+- ✅ Experience with web technologies
+- ✅ Acceptable ~200-500MB memory footprint (Electron)
 
-## 🛠️ Технический стек GTK4
+## 🛠️ GTK4 Technical Stack
 
 ```yaml
 Platform: Linux (primary)
@@ -118,10 +118,10 @@ UI: GTK4 (4.12+) + libadwaita (1.4+)
 Rendering: Cairo + Pango
 Font: fontParts + fontTools + defcon
 Build: Meson + Ninja
-Packaging: Flatpak (рекомендуется)
+Packaging: Flatpak (recommended)
 ```
 
-## 📖 Дополнительные ресурсы
+## 📖 Additional Resources
 
 ### GTK4 Documentation
 - [GTK4 Tutorial](https://docs.gtk.org/gtk4/)
@@ -133,28 +133,28 @@ Packaging: Flatpak (рекомендуется)
 - [Pango Reference](https://docs.gtk.org/Pango/)
 - [fontTools.pens.cairoPen](https://fonttools.readthedocs.io/)
 
-### Примеры проектов
-- [GNOME Apps](https://gitlab.gnome.org/GNOME/) - примеры GTK4 apps
-- [Font Manager](https://github.com/FontManager/font-manager) - font app на GTK
+### Example Projects
+- [GNOME Apps](https://gitlab.gnome.org/GNOME/) - GTK4 app examples
+- [Font Manager](https://github.com/FontManager/font-manager) - font app on GTK
 
-## 🤝 Вклад в проект
+## 🤝 Contributing
 
-Этот документ - результат AI анализа (Claude, Anthropic).
+This document is the result of AI analysis (Claude, Anthropic).
 
-**Для обсуждения:**
-- Создайте issue в основном репозитории
-- Отметьте `gtk4-port` label
-- Ссылайтесь на этот анализ
+**For discussion:**
+- Create an issue in the main repository
+- Tag with `gtk4-port` label
+- Reference this analysis
 
-## 📝 История изменений
+## 📝 Changelog
 
-- **2025-11-20**: Создана ветка, начальный анализ
-  - ✅ GTK4_ANALYSIS.md - полный анализ
-  - ✅ CODE_EXAMPLES.md - примеры кода
+- **2025-11-20**: Branch created, initial analysis
+  - ✅ GTK4_ANALYSIS.md - complete analysis
+  - ✅ CODE_EXAMPLES.md - code examples
   - ⏳ ARCHITECTURE.md - TODO
   - ⏳ WEB_ANALYSIS.md - TODO
 
 ---
 
-**Статус:** 🟡 Proposal / Analysis Phase
-**Следующий этап:** Proof of Concept
+**Status:** 🟡 Proposal / Analysis Phase
+**Next Stage:** Proof of Concept

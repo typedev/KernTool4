@@ -1,56 +1,56 @@
-# KernTool4 → GTK4 Port: Глубокий анализ
+# KernTool4 → GTK4 Port: In-Depth Analysis
 
-**Дата:** 2025-11-20
-**Версия:** 1.0
-**Статус:** Proposal
-
----
-
-## 📋 Содержание
-
-1. [Обзор проекта](#обзор-проекта)
-2. [Анализ текущей кодовой базы](#анализ-текущей-кодовой-базы)
-3. [Технический стек GTK4](#технический-стек-gtk4)
-4. [Архитектура портирования](#архитектура-портирования)
-5. [Компоненты и их сложность](#компоненты-и-их-сложность)
-6. [Преимущества и недостатки](#преимущества-и-недостатки)
-7. [Подводные камни](#подводные-камни)
-8. [Детальный план разработки](#детальный-план-разработки)
-9. [Оценка ресурсов](#оценка-ресурсов)
+**Date:** 2025-11-20
+**Version:** 1.0
+**Status:** Proposal
 
 ---
 
-## Обзор проекта
+## 📋 Table of Contents
 
-### Текущее состояние
-
-**KernTool4** - это расширение для RoboFont (macOS) для работы с кернингом шрифтов.
-
-**Ключевые характеристики:**
-- ~14,143 строк Python кода
-- 20 модулей
-- 25+ классов
-- Зрелый production-ready проект
-
-### Цель портирования
-
-Создать **standalone desktop приложение** для Linux на базе GTK4 с сохранением всей функциональности.
+1. [Project Overview](#project-overview)
+2. [Current Codebase Analysis](#current-codebase-analysis)
+3. [GTK4 Technical Stack](#gtk4-technical-stack)
+4. [Porting Architecture](#porting-architecture)
+5. [Components and Complexity](#components-and-complexity)
+6. [Pros and Cons](#pros-and-cons)
+7. [Pitfalls](#pitfalls)
+8. [Detailed Development Plan](#detailed-development-plan)
+9. [Resource Estimation](#resource-estimation)
 
 ---
 
-## Анализ текущей кодовой базы
+## Project Overview
 
-### Статистика зависимостей
+### Current State
 
-| Компонент | Файлов | Использование | Критичность |
-|-----------|--------|---------------|-------------|
-| **Vanilla** | 15 | UI Framework | ⚠️ КРИТИЧНО |
-| **Merz** | 6 | Canvas Rendering | ⚠️ КРИТИЧНО |
-| **AppKit** | 4 | macOS Integration | ⚠️ СРЕДНЕ |
-| **Mojo** | 10 | RoboFont API | ⚠️ КРИТИЧНО |
-| **FontParts** | 10 | Font Handling | ✅ ПОРТИРУЕМО |
+**KernTool4** is an extension for RoboFont (macOS) for font kerning work.
 
-### Ключевые метрики
+**Key Characteristics:**
+- ~14,143 lines of Python code
+- 20 modules
+- 25+ classes
+- Mature production-ready project
+
+### Porting Goal
+
+Create a **standalone desktop application** for Linux based on GTK4 while preserving all functionality.
+
+---
+
+## Current Codebase Analysis
+
+### Dependency Statistics
+
+| Component | Files | Usage | Criticality |
+|-----------|-------|-------|-------------|
+| **Vanilla** | 15 | UI Framework | ⚠️ CRITICAL |
+| **Merz** | 6 | Canvas Rendering | ⚠️ CRITICAL |
+| **AppKit** | 4 | macOS Integration | ⚠️ MEDIUM |
+| **Mojo** | 10 | RoboFont API | ⚠️ CRITICAL |
+| **FontParts** | 10 | Font Handling | ✅ PORTABLE |
+
+### Key Metrics
 
 ```python
 # Rendering complexity
@@ -72,35 +72,35 @@ Toolbar items: 13
 Keyboard shortcuts: 30+
 ```
 
-### Портируемость компонентов
+### Component Portability
 
-**✅ ЛЕГКО (30% кода):**
-- Бизнес-логика кернинга
-- Алгоритмы расчета пар, групп, margins
-- Обработка UFO файлов
-- Проверка языковой совместимости
+**✅ EASY (30% of code):**
+- Kerning business logic
+- Algorithms for pairs, groups, margins calculation
+- UFO file processing
+- Language compatibility checking
 
-**⚠️ СРЕДНЕ (20% кода):**
+**⚠️ MEDIUM (20% of code):**
 - Event handling
 - Keyboard shortcuts
-- Простые диалоги
+- Simple dialogs
 - File I/O
 
-**🔴 СЛОЖНО (50% кода):**
+**🔴 HARD (50% of code):**
 - Canvas rendering (Merz → Cairo)
-- Виртуальный scrolling
-- Анимации
+- Virtual scrolling
+- Animations
 - Drag & Drop
-- Главное окно с toolbar
+- Main window with toolbar
 
 ---
 
-## Технический стек GTK4
+## GTK4 Technical Stack
 
 ### Core Technologies
 
 ```yaml
-Platform: Linux (primary), с возможностью BSD
+Platform: Linux (primary), with BSD support possible
 Language: Python 3.10+
 
 UI Framework:
@@ -125,26 +125,26 @@ Build System:
   - AppStream (metadata)
 ```
 
-### Почему GTK4?
+### Why GTK4?
 
-**Преимущества над GTK3:**
-1. **Современный API** - cleaner, более pythonic
-2. **GPU acceleration** - через GskRenderer
+**Advantages over GTK3:**
+1. **Modern API** - cleaner, more pythonic
+2. **GPU acceleration** - via GskRenderer
 3. **Better animations** - Adwaita animation API
-4. **ListView/GridView** - эффективная виртуализация
-5. **Wayland native** - лучше для современного Linux
+4. **ListView/GridView** - efficient virtualization
+5. **Wayland native** - better for modern Linux
 
-**Преимущества над Qt:**
-1. **Python-friendly** - лучшие биндинги
-2. **Меньший footprint** - ~30MB vs ~100MB
-3. **GNOME ecosystem** - стандарт для Linux desktop
+**Advantages over Qt:**
+1. **Python-friendly** - better bindings
+2. **Smaller footprint** - ~30MB vs ~100MB
+3. **GNOME ecosystem** - standard for Linux desktop
 4. **License** - LGPL vs commercial Qt
 
 ---
 
-## Архитектура портирования
+## Porting Architecture
 
-### Высокоуровневая архитектура
+### High-Level Architecture
 
 ```
 ┌──────────────────────────────────────────────┐
@@ -185,7 +185,7 @@ Build System:
 ┌──────────────────────────────────────────────┐
 │        Business Logic Layer                  │
 │  ┌────────────────────────────────────────┐  │
-│  │  KerningEngine (портировано)           │  │
+│  │  KerningEngine (ported)                │  │
 │  │  ├─ FontManager                        │  │
 │  │  ├─ GroupsManager                      │  │
 │  │  ├─ PairsBuilder                       │  │
@@ -205,7 +205,7 @@ Build System:
 └──────────────────────────────────────────────┘
 ```
 
-### Модульная структура
+### Module Structure
 
 ```
 kerntool-gtk4/
@@ -229,7 +229,7 @@ kerntool-gtk4/
 │   │   ├── layers.py           # Layer system
 │   │   └── animations.py       # Animation helpers
 │   │
-│   ├── engine/                 # Business logic (портировано)
+│   ├── engine/                 # Business logic (ported)
 │   │   ├── kerning.py          # Kerning operations
 │   │   ├── groups.py           # Groups management
 │   │   ├── pairs.py            # Pairs generation
@@ -258,7 +258,7 @@ kerntool-gtk4/
 │   │   ├── preferences.ui
 │   │   └── dialogs.ui
 │   ├── icons/                  # Application icons
-│   ├── langset/                # Language data (портировано)
+│   ├── langset/                # Language data (ported)
 │   └── com.typedev.KernTool.gschema.xml
 │
 ├── tests/
@@ -274,155 +274,155 @@ kerntool-gtk4/
 
 ---
 
-## Компоненты и их сложность
+## Components and Complexity
 
 ### 1. Cairo Glyph Renderer
 
-**Сложность:** ⭐⭐⭐⭐ (4/5)
+**Complexity:** ⭐⭐⭐⭐ (4/5)
 
-**Что нужно реализовать:**
-- Рендеринг контуров глифов через fontTools.pens.cairoPen
-- Система слоев (замена Merz layers)
+**What needs to be implemented:**
+- Glyph outline rendering via fontTools.pens.cairoPen
+- Layer system (replacing Merz layers)
 - Margins, metrics, annotations
-- Ray beam для точных измерений
+- Ray beam for precise measurements
 - Kerning visualization
 
-**Основные вызовы:**
-1. **Performance** - Cairo может быть медленным при большом масштабе
-   - Решение: Aggressive caching, рендеринг в ImageSurface
-2. **Text rendering** - Pango для всех текстовых элементов
-   - Решение: Layout caching, переиспользование объектов
-3. **Coordinate system** - конвертация между font units и screen pixels
-   - Решение: Четкая система трансформаций
+**Main Challenges:**
+1. **Performance** - Cairo can be slow at high zoom
+   - Solution: Aggressive caching, ImageSurface rendering
+2. **Text rendering** - Pango for all text elements
+   - Solution: Layout caching, object reuse
+3. **Coordinate system** - conversion between font units and screen pixels
+   - Solution: Clear transformation system
 
-**Оценка времени:** 6-8 недель
+**Time Estimate:** 6-8 weeks
 
-### 2. Виртуальный Scrolling
+### 2. Virtual Scrolling
 
-**Сложность:** ⭐⭐⭐ (3/5)
+**Complexity:** ⭐⭐⭐ (3/5)
 
-**Варианты реализации:**
+**Implementation Options:**
 
-**Вариант A: GTK4 ListView (рекомендуется)**
+**Option A: GTK4 ListView (recommended)**
 ```python
-# Преимущества:
-- Встроенная виртуализация
-- Оптимизирован из коробки
-- Меньше кода
+# Pros:
+- Built-in virtualization
+- Optimized out of the box
+- Less code
 
-# Недостатки:
-- Менее гибкий
-- Может не подойти для сложных случаев
+# Cons:
+- Less flexible
+- May not fit complex cases
 ```
 
-**Вариант B: Custom scrolling**
+**Option B: Custom scrolling**
 ```python
-# Преимущества:
-- Полный контроль
-- Можно оптимизировать под специфику
+# Pros:
+- Full control
+- Can optimize for specifics
 
-# Недостатки:
-- Больше кода
-- Нужно управлять всем вручную
+# Cons:
+- More code
+- Need to manage everything manually
 ```
 
-**Оценка времени:** 1.5-2 недели
+**Time Estimate:** 1.5-2 weeks
 
 ### 3. Keyboard & Event Handling
 
-**Сложность:** ⭐⭐ (2/5)
+**Complexity:** ⭐⭐ (2/5)
 
-**Что нужно:**
-- Keyboard shortcuts (30+ комбинаций)
+**What's needed:**
+- Keyboard shortcuts (30+ combinations)
 - Mouse events (click, drag, scroll)
 - Focus management
 - Event propagation
 
-**GTK4 решение:**
+**GTK4 Solution:**
 ```python
-# Используем EventController API (новый в GTK4)
+# Using EventController API (new in GTK4)
 key_controller = Gtk.EventControllerKey()
 motion_controller = Gtk.EventControllerMotion()
 scroll_controller = Gtk.EventControllerScroll()
 ```
 
-**Оценка времени:** 1 неделя
+**Time Estimate:** 1 week
 
 ### 4. Drag & Drop
 
-**Сложность:** ⭐⭐⭐ (3/5)
+**Complexity:** ⭐⭐⭐ (3/5)
 
-**Функциональность:**
-- Перетаскивание глифов между view
-- Изменение порядка глифов
-- Visual feedback во время drag
+**Functionality:**
+- Dragging glyphs between views
+- Reordering glyphs
+- Visual feedback during drag
 
-**GTK4 решение:**
+**GTK4 Solution:**
 ```python
-# DragSource & DropTarget API (новый в GTK4)
+# DragSource & DropTarget API (new in GTK4)
 drag_source = Gtk.DragSource()
 drop_target = Gtk.DropTarget()
 ```
 
-**Оценка времени:** 1 неделя
+**Time Estimate:** 1 week
 
 ### 5. Animations
 
-**Сложность:** ⭐⭐⭐⭐ (4/5)
+**Complexity:** ⭐⭐⭐⭐ (4/5)
 
-**Текущее использование:**
+**Current Usage:**
 - Cursor animations (loop)
 - Smooth scroll
-- Появление элементов (fade in)
+- Fade in effects
 - Position transitions
 
-**GTK4 решение:**
+**GTK4 Solution:**
 ```python
-# Используем Adwaita animations
+# Using Adwaita animations
 animation = Adw.TimedAnimation.new(...)
 animation.set_easing(Adw.Easing.EASE_IN_OUT_CUBIC)
 animation.play()
 ```
 
-**Вопрос:** Нужны ли все анимации?
-- **Критичные:** Smooth scroll
+**Question:** Are all animations necessary?
+- **Critical:** Smooth scroll
 - **Nice-to-have:** Cursor loop, fade in
-- **Можно убрать:** Большинство остальных
+- **Can remove:** Most others
 
-**Оценка времени:** 1 неделя (если упростить)
+**Time Estimate:** 1 week (if simplified)
 
 ### 6. UI Dialogs
 
-**Сложность:** ⭐⭐ (2/5)
+**Complexity:** ⭐⭐ (2/5)
 
-**Список диалогов:**
+**Dialog List:**
 1. Font Selector
 2. Pairs Builder (Make Pairs)
 3. Language Set Checker
 4. Preferences
 5. File open/save dialogs
 
-**GTK4 преимущества:**
-- Можно использовать Glade/Cambalache для UI design
-- Декларативный подход через .ui файлы
+**GTK4 Advantages:**
+- Can use Glade/Cambalache for UI design
+- Declarative approach via .ui files
 
-**Оценка времени:** 1.5 недели
+**Time Estimate:** 1.5 weeks
 
 ---
 
-## Преимущества и недостатки
+## Pros and Cons
 
-### ✅ Преимущества GTK4
+### ✅ GTK4 Advantages
 
 #### 1. Native Performance
-- **Direct GPU access** через GskRenderer
-- **Hardware acceleration** для Cairo
+- **Direct GPU access** via GskRenderer
+- **Hardware acceleration** for Cairo
 - **Low memory footprint** (~50-100MB)
-- **Instant startup** - нет браузера/JS
+- **Instant startup** - no browser/JS
 
 #### 2. Linux Integration
 ```python
-# Примеры:
+# Examples:
 - Native file dialogs
 - System theme support (dark/light mode)
 - D-Bus integration
@@ -431,8 +431,8 @@ animation.play()
 ```
 
 #### 3. Development Experience
-- **Python-native** - полная поддержка Python экосистемы
-- **Mature ecosystem** - GTK существует 25+ лет
+- **Python-native** - full Python ecosystem support
+- **Mature ecosystem** - GTK has 25+ years
 - **Excellent documentation** - docs.gtk.org
 - **Active community** - GNOME, Python communities
 - **Easy debugging** - standard Python tools
@@ -440,7 +440,7 @@ animation.play()
 #### 4. Deployment
 ```yaml
 Packaging:
-  - Flatpak (рекомендуется) - sandboxed, portable
+  - Flatpak (recommended) - sandboxed, portable
   - AppImage - single binary
   - Snap - Ubuntu ecosystem
   - Native packages - deb, rpm, arch
@@ -453,16 +453,16 @@ Distribution:
 
 #### 5. Accessibility
 - **Built-in a11y** - screen readers, keyboard navigation
-- **GNOME standards** - accessibility из коробки
+- **GNOME standards** - accessibility out of the box
 - **AT-SPI2** - assistive technologies support
 
-### ⚠️ Недостатки GTK4
+### ⚠️ GTK4 Disadvantages
 
-#### 1. Кривая обучения
-**Проблема:** GTK4 API verbose и отличается от Vanilla
+#### 1. Learning Curve
+**Problem:** GTK4 API is verbose and different from Vanilla
 
 ```python
-# Vanilla (простой):
+# Vanilla (simple):
 w = vanilla.Window((800, 600))
 w.btn = vanilla.Button((10, 10, 100, 30), "Click")
 w.open()
@@ -482,20 +482,20 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_child(box)
 ```
 
-**Решение:** Создать wrapper library для упрощения
+**Solution:** Create wrapper library for simplification
 
-#### 2. Cairo rendering сложность
-**Проблема:** Нужно вручную управлять всем
+#### 2. Cairo Rendering Complexity
+**Problem:** Need to manage everything manually
 
 ```python
-# В Merz:
+# In Merz:
 layer.appendLineSublayer(
     startPoint=(0, 0),
     endPoint=(100, 100),
     strokeColor=(1, 0, 0, 1)
 )
 
-# В Cairo:
+# In Cairo:
 cr.save()
 cr.set_source_rgba(1, 0, 0, 1)
 cr.set_line_width(1.0)
@@ -505,39 +505,39 @@ cr.stroke()
 cr.restore()
 ```
 
-**Решение:** Создать layer abstraction поверх Cairo
+**Solution:** Create layer abstraction over Cairo
 
-#### 3. Platform limitation
-**Проблема:** Только Linux (основная платформа)
+#### 3. Platform Limitation
+**Problem:** Linux only (primary platform)
 
-- macOS: Возможно через homebrew, но не native
-- Windows: Теоретически возможно, но сложно
+- macOS: Possible via homebrew, but not native
+- Windows: Theoretically possible, but difficult
 
-**Решение:** Это приемлемо для Linux-first проекта
+**Solution:** Acceptable for Linux-first project
 
-#### 4. Animation capabilities
-**Проблема:** Анимации сложнее чем в Merz
+#### 4. Animation Capabilities
+**Problem:** Animations are more complex than in Merz
 
-**Merz:** Декларативные анимации из коробки
-**GTK4:** Нужно использовать Adwaita или писать вручную
+**Merz:** Declarative animations out of the box
+**GTK4:** Need to use Adwaita or write manually
 
-**Решение:** Упростить UX, минимизировать анимации
+**Solution:** Simplify UX, minimize animations
 
 ---
 
-## Подводные камни
+## Pitfalls
 
 ### 1. Cairo Performance Issues
 
-**Проблема:**
-Cairo может быть медленным при рендеринге большого количества глифов с высоким zoom level.
+**Problem:**
+Cairo can be slow when rendering many glyphs at high zoom levels.
 
-**Симптомы:**
-- Laggy scrolling при >100 глифов на экране
-- Медленный zoom
+**Symptoms:**
+- Laggy scrolling with >100 glyphs on screen
+- Slow zoom
 - High CPU usage
 
-**Решения:**
+**Solutions:**
 
 ```python
 # 1. Aggressive caching
@@ -582,10 +582,10 @@ def invalidate_region(self, x, y, width, height):
 
 ### 2. Memory Leaks
 
-**Проблема:**
-Cairo objects должны быть правильно cleaned up, иначе memory leak.
+**Problem:**
+Cairo objects must be properly cleaned up, otherwise memory leak.
 
-**Опасные места:**
+**Dangerous Places:**
 ```python
 # BAD - leak:
 surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 100, 100)
@@ -613,18 +613,18 @@ with create_surface(100, 100) as surface:
     pass  # Auto cleanup!
 ```
 
-**Тестирование:**
+**Testing:**
 ```bash
-# Используем valgrind для детекции leaks
+# Use valgrind to detect leaks
 valgrind --leak-check=full python kerntool.py
 ```
 
 ### 3. Threading Issues
 
-**Проблема:**
-GTK НЕ потокобезопасный! Все GTK calls должны быть в main thread.
+**Problem:**
+GTK is NOT thread-safe! All GTK calls must be in main thread.
 
-**Правильный подход:**
+**Proper Approach:**
 ```python
 import threading
 from gi.repository import GLib
@@ -656,10 +656,10 @@ def _on_font_loaded(self, font):
 
 ### 4. Pango Text Rendering Performance
 
-**Проблема:**
-Создание PangoLayout на каждый frame дорого.
+**Problem:**
+Creating PangoLayout on every frame is expensive.
 
-**Решение:**
+**Solution:**
 ```python
 class TextCache:
     def __init__(self):
@@ -685,13 +685,13 @@ class TextCache:
 
 ### 5. Coordinate System Confusion
 
-**Проблема:**
-Нужно работать с 3 coordinate systems:
+**Problem:**
+Need to work with 3 coordinate systems:
 1. **Font units** (glyph coordinates)
 2. **View coordinates** (scaled font units)
 3. **Window coordinates** (screen pixels)
 
-**Решение:**
+**Solution:**
 ```python
 class CoordinateTransform:
     def __init__(self):
@@ -723,128 +723,128 @@ class CoordinateTransform:
 
 ---
 
-## Детальный план разработки
+## Detailed Development Plan
 
-### Фаза 1: Инфраструктура (3-4 недели)
+### Phase 1: Infrastructure (3-4 weeks)
 
-**Неделя 1: Настройка проекта**
-- [x] Создать структуру каталогов
-- [x] Настроить Meson build system
-- [x] Создать базовый meson.build
-- [x] Настроить Flatpak manifest
-- [x] Создать .desktop файл
-- [x] Настроить pre-commit hooks
+**Week 1: Project Setup**
+- [x] Create directory structure
+- [x] Setup Meson build system
+- [x] Create basic meson.build
+- [x] Setup Flatpak manifest
+- [x] Create .desktop file
+- [x] Setup pre-commit hooks
 
-**Неделя 2: GTK4 скелет**
-- [ ] Создать Gtk.Application
-- [ ] Создать главное окно (ApplicationWindow)
-- [ ] Добавить меню и базовый toolbar
-- [ ] Настроить GSettings (preferences)
-- [ ] Создать About dialog
+**Week 2: GTK4 Skeleton**
+- [ ] Create Gtk.Application
+- [ ] Create main window (ApplicationWindow)
+- [ ] Add menu and basic toolbar
+- [ ] Setup GSettings (preferences)
+- [ ] Create About dialog
 
-**Неделя 3: Портирование бизнес-логики**
-- [ ] Портировать tdKernToolEssentials4.py
-- [ ] Портировать groups management
-- [ ] Портировать pairs generation
-- [ ] Портировать language checking
-- [ ] Создать unit tests
+**Week 3: Port Business Logic**
+- [ ] Port tdKernToolEssentials4.py
+- [ ] Port groups management
+- [ ] Port pairs generation
+- [ ] Port language checking
+- [ ] Create unit tests
 
-**Неделя 4: Font handling integration**
-- [ ] Интегрировать fontParts
-- [ ] Создать FontManager
-- [ ] Реализовать font loading/saving
-- [ ] Создать font selector UI
-- [ ] Тестирование с реальными шрифтами
+**Week 4: Font Handling Integration**
+- [ ] Integrate fontParts
+- [ ] Create FontManager
+- [ ] Implement font loading/saving
+- [ ] Create font selector UI
+- [ ] Test with real fonts
 
-### Фаза 2: Cairo Renderer (6-8 недель)
+### Phase 2: Cairo Renderer (6-8 weeks)
 
-**Недели 1-2: Базовый rendering**
-- [ ] Создать CairoGlyphRenderer class
-- [ ] Реализовать draw_glyph_outline() через CairoPen
-- [ ] Реализовать coordinate transforms
-- [ ] Добавить basic zoom/pan
-- [ ] Тестирование с разными шрифтами
+**Weeks 1-2: Basic Rendering**
+- [ ] Create CairoGlyphRenderer class
+- [ ] Implement draw_glyph_outline() via CairoPen
+- [ ] Implement coordinate transforms
+- [ ] Add basic zoom/pan
+- [ ] Test with different fonts
 
-**Недели 3-4: Margins & Metrics**
-- [ ] Реализовать draw_margins()
-- [ ] Реализовать draw_metrics()
-- [ ] Добавить Pango text rendering
-- [ ] Создать text cache
-- [ ] Реализовать show/hide toggles
+**Weeks 3-4: Margins & Metrics**
+- [ ] Implement draw_margins()
+- [ ] Implement draw_metrics()
+- [ ] Add Pango text rendering
+- [ ] Create text cache
+- [ ] Implement show/hide toggles
 
-**Недели 5-6: Ray Beam System**
-- [ ] Портировать ray beam calculations
-- [ ] Реализовать draw_ray_beam()
-- [ ] Добавить stem width measurements
-- [ ] Реализовать ray beam controls (Up/Down)
-- [ ] Тестирование с italic fonts
+**Weeks 5-6: Ray Beam System**
+- [ ] Port ray beam calculations
+- [ ] Implement draw_ray_beam()
+- [ ] Add stem width measurements
+- [ ] Implement ray beam controls (Up/Down)
+- [ ] Test with italic fonts
 
-**Недели 7-8: Optimization & Caching**
-- [ ] Реализовать GlyphCache (LRU)
-- [ ] Добавить ImageSurface caching
-- [ ] Реализовать dirty region tracking
+**Weeks 7-8: Optimization & Caching**
+- [ ] Implement GlyphCache (LRU)
+- [ ] Add ImageSurface caching
+- [ ] Implement dirty region tracking
 - [ ] Level-of-detail rendering
-- [ ] Performance profiling и tuning
+- [ ] Performance profiling and tuning
 
-### Фаза 3: Виртуальный Scrolling (1.5 недели)
+### Phase 3: Virtual Scrolling (1.5 weeks)
 
 **Option A: GTK4 ListView**
-- [ ] Создать GlyphLineModel (Gio.ListStore)
-- [ ] Создать ListItemFactory
-- [ ] Реализовать setup/bind callbacks
-- [ ] Интегрировать с renderer
-- [ ] Тестирование с большими списками (1000+ строк)
+- [ ] Create GlyphLineModel (Gio.ListStore)
+- [ ] Create ListItemFactory
+- [ ] Implement setup/bind callbacks
+- [ ] Integrate with renderer
+- [ ] Test with large lists (1000+ lines)
 
 **Option B: Custom scrolling**
-- [ ] Создать GlyphsCanvas (Gtk.DrawingArea)
-- [ ] Реализовать виртуализацию вручную
-- [ ] Добавить scrollbars
-- [ ] Оптимизация видимых элементов
+- [ ] Create GlyphsCanvas (Gtk.DrawingArea)
+- [ ] Implement virtualization manually
+- [ ] Add scrollbars
+- [ ] Optimize visible elements
 
-### Фаза 4: UI Components (4-5 недель)
+### Phase 4: UI Components (4-5 weeks)
 
-**Неделя 1: Split View & Panels**
-- [ ] Реализовать Gtk.Paned для split
-- [ ] Создать GlyphsViewport (main)
-- [ ] Создать GroupsViewport (bottom)
-- [ ] Синхронизация между panels
+**Week 1: Split View & Panels**
+- [ ] Implement Gtk.Paned for split
+- [ ] Create GlyphsViewport (main)
+- [ ] Create GroupsViewport (bottom)
+- [ ] Synchronize between panels
 - [ ] Resize handling
 
-**Неделя 2: Keyboard Handling**
-- [ ] Создать KeyboardController
-- [ ] Реализовать все shortcuts (30+)
-- [ ] Добавить shortcut hints
-- [ ] Создать keyboard help dialog
+**Week 2: Keyboard Handling**
+- [ ] Create KeyboardController
+- [ ] Implement all shortcuts (30+)
+- [ ] Add shortcut hints
+- [ ] Create keyboard help dialog
 
-**Неделя 3: Drag & Drop**
-- [ ] Реализовать DragSource
-- [ ] Реализовать DropTarget
-- [ ] Добавить visual feedback
-- [ ] Тестирование различных сценариев
+**Week 3: Drag & Drop**
+- [ ] Implement DragSource
+- [ ] Implement DropTarget
+- [ ] Add visual feedback
+- [ ] Test various scenarios
 
-**Недели 4-5: Dialogs**
+**Weeks 4-5: Dialogs**
 - [ ] Font Selector dialog
 - [ ] Pairs Builder dialog (Make Pairs)
 - [ ] Preferences window
 - [ ] Language Set checker dialog
-- [ ] All dialogs с .ui файлами
+- [ ] All dialogs with .ui files
 
-### Фаза 5: Polish & Testing (2-3 недели)
+### Phase 5: Polish & Testing (2-3 weeks)
 
-**Неделя 1: Animations (optional)**
+**Week 1: Animations (optional)**
 - [ ] Smooth scroll animations
 - [ ] Cursor animations
 - [ ] Fade in/out effects
-- [ ] Или: упростить UX без анимаций
+- [ ] Or: simplify UX without animations
 
-**Неделя 2: Bug Fixing & Testing**
-- [ ] Тестирование на разных дистрибутивах
+**Week 2: Bug Fixing & Testing**
+- [ ] Test on different distros
 - [ ] Wayland vs X11 testing
 - [ ] Memory leak detection (valgrind)
 - [ ] Performance profiling
 - [ ] Edge cases testing
 
-**Неделя 3: Documentation & Packaging**
+**Week 3: Documentation & Packaging**
 - [ ] User documentation
 - [ ] Developer docs (API)
 - [ ] Flatpak packaging
@@ -853,111 +853,111 @@ class CoordinateTransform:
 
 ---
 
-## Оценка ресурсов
+## Resource Estimation
 
-### Временные затраты
+### Time Requirements
 
 ```
-Общая оценка: 15-20 недель (4-5 месяцев)
+Overall Estimate: 15-20 weeks (4-5 months)
 
-По фазам:
-├─ Фаза 1: Инфраструктура        3-4 недели
-├─ Фаза 2: Cairo Renderer        6-8 недель
-├─ Фаза 3: Virtual Scrolling     1.5 недели
-├─ Фаза 4: UI Components         4-5 недель
-└─ Фаза 5: Polish & Testing      2-3 недели
+By Phase:
+├─ Phase 1: Infrastructure        3-4 weeks
+├─ Phase 2: Cairo Renderer        6-8 weeks
+├─ Phase 3: Virtual Scrolling     1.5 weeks
+├─ Phase 4: UI Components         4-5 weeks
+└─ Phase 5: Polish & Testing      2-3 weeks
 
-Сложность по компонентам:
-├─ Cairo rendering               ⭐⭐⭐⭐ (40% времени)
-├─ Виртуальный scrolling         ⭐⭐⭐  (10% времени)
-├─ UI components                 ⭐⭐   (30% времени)
-├─ Портирование логики           ⭐⭐   (10% времени)
-└─ Testing & polish              ⭐⭐   (10% времени)
+Complexity by Component:
+├─ Cairo rendering               ⭐⭐⭐⭐ (40% of time)
+├─ Virtual scrolling             ⭐⭐⭐  (10% of time)
+├─ UI components                 ⭐⭐   (30% of time)
+├─ Port logic                    ⭐⭐   (10% of time)
+└─ Testing & polish              ⭐⭐   (10% of time)
 ```
 
-### Команда
+### Team
 
-**Минимальный состав:**
-- 1x Senior Python/GTK Developer (full-time, 4-5 месяцев)
+**Minimum:**
+- 1x Senior Python/GTK Developer (full-time, 4-5 months)
 
-**Оптимальный состав:**
+**Optimal:**
 - 1x Lead Developer (GTK4 expert)
 - 1x Python Developer (business logic)
 - 1x QA Engineer (part-time)
-- 1x UX Designer (консультант)
+- 1x UX Designer (consultant)
 
-### Риски & Буфер
+### Risks & Buffer
 
-| Риск | Вероятность | Влияние | Буфер |
-|------|-------------|---------|-------|
-| Cairo performance issues | Средняя | Высокое | +2 недели |
-| Сложность виртуализации | Средняя | Среднее | +1 неделя |
-| Memory leaks | Низкая | Высокое | +1 неделя |
-| Анимации слишком сложны | Высокая | Низкое | 0 (можно убрать) |
-| Проблемы совместимости | Низкая | Среднее | +1 неделя |
+| Risk | Probability | Impact | Buffer |
+|------|-------------|--------|--------|
+| Cairo performance issues | Medium | High | +2 weeks |
+| Virtualization complexity | Medium | Medium | +1 week |
+| Memory leaks | Low | High | +1 week |
+| Animations too complex | High | Low | 0 (can remove) |
+| Compatibility issues | Low | Medium | +1 week |
 
-**Рекомендованный буфер:** +5 недель (25%)
+**Recommended Buffer:** +5 weeks (25%)
 
-**Итого с буфером:** 20-25 недель (5-6 месяцев)
+**Total with Buffer:** 20-25 weeks (5-6 months)
 
 ---
 
-## Выводы и рекомендации
+## Conclusions and Recommendations
 
-### Итоговая оценка портирования на GTK4
+### Final GTK4 Porting Assessment
 
-**Сложность:** 7/10
-**Время:** 5-6 месяцев (с буфером)
-**Feasibility:** ✅ Реалистично
+**Complexity:** 7/10
+**Timeline:** 5-6 months (with buffer)
+**Feasibility:** ✅ Realistic
 
-### Почему GTK4 - хороший выбор
+### Why GTK4 is a Good Choice
 
-1. **Зрелая платформа** - 25+ лет развития
-2. **Отличная Python поддержка** - PyGObject стабильный и полный
-3. **Native Linux experience** - интеграция с системой из коробки
-4. **Cairo performance** - при правильной оптимизации очень быстрый
-5. **Большая community** - поддержка и примеры
+1. **Mature platform** - 25+ years of development
+2. **Excellent Python support** - PyGObject is stable and complete
+3. **Native Linux experience** - system integration out of the box
+4. **Cairo performance** - very fast with proper optimization
+5. **Large community** - support and examples available
 
-### Ключевые вызовы
+### Key Challenges
 
-1. **Cairo rendering** - самая сложная часть (40% времени)
-2. **Virtual scrolling** - критично для UX
-3. **Performance optimization** - нужен профилинг
+1. **Cairo rendering** - the most complex part (40% of time)
+2. **Virtual scrolling** - critical for UX
+3. **Performance optimization** - profiling needed
 
-### Следующие шаги
+### Next Steps
 
-1. **Proof of Concept** (1-2 недели):
-   - Базовый GTK4 window
+1. **Proof of Concept** (1-2 weeks):
+   - Basic GTK4 window
    - Simple Cairo glyph rendering
-   - Test performance с реальными шрифтами
+   - Test performance with real fonts
 
-2. **Prototype** (1 месяц):
+2. **Prototype** (1 month):
    - Core rendering functionality
    - Basic UI
    - Validate architecture
 
-3. **Full Development** (3-4 месяца):
-   - По плану выше
+3. **Full Development** (3-4 months):
+   - According to plan above
 
-### Альтернативы
+### Alternatives
 
-Если GTK4 окажется слишком сложным:
-- **Web-based version** - рассмотреть отдельно
-- **Qt/PySide6** - более тяжелый, но проще rendering
-- **Dear ImGui** - для быстрого прототипа
+If GTK4 proves too complex:
+- **Web-based version** - consider separately
+- **Qt/PySide6** - heavier, but easier rendering
+- **Dear ImGui** - for quick prototype
 
 ---
 
-## Приложения
+## Appendices
 
-См. также:
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - Детальная архитектура
+See also:
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - Detailed architecture
 - [RENDERING.md](./RENDERING.md) - Cairo rendering guide
-- [EXAMPLES.md](./EXAMPLES.md) - Примеры кода
-- [ROADMAP.md](./ROADMAP.md) - Развернутый roadmap
+- [EXAMPLES.md](./EXAMPLES.md) - Code examples
+- [ROADMAP.md](./ROADMAP.md) - Detailed roadmap
 
 ---
 
-**Документ подготовлен:** Claude (Anthropic)
-**Для проекта:** KernTool4 GTK4 Port
-**Лицензия:** Следует лицензии основного проекта
+**Document Prepared By:** Claude (Anthropic)
+**For Project:** KernTool4 GTK4 Port
+**License:** Follows main project license
