@@ -1,12 +1,12 @@
-# GTK4 Port: Примеры кода
+# GTK4 Port: Code Examples
 
-Практические примеры реализации ключевых компонентов KernTool4 на GTK4.
+Practical examples of implementing key KernTool4 components in GTK4.
 
 ---
 
 ## 1. Cairo Glyph Renderer
 
-### Базовый рендерер глифа
+### Basic Glyph Renderer
 
 ```python
 # src/rendering/glyph_renderer.py
@@ -18,7 +18,7 @@ from fontTools.pens.cairoPen import CairoPen
 
 class CairoGlyphRenderer:
     """
-    Центральный рендерер глифов - замена Merz
+    Central glyph renderer - replaces Merz
     """
 
     def __init__(self):
@@ -44,7 +44,7 @@ class CairoGlyphRenderer:
 
     def draw_scene(self, cr, width, height, glyph_lines):
         """
-        Главный метод - вызывается из do_snapshot()
+        Main method - called from do_snapshot()
 
         Args:
             cr: Cairo context
@@ -68,7 +68,7 @@ class CairoGlyphRenderer:
 
     def draw_glyph_line(self, cr, line_data, y_pos):
         """
-        Рисуем одну линию глифов
+        Draw one line of glyphs
 
         Args:
             cr: Cairo context
@@ -88,7 +88,7 @@ class CairoGlyphRenderer:
         cr.restore()
 
     def _draw_single_glyph(self, cr, glyph, x_pos):
-        """Рисуем один глиф с всеми аннотациями"""
+        """Draw one glyph with all annotations"""
         cr.save()
         cr.translate(x_pos, 0)
 
@@ -114,9 +114,9 @@ class CairoGlyphRenderer:
 
     def draw_glyph_outline(self, cr, glyph, font):
         """
-        Рисуем контур глифа через fontTools CairoPen
+        Draw glyph outline via fontTools CairoPen
 
-        Это замена: container.appendPathSublayer()
+        This replaces: container.appendPathSublayer()
         """
         cr.save()
 
@@ -124,7 +124,7 @@ class CairoGlyphRenderer:
         cr.translate(0, 600)  # Baseline position
         cr.scale(1, -1)
 
-        # Use fontTools CairoPen - прямая поддержка!
+        # Use fontTools CairoPen - direct support!
         glyph_set = font.getGlyphSet()
         pen = CairoPen(glyph_set, cr)
 
@@ -140,15 +140,15 @@ class CairoGlyphRenderer:
 
     def draw_margins(self, cr, glyph, italic_angle=0):
         """
-        Отображение margins
+        Display margins
 
-        Замена: container.appendTextLineSublayer() для margin labels
+        Replaces: container.appendTextLineSublayer() for margin labels
         """
         left_margin, right_margin = self._get_margins(glyph)
 
         cr.save()
 
-        # Italic shift для margins
+        # Italic shift for margins
         def italic_shift(y_pos):
             if italic_angle:
                 return y_pos * math.tan(-italic_angle * 0.0175)
@@ -181,13 +181,13 @@ class CairoGlyphRenderer:
 
     def draw_ray_beam(self, cr, glyph, beam_position):
         """
-        Ray beam для точных измерений margins
+        Ray beam for precise margin measurements
 
-        Замена: container.appendLineSublayer() для beam line
+        Replaces: container.appendLineSublayer() for beam line
         """
         cr.save()
 
-        # Вычисляем пересечения beam с контуром
+        # Calculate beam intersections with outline
         intersections = self._get_ray_intersections(glyph, beam_position)
 
         # Draw horizontal line
@@ -217,9 +217,9 @@ class CairoGlyphRenderer:
 
     def draw_metrics(self, cr, font, glyph_width):
         """
-        Рисуем метрики шрифта (baseline, x-height, cap-height, etc.)
+        Draw font metrics (baseline, x-height, cap-height, etc.)
 
-        Замена: container.appendLineSublayer() для metric lines
+        Replaces: container.appendLineSublayer() for metric lines
         """
         cr.save()
 
@@ -273,9 +273,9 @@ class CairoGlyphRenderer:
 
     def _get_ray_intersections(self, glyph, beam_position):
         """
-        Вычисляем пересечения ray beam с контуром глифа
+        Calculate ray beam intersections with glyph outline
 
-        Портировано из: tdSpaceControl.getIntersectGlyphWithHorizontalBeam()
+        Ported from: tdSpaceControl.getIntersectGlyphWithHorizontalBeam()
         """
         from mojo.tools import IntersectGlyphWithLine
 
@@ -303,7 +303,7 @@ class CairoGlyphRenderer:
         cr.scale(self.scale, self.scale)
 
     def _get_visible_lines(self, all_lines, viewport_height):
-        """Виртуализация - возвращаем только видимые линии"""
+        """Virtualization - return only visible lines"""
         # TODO: Implement proper virtualization
         return all_lines
 
@@ -316,7 +316,7 @@ class CairoGlyphRenderer:
 
 ## 2. Glyph Canvas Widget
 
-### Custom GTK4 DrawingArea для рендеринга
+### Custom GTK4 DrawingArea for rendering
 
 ```python
 # src/views/glyphs_view.py
@@ -326,9 +326,9 @@ from .rendering.glyph_renderer import CairoGlyphRenderer
 
 class GlyphsCanvas(Gtk.DrawingArea):
     """
-    Canvas для рендеринга глифов
+    Canvas for rendering glyphs
 
-    Замена: TDGlyphsMerzView
+    Replaces: TDGlyphsMerzView
     """
 
     def __init__(self, renderer=None):
@@ -454,9 +454,9 @@ class GlyphsCanvas(Gtk.DrawingArea):
 
 ---
 
-## 3. Virtual Scrolling с ListView
+## 3. Virtual Scrolling with ListView
 
-### Альтернативный подход - GTK4 ListView
+### Alternative approach - GTK4 ListView
 
 ```python
 # src/views/glyphs_listview.py
@@ -464,7 +464,7 @@ class GlyphsCanvas(Gtk.DrawingArea):
 from gi.repository import Gtk, Gio, GObject
 
 class GlyphLineModel(GObject.Object):
-    """Model для одной линии глифов"""
+    """Model for one line of glyphs"""
 
     def __init__(self, glyphs, info, link):
         super().__init__()
@@ -475,9 +475,9 @@ class GlyphLineModel(GObject.Object):
 
 class GlyphsListView(Gtk.ScrolledWindow):
     """
-    Виртуализированный список глифов через GTK4 ListView
+    Virtualized glyph list via GTK4 ListView
 
-    Автоматический виртуальный scrolling!
+    Automatic virtual scrolling!
     """
 
     def __init__(self):
@@ -503,7 +503,7 @@ class GlyphsListView(Gtk.ScrolledWindow):
         self.renderer = CairoGlyphRenderer()
 
     def _on_setup(self, factory, list_item):
-        """Setup - создаем виджет для элемента"""
+        """Setup - create widget for item"""
         # Create drawing area for this item
         drawing_area = Gtk.DrawingArea()
         drawing_area.set_size_request(-1, 200)
@@ -512,7 +512,7 @@ class GlyphsListView(Gtk.ScrolledWindow):
         list_item.set_child(drawing_area)
 
     def _on_bind(self, factory, list_item):
-        """Bind - привязываем данные к виджету"""
+        """Bind - attach data to widget"""
         # Get data model
         model = list_item.get_item()
 
@@ -546,7 +546,7 @@ class GlyphsListView(Gtk.ScrolledWindow):
         self.renderer.draw_glyph_line(cr, line_data, 0)
 
     def set_glyph_lines(self, lines):
-        """Update data - только это вызываем!"""
+        """Update data - only call this!"""
         self.store.remove_all()
 
         for line_data in lines:
@@ -562,7 +562,7 @@ class GlyphsListView(Gtk.ScrolledWindow):
 
 ## 4. Keyboard Controller
 
-### Управление горячими клавишами
+### Hotkey management
 
 ```python
 # src/controllers/keyboard.py
@@ -571,9 +571,9 @@ from gi.repository import Gtk, Gdk
 
 class KeyboardController:
     """
-    Управление горячими клавишами
+    Hotkey management
 
-    Замена: tdKeyCommander
+    Replaces: tdKeyCommander
     """
 
     def __init__(self, widget):
@@ -587,7 +587,7 @@ class KeyboardController:
 
     def register(self, keyval, modifiers, callback, value=None):
         """
-        Зарегистрировать горячую клавишу
+        Register hotkey
 
         Args:
             keyval: Gdk.KEY_* constant
@@ -623,7 +623,7 @@ class KeyboardController:
         return False
 
 
-# Использование:
+# Usage example:
 class MainWindow(Gtk.ApplicationWindow):
     def __init__(self, app):
         super().__init__(application=app)
@@ -634,7 +634,7 @@ class MainWindow(Gtk.ApplicationWindow):
         # Setup keyboard
         self.keyboard = KeyboardController(self.glyphs_view)
 
-        # Register shortcuts (из оригинала):
+        # Register shortcuts (from original):
 
         # TAB - next pair
         self.keyboard.register(
@@ -673,7 +673,7 @@ class MainWindow(Gtk.ApplicationWindow):
             self.toggle_ray_beam
         )
 
-        # +/- для zoom
+        # +/- for zoom
         self.keyboard.register(
             Gdk.KEY_plus,
             (False, False, False, False),
@@ -699,9 +699,9 @@ class MainWindow(Gtk.ApplicationWindow):
 
 ---
 
-## 5. Glyph Cache для производительности
+## 5. Glyph Cache for Performance
 
-### LRU кэш отрендеренных глифов
+### LRU cache for rendered glyphs
 
 ```python
 # src/rendering/cache.py
@@ -712,9 +712,9 @@ from contextlib import contextmanager
 
 class GlyphCache:
     """
-    LRU кэш для отрендеренных глифов
+    LRU cache for rendered glyphs
 
-    Сохраняем глифы как ImageSurface для быстрого блиттинга
+    Store glyphs as ImageSurface for fast blitting
     """
 
     def __init__(self, max_size=1000):
@@ -781,9 +781,9 @@ class GlyphCache:
         }
 
 
-# Использование с renderer:
+# Usage with renderer:
 class CachedGlyphRenderer(CairoGlyphRenderer):
-    """Renderer с кэшированием"""
+    """Renderer with caching"""
 
     def __init__(self):
         super().__init__()
@@ -836,7 +836,7 @@ class CachedGlyphRenderer(CairoGlyphRenderer):
 
 ## 6. Application Structure
 
-### Главное приложение
+### Main application
 
 ```python
 # src/application.py
@@ -846,9 +846,9 @@ import sys
 
 class KernToolApplication(Adw.Application):
     """
-    Главное GTK приложение
+    Main GTK application
 
-    Замена: TDKernMultiTool
+    Replaces: TDKernMultiTool
     """
 
     def __init__(self):
@@ -904,7 +904,7 @@ class KernToolApplication(Adw.Application):
         dialog = Gtk.FileDialog()
         dialog.set_title("Open Font")
 
-        # Filter для UFO файлов
+        # Filter for UFO files
         filter_ufo = Gtk.FileFilter()
         filter_ufo.set_name("UFO Fonts")
         filter_ufo.add_pattern("*.ufo")
@@ -955,7 +955,7 @@ class KernToolApplication(Adw.Application):
 
 
 class MainWindow(Adw.ApplicationWindow):
-    """Главное окно"""
+    """Main window"""
 
     def __init__(self, application):
         super().__init__(application=application)
@@ -967,7 +967,7 @@ class MainWindow(Adw.ApplicationWindow):
         self._build_ui()
 
     def _build_ui(self):
-        """Построить UI"""
+        """Build UI"""
         # Header bar
         header = Adw.HeaderBar()
 
@@ -1004,16 +1004,16 @@ if __name__ == "__main__":
 
 ---
 
-## Следующие шаги
+## Next Steps
 
-1. **Создать проект:**
+1. **Create project:**
    ```bash
    mkdir kerntool-gtk4
    cd kerntool-gtk4
    meson init
    ```
 
-2. **Настроить зависимости:**
+2. **Setup dependencies:**
    ```toml
    # pyproject.toml
    [dependencies]
@@ -1024,11 +1024,11 @@ if __name__ == "__main__":
    ufolib2 = "^0.16"
    ```
 
-3. **Запустить прототип:**
+3. **Run prototype:**
    ```python
    python src/main.py
    ```
 
-См. также:
-- [GTK4_ANALYSIS.md](./GTK4_ANALYSIS.md) - Полный анализ
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - Детальная архитектура
+See also:
+- [GTK4_ANALYSIS.md](./GTK4_ANALYSIS.md) - Complete analysis
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - Detailed architecture
